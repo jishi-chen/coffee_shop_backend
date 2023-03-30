@@ -2,9 +2,6 @@
 
 namespace coffee_shop_backend.Controllers
 {
-    [ApiVersion("1.0", Deprecated = true)]
-    [ApiController]
-    [Route("api/[controller]")]
     public class IndexController : BaseController
     {
         public IndexController(IHttpContextAccessor accessor) : base(accessor)
@@ -12,17 +9,9 @@ namespace coffee_shop_backend.Controllers
            
         }
 
-        [HttpGet]
-        [Route("test")]
-
         public IActionResult Index()
         {
-
-            return this.Ok(new
-            {
-                Version = 1.0,
-                Name = "1.0"
-            });
+            return View();
         }
 
     }

@@ -80,7 +80,7 @@ namespace coffee_shop_backend
             }
 
             //app.UseHttpsRedirection(); // 強制跳轉https
-            app.UseStatusCodePagesWithRedirects("~/404.html");
+            //app.UseStatusCodePagesWithRedirects("~/404.html");
             app.UseStaticFiles();
 
             app.UseRouting(); //遍歷 Controls 找到符合 request 的 action
@@ -97,15 +97,20 @@ namespace coffee_shop_backend
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Document V1");  // https://localhost:7219/swagger/v1/swagger.json
-                c.RoutePrefix = string.Empty;
+                //c.RoutePrefix = string.Empty;
+                c.RoutePrefix = "api";
             });
 
             // 註冊路由節點，若request有符合路由節點則執行相應的委派並開始回流
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Index}/{action=Index}/{id?}");
+                  name: "Admin",
+                  pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute(
+                  name: "default",
+                  pattern: "{controller=Index}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
             });
         }
     }

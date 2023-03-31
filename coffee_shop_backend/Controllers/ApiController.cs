@@ -15,7 +15,7 @@ namespace coffee_shop_backend.Controllers
         [HttpGet]
         [Route("test")]
 
-        public IActionResult IndexApi()
+        public IActionResult Index()
         {
 
             return this.Ok(new

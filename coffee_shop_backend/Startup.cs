@@ -70,6 +70,18 @@ namespace coffee_shop_backend
                     new QueryStringApiVersionReader("api-version"),  // 增加版本的 query string，?api-version=1.1
                     new UrlSegmentApiVersionReader());
             });
+
+            //同源政策相關
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllOrigins",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin();
+                        builder.AllowAnyMethod();
+                        builder.AllowAnyHeader();
+                    });
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -78,6 +90,7 @@ namespace coffee_shop_backend
             {
                 app.UseDeveloperExceptionPage();
             }
+            app.UseCors("AllowAllOrigins");
 
             //app.UseHttpsRedirection(); // 強制跳轉https
             //app.UseStatusCodePagesWithRedirects("~/404.html");

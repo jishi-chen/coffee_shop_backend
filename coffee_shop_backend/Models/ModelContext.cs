@@ -28,21 +28,13 @@ namespace coffee_shop_backend.Models
 
                 entity.Property(e => e.Address).HasMaxLength(100);
 
-                entity.Property(e => e.Cellphone)
-                    .HasMaxLength(10)
-                    .IsUnicode(false);
-
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
                 entity.Property(e => e.Email)
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
-                entity.Property(e => e.Name).HasMaxLength(20);
-
-                entity.Property(e => e.Telephone)
-                    .HasMaxLength(15)
-                    .IsUnicode(false);
+                entity.Property(e => e.UserName).HasMaxLength(20);
 
                 entity.Property(e => e.UpdateDate).HasColumnType("datetime");
             });

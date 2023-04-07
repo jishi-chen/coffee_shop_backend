@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace coffee_shop_backend.Controllers
 {
+    [Authorize]
     [ApiVersion("1.0", Deprecated = true)]
     [ApiController]
     [Route("api/[controller]")]
@@ -22,6 +24,19 @@ namespace coffee_shop_backend.Controllers
             {
                 Version = 1.0,
                 Name = "1.0"
+            });
+        }
+
+        [HttpGet]
+        [Route("shop")]
+
+        public IActionResult Shop()
+        {
+
+            return this.Ok(new
+            {
+                name = "toy",
+                price = 1000
             });
         }
     }

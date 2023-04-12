@@ -92,13 +92,26 @@ namespace coffee_shop_backend
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
+                         // 透過這項宣告，就可以從 "sub" 取值並設定給 User.Identity.Name
+                        //NameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
+                        // 透過這項宣告，就可以從 "roles" 取值，並可讓 [Authorize] 判斷角色
+                        //RoleClaimType = "Member",
+
+                        // 一般我們都會驗證 Issuer
                         ValidateIssuer = true,
-                        ValidateAudience = true,
+                        ValidIssuer = Configuration.GetValue<string>("Issuer"),
+
+                        // 通常不太需要驗證 Audience
+                        ValidateAudience = false,
+                        //ValidAudience = "JwtAuthDemo", // 不驗證就不需要填寫
+
+                        // 一般我們都會驗證 Token 的有效期間
                         ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = "my_issuer",
-                        ValidAudience = "my_audience",
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["AccessSecret"]))
+
+                        // 如果 Token 中包含 key 才需要驗證，一般都只有簽章而已
+                        ValidateIssuerSigningKey = false,
+
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetValue<string>("AccessSecret")))
                     };
 
                     options.Events = new JwtBearerEvents

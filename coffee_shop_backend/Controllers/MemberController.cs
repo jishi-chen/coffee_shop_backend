@@ -31,8 +31,8 @@ namespace coffee_shop_backend.Controllers
                 if (info != null)
                 {
                     var secret = _config["AccessSecret"]; // 密鑰
-                    var issuer = "my_issuer"; // 發行者
-                    var audience = "my_audience"; // 使用者
+                    var issuer = _config["Issuer"]; // 發行者
+                    var audience = info.UserName; // 使用者
                     var expires = 60; // JWT 有效期，單位為分鐘
                     
                     // 會員登入成功

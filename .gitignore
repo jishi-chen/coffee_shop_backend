@@ -1,3 +1,5 @@
 .vs/
 coffee_shop_backend/bin/
 coffee_shop_backend/obj/
+InsertAddressData/bin/
+InsertAddressData/obj/

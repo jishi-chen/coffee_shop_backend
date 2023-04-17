@@ -18,6 +18,7 @@ namespace coffee_shop_backend.Controllers
 
         [HttpGet]
         [Route("test")]
+        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
 
         public IActionResult Index()
         {
@@ -31,6 +32,7 @@ namespace coffee_shop_backend.Controllers
 
         [HttpGet]
         [Route("shop")]
+        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
 
         public IActionResult Shop()
         {

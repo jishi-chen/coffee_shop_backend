@@ -1,0 +1,39 @@
+﻿@using coffee_shop_backend.Controllers
+@model BasicData
+
+<form method="post" asp-controller="ControllerName" asp-action="ActionName" novalidate>
+    <div class="form-group">
+        <label asp-for="Name">姓名</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="IdentityString">身分證字號</label>
+        <input asp-for="IdentityString" class="form-control" />
+        <span asp-validation-for="IdentityString" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Phone">電話</label>
+        <input asp-for="Phone" class="form-control" />
+        <span asp-validation-for="Phone" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <select asp-for="Address.City" class="form-control">
+            <option value="">--請選擇城市--</option>
+        </select>
+        <span asp-validation-for="Address.City" class="text-danger"></span>
+        <select asp-for="Address.Region" class="form-control">
+            <option value="">--請選擇地區--</option>
+        </select>
+        <span asp-validation-for="Address.Region" class="text-danger"></span>
+        <input asp-for="Address.AddressField" class="form-control" />
+        <span asp-validation-for="Address.AddressField" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">提交</button>
+</form>
+
+<script>
+    $(document).ready(function() {
+        
+    });
+</script>

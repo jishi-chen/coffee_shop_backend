@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "coffee_shop_backend", "coffee_shop_backend\coffee_shop_backend.csproj", "{EEC6A352-599C-498D-ABE5-91A0E47F11F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "coffee_shop_backend", "coffee_shop_backend\coffee_shop_backend.csproj", "{EEC6A352-599C-498D-ABE5-91A0E47F11F1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InsertAddressData", "InsertAddressData\InsertAddressData.csproj", "{93ACB5A0-3450-487D-A1CB-92317A7F5BD6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{EEC6A352-599C-498D-ABE5-91A0E47F11F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EEC6A352-599C-498D-ABE5-91A0E47F11F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EEC6A352-599C-498D-ABE5-91A0E47F11F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93ACB5A0-3450-487D-A1CB-92317A7F5BD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93ACB5A0-3450-487D-A1CB-92317A7F5BD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93ACB5A0-3450-487D-A1CB-92317A7F5BD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93ACB5A0-3450-487D-A1CB-92317A7F5BD6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

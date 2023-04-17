@@ -20,6 +20,15 @@ namespace coffee_shop_backend.Controllers
         {
             return View();
         }
+        public IActionResult Index3()
+        {
+            return View();
+        }
+        public IActionResult Index4()
+        {
+            var model = new BasicData();
+            return View(model);
+        }
 
         [HttpPost]
         public IActionResult Index2(string name)
@@ -37,5 +46,22 @@ namespace coffee_shop_backend.Controllers
             ViewBag.ModifySuccess = "驗證碼正確";
             return View();
         }
+
+    }
+    public class BasicData
+    {
+        public string Name { get; set; }
+        public string Phone { get; set; }
+        public string IdentityString { get; set; }
+        public Address Address { get; set; }
+
+    }
+
+    public class Address
+    {
+        public string City { get; set; }
+        public string Region { get; set; }
+        public string PostalCode { get; set; }
+        public string AddressField { get; set; }
     }
 }

@@ -1,14 +1,12 @@
 ﻿using coffee_shop_backend.Services;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using System.Collections.Specialized;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Net;
 using System.Text;
 
 namespace coffee_shop_backend.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class ValidateCodeController : BaseController
     {
         private HttpContext? _context;
@@ -20,6 +18,7 @@ namespace coffee_shop_backend.Controllers
             contextAccessor = accessor;
         }
 
+        [HttpGet]
         [Route("ValidateCode")]
         public ActionResult Index(string type, string model, string PartialViewName = "")
         {

@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Mvc.Controllers;
 
 namespace coffee_shop_backend
 {
@@ -154,7 +155,7 @@ namespace coffee_shop_backend
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Document V1");  // https://localhost:7219/swagger/v1/swagger.json
                 //c.RoutePrefix = string.Empty;
-                c.RoutePrefix = "api";
+                c.RoutePrefix = "swagger";
             });
 
             // 註冊路由節點，若request有符合路由節點則執行相應的委派並開始回流

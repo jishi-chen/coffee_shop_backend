@@ -3,6 +3,7 @@
 
 using InsertAddressData;
 using Newtonsoft.Json;
+using System.Data.SqlClient;
 using System.Text;
 
 
@@ -10,6 +11,7 @@ var filePath = AppContext.BaseDirectory;
 filePath = Utility.GetParentDirectoryPath(filePath,4);
 filePath = Path.Combine(filePath, "address.json");
 List<AddressModel> data = new List<AddressModel>();
+List<string> cityList = new List<string>();
 // 讀取 JSON 檔案
 using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
 {
@@ -23,8 +25,21 @@ using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
         data = JsonConvert.DeserializeObject<List<AddressModel>>(fileData);
         data.ForEach(x => x.Zip5 = x.Zip5.Substring(0, 3));
         data = data.GroupBy(p => new { p.City, p.Area }).Select(x => x.First()).OrderBy(x => x.Zip5).ToList();
+        cityList = data.Select(x => x.City).Distinct().ToList();
     };
 };
+DataManipulation db = new DataManipulation();
+if (!db.CheckIsExist())
+{
+    db.BeginTransaction();
+    foreach (var city in cityList)
+    {
+        Guid cityId = Guid.NewGuid();
+        db.InsertCity(cityId, city);
+        data.Where(x => x.City == city).ToList().ForEach(x => db.InsertArea(cityId, x.Area, x.Zip5));
+    }
+    db.CommitTransaction();
+}
 
 Console.WriteLine("Hello, World!");
 

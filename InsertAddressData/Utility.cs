@@ -1,9 +1,9 @@
 ﻿
-
 namespace InsertAddressData
 {
     public static class Utility
     {
+
         /// <summary>
         /// 取得某目錄的上幾層的目錄路徑
         /// </summary>
@@ -26,5 +26,7 @@ namespace InsertAddressData
             }
             return result;
         }
+
+        
     }
 }

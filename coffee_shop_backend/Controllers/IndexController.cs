@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace coffee_shop_backend.Controllers
 {
@@ -11,8 +12,25 @@ namespace coffee_shop_backend.Controllers
             _context = accessor.HttpContext;
         }
 
+        public override void OnActionExecuting(ActionExecutingContext context)
+        {
+            // 在這裡進行一些 Action 執行前的操作
+
+            base.OnActionExecuting(context);
+        }
+
+
         public IActionResult Index()
         {
+            // 寫入 cookie
+            _context.Response.Cookies.Append("myCookie", "myValue", new CookieOptions
+            {
+                Expires = DateTime.Now.AddHours(1),
+                Path = "/",
+                Secure = true
+            });
+            var myCookieValue = _context.Request.Cookies["myCookie"];
+            _context.Response.Cookies.Delete("myCookie");
             return View();
         }
 

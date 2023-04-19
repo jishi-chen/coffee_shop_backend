@@ -78,7 +78,7 @@ namespace coffee_shop_backend
             //同源政策相關
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowAllOrigins",
+                options.AddDefaultPolicy(
                     builder =>
                     {
                         builder.AllowAnyOrigin();
@@ -134,7 +134,7 @@ namespace coffee_shop_backend
             {
                 app.UseDeveloperExceptionPage();
             }
-            app.UseCors("AllowAllOrigins");
+            app.UseCors();
 
             //app.UseHttpsRedirection(); // 強制跳轉https
             //app.UseStatusCodePagesWithRedirects("~/404.html");

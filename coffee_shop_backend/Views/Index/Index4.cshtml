@@ -18,8 +18,12 @@
         <span asp-validation-for="Phone" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <select asp-for="Address.City" class="form-control">
+        <select asp-for="Address.City" class="form-control" onchange="SelectChange()">
             <option value="">--請選擇城市--</option>
+             @foreach(var option in ViewBag.CityList)
+            {
+                <option value="@option.Value" selected="@option.Selected">@option.Text</option>
+            }
         </select>
         <span asp-validation-for="Address.City" class="text-danger"></span>
         <select asp-for="Address.Region" class="form-control">
@@ -34,6 +38,42 @@
 
 <script>
     $(document).ready(function() {
-        
+
     });
+    function SelectChange() {
+        if ($('#AddressCity').val() == "") {
+            var area = $('#AddressArea');
+            area.empty();
+            area.append($('<option></option>').val('').text('--請選擇地區--'));
+    } else {
+            var selectedValue = $('#AddressCity option:selected').val();
+            var area = $('#AddressArea');
+        $.ajax({
+            url: '@Url.Action("api", "api")' + '/address',
+            data: {
+                cityName: selectedValue
+            },
+            type: 'post',
+            cache: false,
+            async: false,
+            dataType: 'json',
+            success: function(data) {
+                if (data.length > 0) {
+                    area.empty();
+                    $.each(data, function(i, item) {
+                        area.append($('<option></option>').val(item.Key).text(item.Value));
+                    });
+                }
+            }
+        });
+    };
+    };
+
+    function AreaClick(fieldID) {
+        if ($('#AddressCity').val() == "") {
+            var area = $('#AddressArea');
+            area.empty();
+            area.append($('<option></option>').val('').text('--請選擇地區--'));
+    }
+    };
 </script>

@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using coffee_shop_backend.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace coffee_shop_backend.Controllers
 {
@@ -45,6 +47,21 @@ namespace coffee_shop_backend.Controllers
         public IActionResult Index4()
         {
             var model = new BasicData();
+            List<SelectListItem> cityList = new List<SelectListItem>();
+            List<SelectListItem> areaList = new List<SelectListItem>();
+            List<AddressCity> cityModel = _db.AddressCities.Select(x => x).ToList();
+            foreach (var c in cityModel)
+            {
+                cityList.Add(new SelectListItem()
+                {
+                    Text = c.CityName,
+                    Value = c.CityName,
+                    Selected = model.Address?.City == c.CityName,
+                });
+            }
+            ViewBag.CityList = cityList;
+            ViewBag.AreaList = areaList;
+            
             return View(model);
         }
 

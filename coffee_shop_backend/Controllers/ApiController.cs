@@ -5,7 +5,7 @@ using System.IdentityModel.Tokens.Jwt;
 
 namespace coffee_shop_backend.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [ApiVersion("1.0", Deprecated = true)]
     [ApiController]
     [Route("api/[controller]")]
@@ -50,6 +50,24 @@ namespace coffee_shop_backend.Controllers
                 name = info?.UserName,
                 price = 1000
             });
+        }
+
+        [HttpGet]
+        [Route("address")]
+        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+        public JsonResult Address(string cityName)
+        {
+            List<KeyValuePair<string, string>> items = new List<KeyValuePair<string, string>>();
+            var cityId = _db?.AddressCities.FirstOrDefault(x => x.CityName == cityName).Id;
+            var areas = _db?.AddressAreas.Where(x => x.CityId == cityId);
+            if (areas.Any())
+            {
+                foreach (var a in areas)
+                {
+                    items.Add(new KeyValuePair<string, string>(a.AreaName, a.AreaName));
+                }
+            }
+            return this.Json(items);
         }
     }
 }

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Mvc.Controllers;
+using coffee_shop_backend.Middleware;
 
 namespace coffee_shop_backend
 {
@@ -157,6 +158,11 @@ namespace coffee_shop_backend
                 //c.RoutePrefix = string.Empty;
                 c.RoutePrefix = "swagger";
             });
+
+            // Middleware使用
+            app.UseMiddleware<CustomMiddleware>();
+            //app.UseCustom();
+            //app.UseCustom2();
 
             // 註冊路由節點，若request有符合路由節點則執行相應的委派並開始回流
             app.UseEndpoints(endpoints =>

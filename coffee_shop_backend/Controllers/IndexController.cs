@@ -44,26 +44,7 @@ namespace coffee_shop_backend.Controllers
         {
             return View();
         }
-        public IActionResult Index4()
-        {
-            var model = new BasicData();
-            List<SelectListItem> cityList = new List<SelectListItem>();
-            List<SelectListItem> areaList = new List<SelectListItem>();
-            List<AddressCity> cityModel = _db.AddressCities.Select(x => x).ToList();
-            foreach (var c in cityModel)
-            {
-                cityList.Add(new SelectListItem()
-                {
-                    Text = c.CityName,
-                    Value = c.CityName,
-                    Selected = model.Address?.City == c.CityName,
-                });
-            }
-            ViewBag.CityList = cityList;
-            ViewBag.AreaList = areaList;
-            
-            return View(model);
-        }
+
 
         [HttpPost]
         public IActionResult Index2(string name)
@@ -81,22 +62,6 @@ namespace coffee_shop_backend.Controllers
             ViewBag.ModifySuccess = "驗證碼正確";
             return View();
         }
-
-    }
-    public class BasicData
-    {
-        public string Name { get; set; }
-        public string Phone { get; set; }
-        public string IdentityString { get; set; }
-        public Address Address { get; set; }
-
     }
 
-    public class Address
-    {
-        public string City { get; set; }
-        public string Region { get; set; }
-        public string PostalCode { get; set; }
-        public string AddressField { get; set; }
-    }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace coffee_shop_backend.Services
+namespace coffee_shop_backend.Utility
 {
     public class DataProtectionUtility
     {

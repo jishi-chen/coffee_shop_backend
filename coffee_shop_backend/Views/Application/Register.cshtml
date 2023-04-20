@@ -41,15 +41,15 @@
 
     });
     function SelectChange() {
-        if ($('#AddressCity').val() == "") {
-            var area = $('#AddressArea');
+        if ($('#Address_City').val() == "") {
+            var area = $('#Address_Region');
             area.empty();
             area.append($('<option></option>').val('').text('--請選擇地區--'));
     } else {
-            var selectedValue = $('#AddressCity option:selected').val();
-            var area = $('#AddressArea');
+            var selectedValue = $('#Address_City option:selected').val();
+            var area = $('#Address_Region');
         $.ajax({
-            url: '@Url.Action("api", "api")' + '/address',
+            url: '@Url.Action("Address", "Index")',
             data: {
                 cityName: selectedValue
             },
@@ -61,7 +61,8 @@
                 if (data.length > 0) {
                     area.empty();
                     $.each(data, function(i, item) {
-                        area.append($('<option></option>').val(item.Key).text(item.Value));
+                        var newOption = `<option value=${item.value}>${item.value}</option>`;
+                        area.append(newOption);
                     });
                 }
             }
@@ -69,9 +70,9 @@
     };
     };
 
-    function AreaClick(fieldID) {
-        if ($('#AddressCity').val() == "") {
-            var area = $('#AddressArea');
+    function AreaClick() {
+        if ($('#Address_City').val() == "") {
+            var area = $('#Address_Region');
             area.empty();
             area.append($('<option></option>').val('').text('--請選擇地區--'));
     }

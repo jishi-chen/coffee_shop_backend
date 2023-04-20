@@ -8,7 +8,7 @@ namespace coffee_shop_backend.Controllers
     //[Authorize]
     [ApiVersion("1.0", Deprecated = true)]
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api")]
     public class ApiController : BaseController
     {
         public ApiController(IHttpContextAccessor accessor) : base(accessor)
@@ -52,22 +52,5 @@ namespace coffee_shop_backend.Controllers
             });
         }
 
-        [HttpGet]
-        [Route("address")]
-        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
-        public JsonResult Address(string cityName)
-        {
-            List<KeyValuePair<string, string>> items = new List<KeyValuePair<string, string>>();
-            var cityId = _db?.AddressCities.FirstOrDefault(x => x.CityName == cityName).Id;
-            var areas = _db?.AddressAreas.Where(x => x.CityId == cityId);
-            if (areas.Any())
-            {
-                foreach (var a in areas)
-                {
-                    items.Add(new KeyValuePair<string, string>(a.AreaName, a.AreaName));
-                }
-            }
-            return this.Json(items);
-        }
     }
 }

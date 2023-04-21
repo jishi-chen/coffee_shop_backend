@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace coffee_shop_backend.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class IndexController : BaseController
     {
         private HttpContext? _context;

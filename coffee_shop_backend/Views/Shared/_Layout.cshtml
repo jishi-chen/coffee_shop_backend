@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/coffee_shop_backend.styles.css" asp-append-version="true" />
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <link rel="stylesheet" href="~/css/bootstrap-icons.css"/>
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css"/>
 </head>
 <body>
     <header>
@@ -30,7 +31,7 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Index" asp-action="Index3">Datatable</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Index" asp-action="Index4">基本資料驗證</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Application" asp-action="Login">基本資料驗證</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" href="../swagger">Api UI</a>
@@ -42,7 +43,9 @@
     </header>
     <div class="container">
         <main role="main" class="pb-3">
-            @RenderBody()
+            <div class="wrapper">
+                @RenderBody()
+            </div>
         </main>
     </div>
 
@@ -51,7 +54,8 @@
             &copy; 2023 - coffee_shop_backend - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!--頁腳Scripts-->
+    <partial name="_FooterScripts" />
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

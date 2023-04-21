@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace coffee_shop_backend.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Route("[controller]")]
     public class ApplicationController : BaseController
     {
@@ -22,6 +23,8 @@ namespace coffee_shop_backend.Controllers
             return View(model);
         }
 
+        [HttpGet]
+        [Route("Register")]
         public IActionResult Register()
         {
             var model = new BasicData();
@@ -60,36 +63,54 @@ namespace coffee_shop_backend.Controllers
 
         [HttpPost]
         [Route("Address")]
-        public JsonResult Address(string cityName)
+        public JsonResult Address(string cityName, string areaName)
         {
-            List<KeyValuePair<string, string>> items = new List<KeyValuePair<string, string>>();
-            var cityId = _db?.AddressCities.FirstOrDefault(x => x.CityName == cityName)?.Id;
-            var areas = _db?.AddressAreas.Where(x => x.CityId == cityId);
-            if (areas.Any())
+            if (!string.IsNullOrEmpty(areaName) && !string.IsNullOrEmpty(cityName))
             {
-                foreach (var area in areas)
-                {
-                    items.Add(new KeyValuePair<string, string>(area.AreaName, area.AreaName));
-                }
+                var cityId = _db?.AddressCities.FirstOrDefault(x => x.CityName == cityName)?.Id;
+                var area = _db?.AddressAreas.FirstOrDefault(x => x.AreaName == areaName && x.CityId == cityId);
+                return this.Json(area?.ZipCode);
             }
-            return this.Json(items);
+            else if (!string.IsNullOrEmpty(cityName))
+            {
+                List<KeyValuePair<string, string>> items = new List<KeyValuePair<string, string>>();
+                var cityId = _db?.AddressCities.FirstOrDefault(x => x.CityName == cityName)?.Id;
+                var areas = _db?.AddressAreas.Where(x => x.CityId == cityId);
+                if (areas.Any())
+                {
+                    foreach (var area in areas)
+                    {
+                        items.Add(new KeyValuePair<string, string>(area.AreaName, area.AreaName));
+                    }
+                }
+                return this.Json(items);
+            }
+            return this.Json(string.Empty);
         }
     }
 
     public class BasicData
     {
-        public string Name { get; set; }
-        public string Phone { get; set; }
-        public string IdentityString { get; set; }
-        public Address Address { get; set; }
-
+        public string? Name { get; set; }
+        public string? Phone { get; set; }
+        public string? IdentityString { get; set; }
+        public Address Address { get; set; } = new Address();
+        public string? Account { get; set; }
+        public string? Password { get; set; }
+        public string? Gender { get; set; }
+        public List<SelectListItem> GenderOption { get; set; } = new List<SelectListItem>()
+        {
+            new SelectListItem("男", "0"){ Selected = true },
+            new SelectListItem("女", "1"),
+        };
+        public DateTime? DateTimeObject { get; set; } = DateTime.Now;
     }
 
     public class Address
     {
-        public string City { get; set; }
-        public string Region { get; set; }
-        public string PostalCode { get; set; }
-        public string AddressField { get; set; }
+        public string? City { get; set; }
+        public string? Region { get; set; }
+        public string? PostalCode { get; set; }
+        public string? AddressField { get; set; }
     }
 }

@@ -160,7 +160,7 @@ namespace coffee_shop_backend
             });
 
             // Middleware使用
-            app.UseMiddleware<CustomMiddleware>();
+            //app.UseMiddleware<CustomMiddleware>();
             //app.UseCustom();
             //app.UseCustom2();
 

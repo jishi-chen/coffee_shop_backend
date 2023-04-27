@@ -8,6 +8,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using coffee_shop_backend.Middleware;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 namespace coffee_shop_backend
 {
@@ -55,6 +57,9 @@ namespace coffee_shop_backend
             services.AddDbContext<ModelContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
+
+            //資料保護 cryptographic API
+            services.AddDataProtection();
 
             // Api Version相關資訊
             services.AddApiVersioning(option =>
@@ -127,6 +132,34 @@ namespace coffee_shop_backend
                         }
                     };
                 });
+            //OpenID Connect 整合 Google 登入
+            services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+            })
+            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
+            {
+                options.Authority = Configuration["OpenIDConnect:Authority"];
+                options.ClientId = Configuration["OpenIDConnect:ClientId"];
+                options.ClientSecret = Configuration["OpenIDConnect:ClientSecret"];
+                options.ResponseType = "code";
+
+                options.Scope.Add("openid");
+                options.Scope.Add("profile");
+
+                // LINE Login 不加入以下這一段設定，將無法走完 OpenID Connect 整個流程，最後會驗不過 JWT Token
+                options.Events = new OpenIdConnectEvents()
+                {
+                    OnAuthorizationCodeReceived = context => {
+                        context.TokenEndpointRequest?.SetParameter("id_token_key_type", "JWK");
+                        return Task.CompletedTask;
+                    }
+                };
+
+                options.SaveTokens = true;
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -172,7 +205,8 @@ namespace coffee_shop_backend
                   pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapControllerRoute(
                   name: "default",
-                  pattern: "{controller=Index}/{action=Index}/{id?}");
+                  pattern: "{controller=Index}/{action=Index}/{id?}")
+                  .RequireAuthorization(); // <-- 加入這行，這會讓整個網站都需要登入才能用！
                 endpoints.MapRazorPages();
             });
         }

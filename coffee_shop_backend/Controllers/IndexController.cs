@@ -1,7 +1,8 @@
-﻿using coffee_shop_backend.Models;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace coffee_shop_backend.Controllers
 {
@@ -22,7 +23,7 @@ namespace coffee_shop_backend.Controllers
             base.OnActionExecuting(context);
         }
 
-
+        [AllowAnonymous]
         public IActionResult Index()
         {
             // 寫入 cookie
@@ -45,7 +46,10 @@ namespace coffee_shop_backend.Controllers
         {
             return View();
         }
-
+        public IActionResult Index4()
+        {
+            return View();
+        }
 
         [HttpPost]
         public IActionResult Index2(string name)
@@ -62,6 +66,13 @@ namespace coffee_shop_backend.Controllers
             ValidateCodeHelper.RemoveResult(ConstString.FrontEndSessionName + ControllerContext.RouteData.Values["controller"]);
             ViewBag.ModifySuccess = "驗證碼正確";
             return View();
+        }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction(nameof(Index));
         }
     }
 

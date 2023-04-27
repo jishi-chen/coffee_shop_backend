@@ -2,6 +2,7 @@
 using coffee_shop_backend.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 namespace coffee_shop_backend.Controllers
 {
@@ -113,4 +114,5 @@ namespace coffee_shop_backend.Controllers
         public string? PostalCode { get; set; }
         public string? AddressField { get; set; }
     }
+
 }

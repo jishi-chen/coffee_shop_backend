@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using coffee_shop_backend.ViewComponents
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -34,7 +36,16 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Application" asp-action="Login">基本資料驗證</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Test" asp-action="Index">Test</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link text-dark" href="../swagger">Api UI</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Index" asp-action="Index4">個人資料</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Index" asp-action="Logout">登出</a>
                         </li>
                     </ul>
                 </div>
@@ -57,6 +68,7 @@
     <!--頁腳Scripts-->
     <partial name="_FooterScripts" />
     <script src="~/js/site.js" asp-append-version="true"></script>
+    @await Component.InvokeAsync(nameof(Footer), new { name = "Willy"})
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

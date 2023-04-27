@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Text;
+using Microsoft.AspNetCore.DataProtection;
 
 namespace coffee_shop_backend.Controllers
 {
@@ -11,9 +12,11 @@ namespace coffee_shop_backend.Controllers
     {
         private HttpContext? _context;
         private IHttpContextAccessor contextAccessor;
+        private IDataProtector _protector;
 
-        public ValidateCodeController(IHttpContextAccessor accessor) : base(accessor)
+        public ValidateCodeController(IHttpContextAccessor accessor, IDataProtectionProvider provider) : base(accessor)
         {
+            _protector = provider.CreateProtector("AspNetCoreDataProtectionDemo.v1");
             _context = accessor.HttpContext;
             contextAccessor = accessor;
         }
@@ -22,7 +25,7 @@ namespace coffee_shop_backend.Controllers
         [Route("ValidateCode")]
         public ActionResult Index(string type, string model, string PartialViewName = "")
         {
-            ValidateCodeHelper validateCodeHelper = new ValidateCodeHelper(contextAccessor);
+            ValidateCodeHelper validateCodeHelper = new ValidateCodeHelper(contextAccessor, _protector);
             ValidateCodeType validType = ValidateCodeHelper.GetValidateType();
 
             if (validType == ValidateCodeType.Classic)
@@ -147,9 +150,11 @@ namespace coffee_shop_backend.Controllers
         public static string AudioMimeType { get; set; } = "audio/mpeg";
 
         private static IHttpContextAccessor _httpContext;
+        private static IDataProtector _protector;
 
-        public ValidateCodeHelper(IHttpContextAccessor httpContextAccessor)
+        public ValidateCodeHelper(IHttpContextAccessor httpContextAccessor,IDataProtectionProvider provider)
         {
+            _protector = provider.CreateProtector("AspNetCoreDataProtectionDemo.v1");
             _httpContext = httpContextAccessor;
         }
 
@@ -188,7 +193,7 @@ namespace coffee_shop_backend.Controllers
                 }
 
                 string? checkCode = _httpContext.HttpContext?.Session?.GetString(keepSessionKey)?.ToString();
-                string decryptedCode = DataProtectionUtility.Create().Decrypt(checkCode);
+                string decryptedCode = new DataCryptUtility(_protector).Decrypt(checkCode);
 
                 // 驗證碼是否正確
                 var result = String.Compare(decryptedCode, validateCode, true) == 0;
@@ -233,7 +238,7 @@ namespace coffee_shop_backend.Controllers
             }
 
             string txt = checkCode.ToString();
-            string encryCode = DataProtectionUtility.Create().Encrypt(txt);
+            string encryCode = new DataCryptUtility(_protector).Encrypt(txt);
 
             //儲存在cookie
             _httpContext.HttpContext?.Response.Cookies.Append(keepSessionKey, encryCode);

@@ -16,7 +16,6 @@
             this.activePlugin();
 
         },
-
         // 載入遠端設定的設定檔
         // 設定檔是先建立為 js 檔，並指定存在 window 物件中
         // 如果有設定檔被載入的話，window.mashop.config 就會有值

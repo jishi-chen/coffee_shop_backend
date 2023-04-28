@@ -1,5 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Data.SqlClient;
+using Serilog;
+using Serilog.Events;
 using System.Text;
 
 namespace coffee_shop_backend.Controllers
@@ -50,7 +54,58 @@ namespace coffee_shop_backend.Controllers
                 };
             };
 
+            // 漂亮的建立 Query String 查詢字串
             
+            var authUrl = "https://access.line.me/oauth2/v2.1/authorize";
+            string url = "";
+            //使用 QueryBuilder 類別
+            var qb = new QueryBuilder();
+            qb.Add("response_type", "code");
+            qb.Add("client_id", _config["LINELogin:client_id"]);
+            qb.Add("redirect_uri", _config["LINELogin:redirect_uri"]);
+            qb.Add("scope", _config["LINELogin:scope"]);
+            qb.Add("state", "");
+            url = $"{authUrl}{qb.ToQueryString().Value}";
+
+            //使用 QueryHelpers 類別
+            var query = new Dictionary<string, string>
+            {
+                ["response_type"] = "code",
+                ["client_id"] = _config["LINELogin:client_id"],
+                ["state"] = "",
+                ["scope"] = _config["LINELogin:scope"],
+                ["redirect_uri"] = _config["LINELogin:redirect_uri"],
+            };
+            url = QueryHelpers.AddQueryString(authUrl, query);
+
+            //用 .NET 解析完整的網址
+            var authUrl2 = "https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=111111&state=222&scope=profile%20openid%20email&redirect_uri=https%3A%2F%2Flocalhost%3A7133%2Fcallback";
+            var uri = new Uri(authUrl2);    
+            var uriPath = uri.GetLeftPart(UriPartial.Path); // https://access.line.me/oauth2/v2.1/authorize
+            var uriQuery = uri.GetLeftPart(UriPartial.Query);  //問號後面的
+            var uriQuery2 = uri.Query;
+            var uriScheme = uri.GetLeftPart(UriPartial.Scheme); // https://              
+            var uriAuthority = uri.GetLeftPart(UriPartial.Authority); // https://access.line.me
+
+            var queryString = QueryHelpers.ParseQuery(uri.Query);
+            var client_id = queryString["client_id"].ToString();
+
+
+            // 使用 Serilog 進行結構化記錄
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
+                .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
+                .CreateLogger();
+
+            // 偵測用戶端已斷線並自動取消非同步方法執行
+            //_db.SaveChangesAsync(_context.RequestAborted);
+            if (_context.RequestAborted.IsCancellationRequested)
+            {
+                // 如果你想在最後檢查用戶端是否斷線，如果斷線可以在這裡進行一些髒資料清理動作！
+            }
 
             List<int>  result = highest_biPrimefac(2, 3, 50);
             return View();

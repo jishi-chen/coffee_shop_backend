@@ -24,7 +24,8 @@ namespace coffee_shop_backend
         {
             services.AddMvc()
                 .AddViewLocalization()  //為了在 View 中使用多國語言
-                .AddDataAnnotationsLocalization();  //為了在 Model 中使用多國語言;
+                .AddDataAnnotationsLocalization()  //為了在 Model 中使用多國語言;
+                .AddRazorRuntimeCompilation();  //啟用 Razor 執行階段編譯
 
             services.AddHttpContextAccessor();
             // Register the Swagger Generator service.

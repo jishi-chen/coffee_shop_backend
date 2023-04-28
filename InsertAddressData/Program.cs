@@ -3,33 +3,19 @@
 
 using InsertAddressData;
 using Newtonsoft.Json;
-using System.Text;
-
+using System.Runtime.Serialization;
 
 var filePath = AppContext.BaseDirectory;
 filePath = Utility.GetParentDirectoryPath(filePath,4);
 filePath = Path.Combine(filePath, "address.json");
-List<AddressModel> data = new List<AddressModel>();
+List<AddressModel> data = JsonConvert.DeserializeObject<List<AddressModel>>(File.ReadAllText(filePath));
 List<string> cityList = new List<string>();
 
-Menu(55);
+data.ForEach(x => x.Zip5 = x.Zip5.Substring(0, 3));
+data = data.GroupBy(p => new { p.City, p.Area }).Select(x => x.First()).OrderBy(x => x.Zip5).ToList();
+cityList = data.Select(x => x.City).Distinct().ToList();
 
-// 讀取 JSON 檔案
-using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-{
-    // 將 FileStream 包裝成 StreamReader
-    using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
-    {
-        // 讀取 StreamReader 中的所有資料
-        string text = reader.ReadToEnd();
-        // 將讀取的資料存入變數中
-        string fileData = text;
-        data = JsonConvert.DeserializeObject<List<AddressModel>>(fileData);
-        data.ForEach(x => x.Zip5 = x.Zip5.Substring(0, 3));
-        data = data.GroupBy(p => new { p.City, p.Area }).Select(x => x.First()).OrderBy(x => x.Zip5).ToList();
-        cityList = data.Select(x => x.City).Distinct().ToList();
-    };
-};
+
 DataManipulation db = new DataManipulation();
 if (!db.CheckIsExist())
 {
@@ -45,45 +31,69 @@ if (!db.CheckIsExist())
 
 Console.WriteLine("Hello, World!");
 
-void Menu(int totalCost)
+
+//AdditionalData 用法
+
+//foreach (var item in data)
+//{
+//    if (item.AdditionalData.Keys.Contains("Road"))
+//    {
+//        Console.WriteLine("道路: " + item.AdditionalData["Road"]);
+//    }
+//    if (item.AdditionalData.Keys.Contains("Scope"))
+//    {
+//        Console.WriteLine("Scope: " + item.AdditionalData["Scope"]);
+//    }
+//}
+
+var day = new Holiday()
 {
-    List<Food> toastList = new List<Food>()
-    {
-        new Food(){ Name = "蔬菜", Price = 30 },
-        new Food(){ Name = "火腿", Price = 35 },
-        new Food(){ Name = "肉鬆", Price = 35 },
-        new Food(){ Name = "鮪魚", Price = 35 },
-        new Food(){ Name = "培根", Price = 35 },
-    };
-    List<Food> drinkList = new List<Food>()
-    {
-        new Food(){ Name = "薏仁漿", Price = 20 },
-        new Food(){ Name = "豆漿", Price = 20 },
-        new Food(){ Name = "紅茶", Price = 15 },
+    Id = 959,
+    Date = "2021/1/1",
+    IsHoliday = "是"
+};
 
-    };
-    List<Food> otherList = new List<Food>()
-    {
-        new Food(){ Name = "", Price = 0 },
-        new Food(){ Name = "薯餅", Price = 20 },
-    };
+Console.WriteLine(JsonConvert.SerializeObject(day));
+day.AdditionalData.Add("name", "中華民國開國紀念日");
+day.AdditionalData.Add("description", "全國各機關學校放假一日");
+var text = JsonConvert.SerializeObject(day);
+Console.WriteLine(text);
+var obj = JsonConvert.DeserializeObject<Holiday>(text);
+Console.WriteLine(obj);
 
-    Random rand = new Random();
-    Food result = new Food(), result2 = new Food(), result3 = new Food();
-    while(result.Price + result2.Price + result3.Price != totalCost)
+public class Holiday
+{
+    [JsonProperty("_id")]
+    public long Id { get; set; }
+
+    [JsonProperty("date")]
+    public string Date { get; set; }
+
+    // these properties are set in OnDeserialized
+    [JsonProperty("dayName")]
+    public string DayName { get; set; }
+
+    // [JsonProperty("name")]
+    // public string Name { get; set; }
+
+    // [JsonProperty("description")]
+    // public string Description { get; set; }
+
+    [JsonProperty("holidayCategory")]
+    public string HolidayCategory { get; set; }
+
+    [JsonProperty("isHoliday")]
+    public string IsHoliday { get; set; }
+
+    [JsonExtensionData]
+    public IDictionary<string, object> AdditionalData { get; set; } = new Dictionary<string, object>();
+
+    [OnDeserialized]
+    private void OnDeserialized(StreamingContext context)
     {
-        result = toastList[rand.Next(toastList.Count)];
-        result2 = drinkList[rand.Next(drinkList.Count)];
-        result3 = otherList[rand.Next(otherList.Count)];
+        // SAMAccountName is not deserialized to any property
+        // and so it is added to the extension data dictionary
+        string sameName = (string)AdditionalData["name"];
+        DayName = sameName.Split("")[0];
     }
-    Console.WriteLine("價值需求:" + totalCost);
-    Console.WriteLine(result.Name + "$" + result.Price);
-    Console.WriteLine(result2.Name + "$" + result2.Price);
-    Console.WriteLine(result3.Name + "$" + result3.Price);
-}
-
-class Food
-{
-    public string Name { get; set; }
-    public int Price { get; set; } = 0;
 }

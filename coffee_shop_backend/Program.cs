@@ -1,9 +1,11 @@
 using coffee_shop_backend;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 //改寫回讀取Startup設定
 var startup = new Startup(builder.Configuration);
 startup.ConfigureServices(builder.Services);
+builder.Host.UseSerilog(); // <-- 使用Serilog 加入這一行
 var app = builder.Build();
 startup.Configure(app, app.Environment);
 app.Run();

@@ -4,10 +4,12 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Data.SqlClient;
 using Serilog;
 using Serilog.Events;
+using System.Net;
 using System.Text;
 
 namespace coffee_shop_backend.Controllers
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class TestController : BaseController
     {
         private HttpContext? _context;
@@ -109,6 +111,22 @@ namespace coffee_shop_backend.Controllers
 
             List<int>  result = highest_biPrimefac(2, 3, 50);
             return View();
+        }
+
+        [Route("[controller]/GetFile")]
+        public IActionResult GetFile()
+        {
+            int id = 1;
+            string path = _host.ContentRootPath;
+            if (id <= 0)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, new
+                {
+                    errorno = 1,
+                    message = "id must larger than zero."
+                });
+            }
+            return File("image/testImg.PNG", "image/jpeg"); //以 web root 路徑為起點 (wwwroot)
         }
 
         public List<int> highest_biPrimefac(int a, int b, int max)

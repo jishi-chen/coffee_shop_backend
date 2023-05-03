@@ -1,8 +1,9 @@
-﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor
 @using coffee_shop_backend.Controllers
+@using Microsoft.AspNetCore.Routing
 
 @{
-    var controllerName = HttpContextAccessor.HttpContext.GetRouteData().Values["controller"].ToString();
+    var controllerName = httpContextAccessor.HttpContext.GetRouteData().Values["controller"].ToString();
     var alertMsg = ViewBag.ModifySuccess;
 }
 

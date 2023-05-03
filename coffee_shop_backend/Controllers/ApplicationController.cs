@@ -105,6 +105,7 @@ namespace coffee_shop_backend.Controllers
             new SelectListItem("女", "1"),
         };
         public DateTime? DateTimeObject { get; set; } = DateTime.Now;
+        public string? Description { get; set; }
     }
 
     public class Address

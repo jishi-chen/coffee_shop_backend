@@ -54,10 +54,13 @@ namespace coffee_shop_backend
             services.AddLocalization(options => options.ResourcesPath = "Resources");
             services.AddMemoryCache();
             services.AddSession();
+
             // Entity Framework
             services.AddDbContext<ModelContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+                options.EnableSensitiveDataLogging(); //啟用「敏感資料」紀錄的結果
+            });
 
             //資料保護 cryptographic API
             services.AddDataProtection();
@@ -139,7 +142,7 @@ namespace coffee_shop_backend
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
             })
-            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)  //Cookie-based 身分驗證機制
             .AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
             {
                 options.Authority = Configuration["OpenIDConnect:Authority"];

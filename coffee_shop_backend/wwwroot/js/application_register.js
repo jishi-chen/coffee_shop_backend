@@ -103,52 +103,102 @@
             password.attr('type', type);
             this.classList.toggle('bi-eye');
         },
-        //驗證日期時間格式
-        _checkValidDateTime: function () {
-            var regDate = /^(\d{4})-(\d{2})-(\d{2})$/;
-            var regTime = /([0-1][0-9]|2[0-3]):[0-5][0-9]/;
-            var value = "";
-            let datetime = "";
+        //驗證輸入項目
+        _checkValidInput: function () {
             let startDate = $('[id^=StartDate]');
             let endDate = $('[id^=EndDate]');
-            for (var i = 0; i < startDate.length; i++) {
-                value = startDate[i].value;
-                datetime = value.split(' ');
-                if (!regDate.test(datetime[0]) || RegExp.$2 > 12 || RegExp.$3 > 31 || !regTime.test(datetime[1])) {
-                    startDate[i].classList.add("is-invalid");
-                    startDate[i].classList.remove("is-valid");
-                }
-                else {
-                    startDate[i].classList.add("is-valid");
-                    startDate[i].classList.remove("is-invalid");
-                }
+            let phone = $('[id^=Phone]');
+            let identityString = $('[id^=IdentityString]');
+            let email = $('[id^=Email]');
+            //日期時間
+            if (!this._isValidDateTime(startDate)) {
+                this._valid.valid = false;
+                this._valid.errorMsg += '開始日期時間格式錯誤\n';
             }
-            for (var i = 0; i < endDate.length; i++) {
-                value = endDate[i].value;
-                datetime = value.split(' ');
-                if (!regDate.test(datetime[0]) || RegExp.$2 > 12 || RegExp.$3 > 31 || !regTime.test(datetime[1])) {
-                    endDate[i].classList.add("is-invalid");
-                    endDate[i].classList.remove("is-valid");
-                }
-                else {
-                    endDate[i].classList.add("is-valid");
-                    endDate[i].classList.remove("is-invalid");
-                }
+            if (!this._isValidDateTime(endDate)) {
+                this._valid.valid = false;
+                this._valid.errorMsg += '結束日期時間格式錯誤\n';
+            }
+            //手機號碼
+            if (!this._isValidPhoneNumber(phone.val())) {
+                this._valid.valid = false;
+                this._valid.errorMsg += '電話號碼格式錯誤\n';
+            }
+            //身分證字號
+            if (!this._isValidIDCardNumber(identityString.val())) {
+                this._valid.valid = false;
+                this._valid.errorMsg += '身分證字號格式錯誤\n';
+            }
+            //Email
+            if (!this._isValidEmail(email.val())) {
+                this._valid.valid = false;
+                this._valid.errorMsg += 'Email格式錯誤\n';
             }
         },
         //驗證日期時間格式
         _isValidDateTime: function (e) {
             var value = e.value;
-            let datetime = value.split(' ');
-            var regDate = /^(\d{4})-(\d{2})-(\d{2})$/;
-            var regTime = /([0-1][0-9]|2[0-3]):[0-5][0-9]/;
-            if (!regDate.test(datetime[0]) || RegExp.$2 > 12 || RegExp.$3 > 31 || !regTime.test(datetime[1])) {
+            if (typeof myVar !== "undefined") {
+                let datetime = value.split(' ');
+                var regDate = /^(\d{4})-(\d{2})-(\d{2})$/;
+                var regTime = /([0-1][0-9]|2[0-3]):[0-5][0-9]/;
+                if (!regDate.test(datetime[0]) || RegExp.$2 > 12 || RegExp.$3 > 31 || !regTime.test(datetime[1])) {
+                    return false;
+                }
+                return true;
+            }
+            return false;
+        },
+        //驗證電話號碼
+        _isValidPhoneNumber : function (e) {
+            // 驗證是否為 09 開頭的手機號碼，長度為 10 碼
+            const regex = /^09\d{8}$/;
+            return regex.test(e);
+        },
+        //驗證身分證字號
+        _isValidIDCardNumber: function (e) {
+            // 驗證格式是否正確
+            const regex = /^[A-Z][1-2]\d{8}$/;
+            if (!regex.test(e)) {
                 return false;
             }
-            return true;
+
+            // 計算檢查碼
+            const idArray = e.split('');
+            const letters = 'ABCDEFGHJKLMNPQRSTUVXYWZIO';
+            const letterNumber = (letters.indexOf(idArray[0]) + 10).toString().split('');
+            const checkSum =
+                Number(letterNumber[0]) * 1 +
+                Number(letterNumber[1]) * 9 +
+                Number(idArray[1]) * 9 +
+                Number(idArray[2]) * 8 +
+                Number(idArray[3]) * 7 +
+                Number(idArray[4]) * 6 +
+                Number(idArray[5]) * 5 +
+                Number(idArray[6]) * 4 +
+                Number(idArray[7]) * 3 +
+                Number(idArray[8]) * 2 +
+                Number(idArray[9]) +
+                Number(idArray[10]);
+
+            // 驗證檢查碼是否正確
+            return checkSum % 10 === 0;
+        },
+        //驗證Email
+        _isValidEmail: function (e) {
+            const emailRule =
+                /^\w+((-\w+)|(\.\w+)|(\+\w+))*@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/;
+            return emailRule.test(e);
         },
         //送出表單
         _btnSubmit: function (e) {
+            this._checkValidInput();
+
+            if (this._valid.valid === false) {
+                alert(this._valid.errorMsg);
+                this._valid.valid = true;
+                this._valid.errorMsg = '';
+            }
             Swal.fire({
                 icon: 'error',
                 title: 'Oops...',

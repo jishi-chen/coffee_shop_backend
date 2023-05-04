@@ -3,6 +3,7 @@ using coffee_shop_backend.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using coffee_shop_backend.Utility;
 
 namespace coffee_shop_backend.Controllers
 {
@@ -51,8 +52,39 @@ namespace coffee_shop_backend.Controllers
         [Route("Register")]
         public IActionResult Register(BasicData model)
         {
+            DataCheckUtility check = new DataCheckUtility();
+            string errorMsg = string.Empty;
+            if (!check.CheckNotNULLAndLength(model.Name, 20, out errorMsg))
+                ModelState.AddModelError("Name", "姓名" + errorMsg);
+            if (!check.CheckNotNULLAndLength(model.Account, 20, out errorMsg))
+                ModelState.AddModelError("Account", "帳號" + errorMsg);
+            if (!check.IsAlphaNumeric(model.Password))
+                ModelState.AddModelError("Password", "密碼格式錯誤");
+            if (!check.IsCellPhone(model.Phone))
+                ModelState.AddModelError("Phone", "電話格式錯誤");
+            if (!check.IsEmail(model.Email))
+                ModelState.AddModelError("Email", "信箱格式錯誤");
 
-            return View();
+            List<SelectListItem> cityList = new List<SelectListItem>();
+            List<SelectListItem> areaList = new List<SelectListItem>();
+            List<AddressCity> cityModel = _db.AddressCities.Select(x => x).ToList();
+            foreach (var c in cityModel)
+            {
+                cityList.Add(new SelectListItem()
+                {
+                    Text = c.CityName,
+                    Value = c.CityName,
+                    Selected = model.Address?.City == c.CityName,
+                });
+            }
+            ViewBag.CityList = cityList;
+            ViewBag.AreaList = areaList;
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            return View(model);
         }
 
         [Route("Settings")]
@@ -96,6 +128,7 @@ namespace coffee_shop_backend.Controllers
         public string? Phone { get; set; }
         public string? IdentityString { get; set; }
         public Address Address { get; set; } = new Address();
+        public string? Email { get; set; }
         public string? Account { get; set; }
         public string? Password { get; set; }
         public string? Gender { get; set; }

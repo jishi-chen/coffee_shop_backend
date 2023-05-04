@@ -4,11 +4,11 @@ namespace coffee_shop_backend.Utility
 {
     public class DataCheckUtility
     {
-        private readonly IConfiguration _config;
 
-        public DataCheckUtility(IConfiguration config)
+
+        public DataCheckUtility()
         {
-            this._config = config;
+
         }
 
         #region 靜態公用方法
@@ -57,10 +57,30 @@ namespace coffee_shop_backend.Utility
         /// <summary>
         /// 檢核是否為手機格式
         /// </summary>
-        public bool IsCellPhone(string cellphone)
+        public bool IsCellPhone(String InputString)
         {
             string regexFormat = @"^[0-9]{10}$";
-            return Regex.IsMatch(cellphone, regexFormat);
+            return (InputString != string.Empty && Regex.IsMatch(InputString, regexFormat));
+        }
+
+        /// <summary> 驗字串長度 </summary>
+        /// <param name="text"></param>
+        /// <param name="len"></param>
+        /// <returns>字串是否符合長度</returns>
+        public bool CheckNotNULLAndLength(string text, int len, out string message)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                message = "為必填";
+                return false;
+            }
+            else if (text.Length > len)
+            {
+                message = "長度不可超過" + len + "字";
+                return false;
+            }
+            message = string.Empty;
+            return true;
         }
 
         /// <summary> 驗身分證 </summary>
@@ -124,6 +144,47 @@ namespace coffee_shop_backend.Utility
             if ((sumVal + valueContainer[10]) % 10 == 0)
                 return true;
             return false;
+        }
+
+        /// <summary>
+        /// 帳號限制須為5~20碼英數字
+        /// </summary>
+        /// <param name="account">帳號</param>
+        /// <returns></returns>
+        public bool IsAccountRule(string account)
+        {
+            string regexFormat = @"^(?=.*[0-9a-zA-Z]).{5,20}$";
+            return Regex.IsMatch(account, regexFormat);
+        }
+
+        /// <summary>
+        /// 檢查密碼強度,1,2,3,4
+        /// </summary>
+        /// <param name="identityString">密碼</param>
+        /// <param name="level">密碼強度1~4</param>
+        /// <param name="minLength">最短長度</param>
+        public bool CheckPasswordStrength(string identityString, int level, int minLength)
+        {
+            string regexFormat;
+            switch (level)
+            {
+                case 1:
+                    regexFormat = @"^(?=.*\d)(?=.*[a-zA-Z]).{" + minLength + ",20}$";
+                    break;
+                case 2:
+                    regexFormat = @"^(?=.*[a-zA-Z0-9])(?=.*[!@#$&*]*).{" + minLength + ",}$"; //英文大寫、小寫、數字與特殊字元四種類型至少要有兩種各一個。
+                    break;
+                case 3:
+                    regexFormat = @"^(?=.*[A-Za-zA-Za-z])(?=.*[0-9])(?=.*[A-Z!@#$&*]).{" + minLength + ",}$"; //英文大寫、小寫、數字與特殊字元四種類型至少要有三種各一個。
+                    break;
+                case 4:
+                    regexFormat = @"^(?=.*[^a-zA-Z0-9])(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{" + minLength + ",}$"; //英文大寫、小寫、數字與特殊字元四種類型四種各一個。
+                    break;
+                default:
+                    regexFormat = @"^(?=.*\d)(?=.*[a-zA-Z]).{" + minLength + ",20}$";
+                    break;
+            }
+            return Regex.IsMatch(identityString, regexFormat);
         }
         #endregion
     }

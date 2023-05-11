@@ -129,6 +129,23 @@ namespace coffee_shop_backend.Controllers
             return File("image/testImg.PNG", "image/jpeg"); //以 web root 路徑為起點 (wwwroot)
         }
 
+        [Route("[controller]/Upload")]
+        [HttpPost]
+        public async Task<IActionResult> Upload(IFormFile file)
+        {
+            if (file != null && file.Length > 0)
+            {
+                var fileName = Path.GetFileName(file.FileName);
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", fileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+                return Ok();
+            }
+            return BadRequest("No file was uploaded.");
+        }
+
         public List<int> highest_biPrimefac(int a, int b, int max)
         {
             if (a > b || a < 1 || b < 1) return null;

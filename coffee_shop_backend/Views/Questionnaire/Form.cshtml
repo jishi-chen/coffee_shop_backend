@@ -1,0 +1,113 @@
+﻿@model QuestionnaireViewModel
+@{
+    
+}
+@section Scripts {
+    <script type="text/javascript" src="~/js/tinymce/tinymce.min.js"></script>
+    <script>
+        tinymce.init({
+        selector: '#HeadText #FooterText',
+        language:'zh_TW',
+        height: 300,
+        skin: 'lightgray',
+        menubar: false,
+
+        content_style: 'body { line-height: 1.5 !important; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji" !important; } p { margin-top: 0 !important; margin-bottom: 0 !important; }',
+        fontsize_formats: "8pt 10pt 12pt 14pt 16pt 18pt 20pt 22pt 24pt 28pt 32pt 36pt 48pt 60pt 72pt",
+        font_formats: "微軟正黑體=微軟正黑體; 微軟正黑體 Light=微軟正黑體 Light; 新細明體=新細明體; 細明體=細明體; 標楷體=標楷體; Andale Mono=andale mono,times; Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats;",
+        default_link_target: '_blank',
+        target_list: false,
+        link_title: false,
+        paste_enable_default_filters: false,
+        
+        plugins: 'advlist lists link code autosave emoticons paste table textcolor',
+        toolbar: 'restoredraft | undo redo | fontsizeselect fontselect | bold italic underline forecolor backcolor | ' +
+        'alignleft aligncenter alignright | emoticons link table |' +
+        '| bullist numlist | code | '
+        });
+    </script>
+}
+
+<h1>@(Model.Id == Guid.Empty ? "新增" : "修改")問卷</h1>
+
+<div class="container">
+    <div class="row py-2">
+        @using (Html.BeginForm("Form", "Questionnaire", FormMethod.Post, new { enctype = "multipart/form-data" })){
+            @Html.AntiForgeryToken()
+
+            @Html.HiddenFor(model => model.Id, new { @class = "form-control", @readonly = "true" })
+
+            <div>
+                <label for="Caption" class="col-form-label">標題</label>
+                <div class="row g-2">
+                    <div class="col col-lg-10">
+                        @Html.TextBoxFor(model => model.Caption, new { placeholder = "請輸入標題", @class = "form-control"})
+                    </div>
+                </div>
+                <small class="text-info mt-2">註 : 文字上限300 字</small>
+                @Html.ValidationMessageFor(model => model.Caption, "", new { @class = "text-danger" })
+            </div>
+
+            <div>
+                <label for="Sort" class="col-form-label">排序</label>
+                <div class="row g-2">
+                    <div class="col col-lg-10">
+                        @Html.TextBoxFor(model => model.Sort, new { placeholder = "請輸入排序", @class = "form-control", type = "number"})
+                    </div>
+                </div>
+                <small class="text-info mt-2">註 : 限填不大於100數字</small>
+                @Html.ValidationMessageFor(model => model.Sort, "", new { @class = "text-danger" })
+            </div>
+            
+            <div>
+                <label for="IsEnabled" class="col-form-label">啟用狀態</label>
+                <div class="row g-2">
+                    <div class="col col-lg-10">
+                        @Html.CheckBoxFor(model => model.IsEnabled)
+                    </div>
+                </div>
+                @Html.ValidationMessageFor(model => model.Sort, "", new { @class = "text-danger" })
+            </div>
+
+
+            <div>
+                <label for="StartDate" class="col-form-label">開放填寫日期</label>
+                <div class="row g-2">
+                    <div class="col col-lg-10">
+                        @Html.TextBoxFor(model => model.StartDate, new { placeholder = "請輸入開始日期", @class = "form-control", type = "date"})
+                        ～
+                        @Html.TextBoxFor(model => model.EndDate, new { placeholder = "請輸入結束日期", @class = "form-control", type = "date"})
+                    </div>
+                </div>
+                @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-danger" })
+                @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-danger" })
+            </div>
+
+            <div>
+                <label for="HeadText" class="col-form-label">表頭</label>
+                <div class="row g-2">
+                    <div class="col col-lg-10">
+                        @Html.TextAreaFor(model => model.HeadText, new { placeholder = "請輸入表頭", @class = "form-control", maxlength = 2000, rows = 5 })
+                    </div>
+                </div>
+                @Html.ValidationMessageFor(model => model.HeadText, "", new { @class = "text-danger" })
+            </div>
+
+            <div>
+                <label for="FooterText" class="col-form-label">表尾</label>
+                <div class="row g-2">
+                    <div class="col col-lg-10">
+                        @Html.TextAreaFor(model => model.FooterText, new { placeholder = "請輸入表尾", @class = "form-control", maxlength = 2000, rows = 5 })
+                    </div>
+                </div>
+                @Html.ValidationMessageFor(model => model.FooterText, "", new { @class = "text-danger" })
+            </div>
+
+            <div>
+                <input class="btn btn-danger" type="reset" value="清除">
+                <input class="btn btn-secondary" type="submit" value="確定儲存">
+            </div>
+        }
+
+    </div>
+</div>

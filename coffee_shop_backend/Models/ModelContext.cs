@@ -18,8 +18,12 @@ namespace coffee_shop_backend.Models
 
         public virtual DbSet<AddressArea> AddressAreas { get; set; } = null!;
         public virtual DbSet<AddressCity> AddressCities { get; set; } = null!;
+        public virtual DbSet<Examine> Examines { get; set; } = null!;
+        public virtual DbSet<ExamineAnswer> ExamineAnswers { get; set; } = null!;
+        public virtual DbSet<ExamineFillInRecord> ExamineFillInRecords { get; set; } = null!;
+        public virtual DbSet<ExamineFillInRecordDetail> ExamineFillInRecordDetails { get; set; } = null!;
+        public virtual DbSet<ExamineQuestion> ExamineQuestions { get; set; } = null!;
         public virtual DbSet<MemberInfo> MemberInfos { get; set; } = null!;
-
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -53,6 +57,103 @@ namespace coffee_shop_backend.Models
                 entity.Property(e => e.CityName).HasMaxLength(5);
 
                 entity.Property(e => e.SortIndex).ValueGeneratedOnAdd();
+            });
+
+            modelBuilder.Entity<Examine>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.Property(e => e.Caption).HasMaxLength(50);
+
+                entity.Property(e => e.CreateDate).HasColumnType("datetime");
+
+                entity.Property(e => e.Creator).HasMaxLength(50);
+
+                entity.Property(e => e.EndDate).HasColumnType("datetime");
+
+                entity.Property(e => e.ExamineNo)
+                    .HasMaxLength(8)
+                    .IsUnicode(false)
+                    .IsFixedLength();
+
+                entity.Property(e => e.FooterText).HasMaxLength(2000);
+
+                entity.Property(e => e.HeadText).HasMaxLength(2000);
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.StartDate).HasColumnType("datetime");
+
+                entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+
+                entity.Property(e => e.Updator).HasMaxLength(50);
+            });
+
+            modelBuilder.Entity<ExamineAnswer>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.Property(e => e.Caption).HasMaxLength(30);
+
+                entity.Property(e => e.CreateDate).HasColumnType("datetime");
+
+                entity.Property(e => e.ExamineQuestionId).HasColumnName("ExamineQuestionID");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.SeqNo).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<ExamineFillInRecord>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.Property(e => e.CreateDate).HasColumnType("datetime");
+
+                entity.Property(e => e.ExamineId).HasColumnName("ExamineID");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.Ip)
+                    .HasMaxLength(30)
+                    .IsUnicode(false)
+                    .HasColumnName("IP");
+
+                entity.Property(e => e.SeqNo).ValueGeneratedOnAdd();
+            });
+
+            modelBuilder.Entity<ExamineFillInRecordDetail>(entity =>
+            {
+                entity.HasKey(e => e.SeqNo);
+
+                entity.Property(e => e.AnswerText).HasMaxLength(2000);
+
+                entity.Property(e => e.ExamineAnswerId).HasColumnName("ExamineAnswerID");
+
+                entity.Property(e => e.ExamineFillInRecordsId).HasColumnName("ExamineFillInRecordsID");
+
+                entity.Property(e => e.ExamineQuestionId).HasColumnName("ExamineQuestionID");
+            });
+
+            modelBuilder.Entity<ExamineQuestion>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.Property(e => e.Caption).HasMaxLength(200);
+
+                entity.Property(e => e.CreateDate).HasColumnType("datetime");
+
+                entity.Property(e => e.ExamineId).HasColumnName("ExamineID");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.ParentId).HasColumnName("ParentID");
+
+                entity.Property(e => e.SeqNo).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.UpdateDate).HasColumnType("datetime");
             });
 
             modelBuilder.Entity<MemberInfo>(entity =>

@@ -6,8 +6,6 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Microsoft.AspNetCore.Mvc.Controllers;
-using coffee_shop_backend.Middleware;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
@@ -44,7 +42,7 @@ namespace coffee_shop_backend
                     }
                 });
             });
-            
+
             // HttpClient()服務
             services.AddHttpClient("server").ConfigurePrimaryHttpMessageHandler(_ => new HttpClientHandler
             {

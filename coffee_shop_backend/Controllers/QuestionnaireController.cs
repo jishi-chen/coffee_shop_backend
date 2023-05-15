@@ -18,26 +18,27 @@ namespace coffee_shop_backend.Controllers
         [Route("Index")]
         public IActionResult Index()
         {
-            IEnumerable<Examine> model = _db.Examines.Where(x => x.StartDate < DateTime.Now && (x.EndDate.HasValue ? x.EndDate.Value : DateTime.MaxValue) > DateTime.Now)
-                .Where(x => x.IsEnabled == true).ToList();
+            IEnumerable<Examine> model = _db.Examines.Where(x => x.StartDate < DateTime.Now && x.EndDate > DateTime.Now).ToList();
             return View(model);
         }
 
         [Route("Form")]
         public IActionResult Form(string id)
         {
-            QuestionnaireViewModel? model = new QuestionnaireViewModel();
+            QuestionnaireViewModel model = new QuestionnaireViewModel();
             if (!string.IsNullOrEmpty(id))
             {
-                model = _db?.Examines.Select(x => new QuestionnaireViewModel
+                model.Info = _db?.Examines.Select(x => new BasicInformation
                 {
                     Id = x.Id,
                     Caption = x.Caption,
                     IsEnabled = x.IsEnabled,
                     Sort = x.Sort,
-                    StartDate = x.StartDate,
-                    EndDate = x.EndDate
-                }).FirstOrDefault(x => x.Id.ToString() == id);
+                    StartDate = x.StartDate.ToString("yyyy-MM-dd"),
+                    EndDate = x.EndDate.ToString("yyyy-MM-dd"),
+                    HeadText = x.HeadText,
+                    FooterText = x.FooterText,
+                }).FirstOrDefault(x => x.Id.ToString() == id)!;
             }
             
 
@@ -49,7 +50,7 @@ namespace coffee_shop_backend.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Form(QuestionnaireViewModel model)
         {
-            if (string.IsNullOrEmpty(model.Caption))
+            if (string.IsNullOrEmpty(model.Info.Caption))
             {
                 ModelState.AddModelError("Caption", "標題不可為空白");
             }
@@ -62,18 +63,20 @@ namespace coffee_shop_backend.Controllers
             else
             {
                 //新增
-                if (model.Id == Guid.Empty)
+                if (model.Info.Id == Guid.Empty)
                 {
                     Examine examine = new Examine()
                     {
                         Id = Guid.NewGuid(),
-                        Sort = model.Sort,
-                        Caption = model.Caption,
-                        StartDate = model.StartDate,
-                        EndDate = model.EndDate,
-                        IsEnabled = model.IsEnabled,
+                        Sort = model.Info.Sort,
+                        Caption = model.Info.Caption,
+                        StartDate = DateTime.Parse(model.Info.StartDate),
+                        EndDate = DateTime.Parse(model.Info.EndDate),
+                        IsEnabled = model.Info.IsEnabled,
                         ExamineNo = "",
                         Hits = 0,
+                        HeadText = model.Info.HeadText,
+                        FooterText = model.Info.FooterText,
                         Creator = "Admin",
                         CreateDate = DateTime.Now,
                     };
@@ -82,16 +85,16 @@ namespace coffee_shop_backend.Controllers
                 //修改
                 else
                 {
-                    Examine? examine = _db?.Examines.FirstOrDefault(x => x.Id == model.Id);
+                    Examine? examine = _db?.Examines.FirstOrDefault(x => x.Id == model.Info.Id);
                     if (examine != null)
                     {
-                        examine.Caption = model.Caption;
-                        examine.HeadText = model.HeadText;
-                        examine.FooterText = model.FooterText;
-                        examine.IsEnabled = model.IsEnabled;
-                        examine.StartDate = model.StartDate;
-                        examine.EndDate = model.EndDate;
-                        examine.Sort = model.Sort;
+                        examine.Caption = model.Info.Caption;
+                        examine.HeadText = model.Info.HeadText;
+                        examine.FooterText = model.Info.FooterText;
+                        examine.IsEnabled = model.Info.IsEnabled;
+                        examine.StartDate = DateTime.Parse(model.Info.StartDate);
+                        examine.EndDate = DateTime.Parse(model.Info.EndDate);
+                        examine.Sort = model.Info.Sort;
                         examine.Updator = "Admin";
                         examine.UpdateDate = DateTime.Now;
                     }

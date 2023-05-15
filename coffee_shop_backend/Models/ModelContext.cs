@@ -61,7 +61,9 @@ namespace coffee_shop_backend.Models
 
             modelBuilder.Entity<Examine>(entity =>
             {
-                entity.HasNoKey();
+                entity.Property(e => e.Id)
+                    .ValueGeneratedNever()
+                    .HasColumnName("ID");
 
                 entity.Property(e => e.Caption).HasMaxLength(50);
 
@@ -79,8 +81,6 @@ namespace coffee_shop_backend.Models
                 entity.Property(e => e.FooterText).HasMaxLength(2000);
 
                 entity.Property(e => e.HeadText).HasMaxLength(2000);
-
-                entity.Property(e => e.Id).HasColumnName("ID");
 
                 entity.Property(e => e.StartDate).HasColumnType("datetime");
 

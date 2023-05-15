@@ -1,6 +1,6 @@
 ﻿@model QuestionnaireViewModel
 @{
-    
+    var basicInfo = Model.Info;
 }
 @section Scripts {
     <script type="text/javascript" src="~/js/tinymce/tinymce.min.js"></script>
@@ -25,82 +25,100 @@
         'alignleft aligncenter alignright | emoticons link table |' +
         '| bullist numlist | code | '
         });
+
+        $('input[name="Question.AnswerType"]').change(function() {
+            var selectedValue = $('input[name="Question.AnswerType"]:checked').val();
+            if (selectedValue == @((int)AnswerTypeEnum.SingleLine)){
+                $("[id$=isFile]").hide();
+                $("[id$=isText]").show();
+                $("[id$=isSelect]").hide();
+            }
+        });
     </script>
 }
 
-<h1>@(Model.Id == Guid.Empty ? "新增" : "修改")問卷</h1>
+<h1>@(Model.Info.Id == Guid.Empty ? "新增" : "修改")問卷</h1>
 
-<div class="container">
+<nav>
+  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+    <button class="nav-link active" id="nav-base-tab" data-bs-toggle="tab" data-bs-target="#nav-base" type="button" role="tab" aria-controls="nav-base" aria-selected="true">基本資料</button>
+    <button class="nav-link" id="nav-column-tab" data-bs-toggle="tab" data-bs-target="#nav-column" type="button" role="tab" aria-controls="nav-column" aria-selected="false">欄位內容</button>
+  </div>
+</nav>
+
+<div class="tab-content" id="nav-tabContent">
+  <div class="tab-pane fade show active" id="nav-base" role="tabpanel" aria-labelledby="nav-base-tab">
+      <div class="container">
     <div class="row py-2">
         @using (Html.BeginForm("Form", "Questionnaire", FormMethod.Post, new { enctype = "multipart/form-data" })){
             @Html.AntiForgeryToken()
 
-            @Html.HiddenFor(model => model.Id, new { @class = "form-control", @readonly = "true" })
+            @Html.HiddenFor(model => model.Info.Id, new { @class = "form-control", @readonly = "true" })
 
             <div>
-                <label for="Caption" class="col-form-label">標題</label>
+                <label for="Info_Caption" class="col-form-label">標題</label>
                 <div class="row g-2">
                     <div class="col col-lg-10">
-                        @Html.TextBoxFor(model => model.Caption, new { placeholder = "請輸入標題", @class = "form-control"})
+                        @Html.TextBoxFor(model => model.Info.Caption, new { placeholder = "請輸入標題", @class = "form-control"})
                     </div>
                 </div>
                 <small class="text-info mt-2">註 : 文字上限300 字</small>
-                @Html.ValidationMessageFor(model => model.Caption, "", new { @class = "text-danger" })
+                @Html.ValidationMessageFor(model => model.Info.Caption, "", new { @class = "text-danger" })
             </div>
 
             <div>
-                <label for="Sort" class="col-form-label">排序</label>
+                <label for="Info_Sort" class="col-form-label">排序</label>
                 <div class="row g-2">
                     <div class="col col-lg-10">
-                        @Html.TextBoxFor(model => model.Sort, new { placeholder = "請輸入排序", @class = "form-control", type = "number"})
+                        @Html.TextBoxFor(model => model.Info.Sort, new { placeholder = "請輸入排序", @class = "form-control", type = "number"})
                     </div>
                 </div>
                 <small class="text-info mt-2">註 : 限填不大於100數字</small>
-                @Html.ValidationMessageFor(model => model.Sort, "", new { @class = "text-danger" })
+                @Html.ValidationMessageFor(model => model.Info.Sort, "", new { @class = "text-danger" })
             </div>
             
             <div>
-                <label for="IsEnabled" class="col-form-label">啟用狀態</label>
+                <label for="Info_IsEnabled" class="col-form-label">啟用狀態</label>
                 <div class="row g-2">
                     <div class="col col-lg-10">
-                        @Html.CheckBoxFor(model => model.IsEnabled)
+                        @Html.CheckBoxFor(model => model.Info.IsEnabled)
                     </div>
                 </div>
-                @Html.ValidationMessageFor(model => model.Sort, "", new { @class = "text-danger" })
+                @Html.ValidationMessageFor(model => model.Info.Sort, "", new { @class = "text-danger" })
             </div>
 
 
             <div>
-                <label for="StartDate" class="col-form-label">開放填寫日期</label>
+                <label for="Info_StartDate" class="col-form-label">開放填寫日期</label>
                 <div class="row g-2">
                     <div class="col col-lg-10">
-                        @Html.TextBoxFor(model => model.StartDate, new { placeholder = "請輸入開始日期", @class = "form-control", type = "date"})
+                        @Html.TextBoxFor(model => model.Info.StartDate, new { placeholder = "請輸入開始日期", @class = "form-control", type = "date"})
                         ～
-                        @Html.TextBoxFor(model => model.EndDate, new { placeholder = "請輸入結束日期", @class = "form-control", type = "date"})
+                        @Html.TextBoxFor(model => model.Info.EndDate, new { placeholder = "請輸入結束日期", @class = "form-control", type = "date"})
                     </div>
                 </div>
-                @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-danger" })
-                @Html.ValidationMessageFor(model => model.EndDate, "", new { @class = "text-danger" })
+                @Html.ValidationMessageFor(model => model.Info.StartDate, "", new { @class = "text-danger" })
+                @Html.ValidationMessageFor(model => model.Info.EndDate, "", new { @class = "text-danger" })
             </div>
 
             <div>
-                <label for="HeadText" class="col-form-label">表頭</label>
+                <label for="Info_HeadText" class="col-form-label">表頭</label>
                 <div class="row g-2">
                     <div class="col col-lg-10">
-                        @Html.TextAreaFor(model => model.HeadText, new { placeholder = "請輸入表頭", @class = "form-control", maxlength = 2000, rows = 5 })
+                        @Html.TextAreaFor(model => model.Info.HeadText, new { placeholder = "請輸入表頭", @class = "form-control", maxlength = 2000, rows = 5 })
                     </div>
                 </div>
-                @Html.ValidationMessageFor(model => model.HeadText, "", new { @class = "text-danger" })
+                @Html.ValidationMessageFor(model => model.Info.HeadText, "", new { @class = "text-danger" })
             </div>
 
             <div>
-                <label for="FooterText" class="col-form-label">表尾</label>
+                <label for="Info_FooterText" class="col-form-label">表尾</label>
                 <div class="row g-2">
                     <div class="col col-lg-10">
-                        @Html.TextAreaFor(model => model.FooterText, new { placeholder = "請輸入表尾", @class = "form-control", maxlength = 2000, rows = 5 })
+                        @Html.TextAreaFor(model => model.Info.FooterText, new { placeholder = "請輸入表尾", @class = "form-control", maxlength = 2000, rows = 5 })
                     </div>
                 </div>
-                @Html.ValidationMessageFor(model => model.FooterText, "", new { @class = "text-danger" })
+                @Html.ValidationMessageFor(model => model.Info.FooterText, "", new { @class = "text-danger" })
             </div>
 
             <div>
@@ -108,6 +126,53 @@
                 <input class="btn btn-secondary" type="submit" value="確定儲存">
             </div>
         }
-
+        </div>
+    </div>
+  </div>
+  <div class="tab-pane fade" id="nav-column" role="tabpanel" aria-labelledby="nav-column-tab">
+      <h4>新增題目</h4>
+       <label for="Question_Caption" class="col-form-label">題目</label>
+       <div class="row g-2">
+            <div class="col col-lg-10">
+                @Html.TextBoxFor(model => model.Question.Caption, new { placeholder = "請輸入題目", @class = "form-control"})
+            </div>
+        </div>
+        <label for="Question_IsNeedAnswer" class="col-form-label">是否必填</label>
+        <div class="row g-2">
+            <div class="col col-lg-10">
+                @Html.CheckBoxFor(model => model.Question.IsNeedAnswer)
+            </div>
+        </div>
+        <label for="Question_IsIncludedExport" class="col-form-label">是否列入匯出表單</label>
+        <div class="row g-2">
+            <div class="col col-lg-10">
+                @Html.CheckBoxFor(model => model.Question.IsIncludedExport)
+            </div>
+        </div>
+        <label for="Question_AnswerType" class="col-form-label">答案類型</label>
+        <div>
+            @for (int q = 0; q < Model.Question.AnswerType.Count(); q++)
+            {
+                var item = Model.Question.AnswerType[q];
+                @Html.RadioButtonFor(model => model.Question.AnswerType, item.Value, new { @class = "form-check-input", @id = "Question_AnswerType" + q })
+                <label class="form-check-label" for="Question.AnswerType@(q)">@item.Text</label>
+            }
+        </div>
+        <div id="isSelect">
+            <label for="Question_NewOption" class="col-form-label">答案選項</label>
+            @Html.TextBoxFor(model => model.Question.NewOption.Text, new { placeholder = "", @class = "form-control"})
+            @Html.DropDownListFor(model => model.Question.NewOption.MemoType, Model.Question.MemoTypes ,new {@class = "form-control"})
+        </div>
+        <div id="isFile">
+            <label for="Question_FileSizeLimit" class="col-form-label">檔案大小限制</label>
+            @Html.TextBoxFor(model => model.Question.FileSizeLimit, new { placeholder = "請輸入檔案大小限制", @class = "form-control", type = "number"})
+        </div>
+        <div id="isText">
+            <label for="Question_WordLimit" class="col-form-label">文字長度限制</label>
+            @Html.TextBoxFor(model => model.Question.WordLimit, new { placeholder = "請輸入文字長度限制", @class = "form-control", type = "number"})
+        </div>
     </div>
 </div>
+
+
+

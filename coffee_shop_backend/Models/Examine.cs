@@ -11,7 +11,7 @@ namespace coffee_shop_backend.Models
         public bool IsEnabled { get; set; }
         public short Sort { get; set; }
         public DateTime StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
+        public DateTime EndDate { get; set; }
         public string? HeadText { get; set; }
         public string? FooterText { get; set; }
         public int Hits { get; set; }

@@ -1,6 +1,10 @@
-﻿using coffee_shop_backend.Models;
+﻿using coffee_shop_backend.Enums;
+using coffee_shop_backend.Models;
+using coffee_shop_backend.Utility;
 using coffee_shop_backend.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Newtonsoft.Json;
 
 namespace coffee_shop_backend.Controllers
 {
@@ -9,6 +13,7 @@ namespace coffee_shop_backend.Controllers
     public class QuestionnaireController : BaseController
     {
         private HttpContext? _context;
+        private string sessionName = "ViewModel";
 
         public QuestionnaireController(IHttpContextAccessor accessor) : base(accessor)
         {
@@ -40,7 +45,27 @@ namespace coffee_shop_backend.Controllers
                     FooterText = x.FooterText,
                 }).FirstOrDefault(x => x.Id.ToString() == id)!;
             }
-            
+            foreach (var item in Enum.GetValues(typeof(AnswerTypeEnum)))
+            {
+                model.Question.AnswerType.Add(new SelectListItem()
+                {
+                    Text = EnumHelper.GetDescription((AnswerTypeEnum)item),
+                    Value = ((int)item).ToString(),
+                    Selected = false,
+                });
+            }
+            foreach (var item in Enum.GetValues(typeof(MemoTypeEnum)))
+            {
+                model.Question.MemoTypes.Add(new SelectListItem()
+                {
+                    Text = EnumHelper.GetDescription((MemoTypeEnum)item),
+                    Value = ((int)item).ToString(),
+                    Selected = false,
+                });
+            }
+
+            string modelString = JsonConvert.SerializeObject(model);
+            TempData[sessionName] = modelString;
 
             return View(model);
         }
@@ -102,6 +127,72 @@ namespace coffee_shop_backend.Controllers
                 _db?.SaveChanges();
                 return RedirectToAction("Index");
             }
+        }
+
+        [HttpPost]
+        [Route("AddToList")]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddToList(QuestionContent Question)
+        {
+            if (TempData.Peek(sessionName) is string jsonText)
+            {
+                QuestionnaireViewModel model = JsonConvert.DeserializeObject<QuestionnaireViewModel>(jsonText)!;
+                if (Question.NewOption.Sort == null) //新增
+                {
+                    Question.NewOption.Sort = model.Question.AnswerOptions.Any() ? model.Question.AnswerOptions.OrderByDescending(x => x.Sort).FirstOrDefault()!.Sort + 1 : 0;
+                    model.Question.AnswerOptions.Add(Question.NewOption);
+                }
+                else //編輯
+                {
+                    AnswerOption option = model.Question.AnswerOptions.FirstOrDefault(x => x.Sort == Question.NewOption.Sort)!;
+                    option.Text = Question.NewOption.Text;
+                    option.MemoType = Question.NewOption.MemoType;
+                }
+                TempData[sessionName] = JsonConvert.SerializeObject(model);
+                ViewBag.Tab = "1";
+                return View("Form", model);
+            }
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        [Route("EditSelectOption")]
+        public IActionResult EditSelectOption(int index)
+        {
+            if (TempData.Peek(sessionName) is string jsonText)
+            {
+                QuestionnaireViewModel model = JsonConvert.DeserializeObject<QuestionnaireViewModel>(jsonText)!;
+                model.Question.NewOption = model.Question.AnswerOptions.FirstOrDefault(x => x.Sort == index)!;
+                TempData[sessionName] = JsonConvert.SerializeObject(model);
+                ViewBag.Tab = "1";
+                ViewBag.IsEditMode = true;
+                return View("Form", model);
+            }
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        [Route("DeleteSelectOption")]
+        public IActionResult DeleteSelectOption(int index)
+        {
+            if (TempData.Peek(sessionName) is string jsonText)
+            {
+                QuestionnaireViewModel model = JsonConvert.DeserializeObject<QuestionnaireViewModel>(jsonText)!;
+                AnswerOption option = model.Question.AnswerOptions.FirstOrDefault(x => x.Sort == index)!;
+                model.Question.AnswerOptions.Remove(option);
+                model.Question.AnswerOptions.OrderBy(x => x.Sort);
+                int q = 0;
+                foreach (var item in model.Question.AnswerOptions)
+                {
+                    item.Sort = q;
+                    q++;
+                }
+
+                TempData[sessionName] = JsonConvert.SerializeObject(model);
+                ViewBag.Tab = "1";
+                return View("Form", model);
+            }
+            return RedirectToAction("Index");
         }
     }
 }

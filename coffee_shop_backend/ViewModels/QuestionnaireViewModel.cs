@@ -35,34 +35,11 @@ namespace coffee_shop_backend.ViewModels
         public List<SelectListItem> MemoTypes { get; set; } = new List<SelectListItem>();
         public AnswerOption NewOption { get; set; } = new AnswerOption();
         public List<AnswerOption> AnswerOptions { get; set; } = new List<AnswerOption>();
-
-        public QuestionContent()
-        {
-            foreach (var item in Enum.GetValues(typeof(AnswerTypeEnum)))
-            {
-                AnswerType.Add(new SelectListItem()
-                {
-                    Text = EnumHelper.GetDescription((AnswerTypeEnum)item),
-                    Value = ((int)item).ToString(),
-                    Selected = false,
-                });
-            }
-            foreach (var item in Enum.GetValues(typeof(MemoTypeEnum)))
-            {
-                MemoTypes.Add(new SelectListItem()
-                {
-                    Text = EnumHelper.GetDescription((MemoTypeEnum)item),
-                    Value = ((int)item).ToString(),
-                    Selected = false,
-                });
-            }
-        }
     }
     public class AnswerOption
     {
-        public string? Text { get; set; }
-        public int Sort { get; set; }
+        public string? Text { get; set; } = string.Empty;
+        public int? Sort { get; set; }
         public int MemoType { get; set; }
     }
-
 }

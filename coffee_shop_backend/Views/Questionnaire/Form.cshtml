@@ -1,6 +1,10 @@
 ﻿@model QuestionnaireViewModel
+@using coffee_shop_backend.Utility
 @{
     var basicInfo = Model.Info;
+    bool isContent = ViewBag.Tab == "1";
+    bool isEditMode = ViewBag.IsEditMode is bool? ViewBag.IsEditMode :false;
+    QuestionnaireViewModel model = Model;
 }
 @section Scripts {
     <script type="text/javascript" src="~/js/tinymce/tinymce.min.js"></script>
@@ -27,12 +31,36 @@
         });
 
         $('input[name="Question.AnswerType"]').change(function() {
-            var selectedValue = $('input[name="Question.AnswerType"]:checked').val();
-            if (selectedValue == @((int)AnswerTypeEnum.SingleLine)){
+            var value = $('input[name="Question.AnswerType"]:checked').val();
+            if (value == @((int)AnswerTypeEnum.SingleLine) || value == @((int)AnswerTypeEnum.MultiLine) || value == @((int)AnswerTypeEnum.Email)){
                 $("[id$=isFile]").hide();
                 $("[id$=isText]").show();
                 $("[id$=isSelect]").hide();
             }
+            else if (value == @((int)AnswerTypeEnum.SingleSelect) || value == @((int)AnswerTypeEnum.MultiSelect)){
+                $("[id$=isFile]").hide();
+                $("[id$=isText]").hide();
+                $("[id$=isSelect]").show();
+            }
+            else if (value == @((int)AnswerTypeEnum.File)){
+                $("[id$=isFile]").show();
+                $("[id$=isText]").hide();
+                $("[id$=isSelect]").hide();
+            }
+            else if (value == @((int)AnswerTypeEnum.Date) || value == @((int)AnswerTypeEnum.Address)){
+                $("[id$=isFile]").hide();
+                $("[id$=isText]").hide();
+                $("[id$=isSelect]").hide();
+            }
+        });
+
+        $('#myForm').submit(function(event) {
+          event.preventDefault(); // 防止表單直接提交
+
+          // 在這裡執行你想要的操作
+
+          // 如果需要提交表單，可以使用以下方法：
+          // $(this).submit();
         });
     </script>
 }
@@ -41,13 +69,13 @@
 
 <nav>
   <div class="nav nav-tabs" id="nav-tab" role="tablist">
-    <button class="nav-link active" id="nav-base-tab" data-bs-toggle="tab" data-bs-target="#nav-base" type="button" role="tab" aria-controls="nav-base" aria-selected="true">基本資料</button>
-    <button class="nav-link" id="nav-column-tab" data-bs-toggle="tab" data-bs-target="#nav-column" type="button" role="tab" aria-controls="nav-column" aria-selected="false">欄位內容</button>
+    <button class="nav-link @(isContent?"":"active")" id="nav-base-tab" data-bs-toggle="tab" data-bs-target="#nav-base" type="button" role="tab" aria-controls="nav-base" aria-selected="@(!isContent)">基本資料</button>
+    <button class="nav-link @(isContent?"active":"")" id="nav-column-tab" data-bs-toggle="tab" data-bs-target="#nav-column" type="button" role="tab" aria-controls="nav-column" aria-selected="@(isContent)">欄位內容</button>
   </div>
 </nav>
 
 <div class="tab-content" id="nav-tabContent">
-  <div class="tab-pane fade show active" id="nav-base" role="tabpanel" aria-labelledby="nav-base-tab">
+  <div class="tab-pane fade @(isContent?"":"show active")" id="nav-base" role="tabpanel" aria-labelledby="nav-base-tab">
       <div class="container">
     <div class="row py-2">
         @using (Html.BeginForm("Form", "Questionnaire", FormMethod.Post, new { enctype = "multipart/form-data" })){
@@ -129,7 +157,7 @@
         </div>
     </div>
   </div>
-  <div class="tab-pane fade" id="nav-column" role="tabpanel" aria-labelledby="nav-column-tab">
+  <div class="tab-pane fade @(isContent?"show active":"")" id="nav-column" role="tabpanel" aria-labelledby="nav-column-tab">
       <h4>新增題目</h4>
        <label for="Question_Caption" class="col-form-label">題目</label>
        <div class="row g-2">
@@ -159,9 +187,38 @@
             }
         </div>
         <div id="isSelect">
-            <label for="Question_NewOption" class="col-form-label">答案選項</label>
-            @Html.TextBoxFor(model => model.Question.NewOption.Text, new { placeholder = "", @class = "form-control"})
-            @Html.DropDownListFor(model => model.Question.NewOption.MemoType, Model.Question.MemoTypes ,new {@class = "form-control"})
+            @using (Html.BeginForm("AddToList", "Questionnaire", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                <label for="Question_NewOption" class="col-form-label">答案選項</label>
+                @Html.TextBoxFor(model => model.Question.NewOption.Text, "", new { @class = "form-control"})
+                @Html.DropDownListFor(model => model.Question.NewOption.MemoType, Model.Question.MemoTypes , new {@class = "form-control"})
+                @Html.HiddenFor(model => model.Question.NewOption.Sort, new { @class = "form-control", @readonly = "true" })
+                <input class="btn btn-secondary" type="submit" value="@(isEditMode?"儲存變更":"加入清單")">
+            }
+            <table class="table table-striped table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>選項</th>
+                        <th>備註</th>
+                        <th>排序</th>
+                        <th>功能列表</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Question.AnswerOptions != null && Model.Question.AnswerOptions.Any()){
+                        foreach(var item in Model.Question.AnswerOptions)
+                        {
+                            <tr>
+                                <td>@item.Text</td>
+                                <td>@(EnumHelper.GetDescription((MemoTypeEnum)item.MemoType))</td>
+                                <td>@item.Sort</td>
+                                <td><a class="btn btn-primary" href="@Url.Action("EditSelectOption","Questionnaire", new { Sort = item.Sort })">編輯</a><a class="btn btn-primary" href="@Url.Action("DeleteSelectOption","Questionnaire", new { Sort = item.Sort })">刪除</a></td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
         </div>
         <div id="isFile">
             <label for="Question_FileSizeLimit" class="col-form-label">檔案大小限制</label>

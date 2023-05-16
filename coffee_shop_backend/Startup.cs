@@ -21,6 +21,7 @@ namespace coffee_shop_backend
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc()
+                .AddSessionStateTempDataProvider()
                 .AddViewLocalization()  //為了在 View 中使用多國語言
                 .AddDataAnnotationsLocalization()  //為了在 Model 中使用多國語言;
                 .AddRazorRuntimeCompilation();  //啟用 Razor 執行階段編譯
@@ -183,16 +184,16 @@ namespace coffee_shop_backend
             app.UseApiVersioning(); //使用 Api Version Middleware
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
-            app.UseSwagger();
+            //app.UseSwagger();
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
             // specifying the Swagger JSON endpoint.
             // 在應用程式的根目錄上提供 Swagger UI，請將 RoutePrefix 屬性設為空字串
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Document V1");  // https://localhost:7219/swagger/v1/swagger.json
-                //c.RoutePrefix = string.Empty;
-                c.RoutePrefix = "swagger";
-            });
+            //app.UseSwaggerUI(c =>
+            //{
+            //    c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Document V1");  // https://localhost:7219/swagger/v1/swagger.json
+            //    //c.RoutePrefix = string.Empty;
+            //    c.RoutePrefix = "swagger";
+            //});
 
             // Middleware使用
             //app.UseMiddleware<CustomMiddleware>();

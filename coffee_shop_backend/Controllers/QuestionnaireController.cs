@@ -23,7 +23,7 @@ namespace coffee_shop_backend.Controllers
         [Route("Index")]
         public IActionResult Index()
         {
-            IEnumerable<Examine> model = _db.Examines.Where(x => x.StartDate < DateTime.Now && x.EndDate > DateTime.Now).ToList();
+            IEnumerable<Application> model = _db.Applications.ToList();
             return View(model);
         }
 
@@ -33,7 +33,7 @@ namespace coffee_shop_backend.Controllers
             QuestionnaireViewModel model = new QuestionnaireViewModel();
             if (!string.IsNullOrEmpty(id))
             {
-                model.Info = _db?.Examines.Select(x => new BasicInformation
+                model.Info = _db?.Applications.Select(x => new BasicInformation
                 {
                     Id = x.Id,
                     Caption = x.Caption,
@@ -44,26 +44,12 @@ namespace coffee_shop_backend.Controllers
                     HeadText = x.HeadText,
                     FooterText = x.FooterText,
                 }).FirstOrDefault(x => x.Id.ToString() == id)!;
-            }
-            foreach (var item in Enum.GetValues(typeof(AnswerTypeEnum)))
-            {
-                model.Question.AnswerType.Add(new SelectListItem()
-                {
-                    Text = EnumHelper.GetDescription((AnswerTypeEnum)item),
-                    Value = ((int)item).ToString(),
-                    Selected = false,
-                });
-            }
-            foreach (var item in Enum.GetValues(typeof(MemoTypeEnum)))
-            {
-                model.Question.MemoTypes.Add(new SelectListItem()
-                {
-                    Text = EnumHelper.GetDescription((MemoTypeEnum)item),
-                    Value = ((int)item).ToString(),
-                    Selected = false,
-                });
-            }
 
+                model.Question.QuestionList = _db.ApplicationFields.Where(x => x.ApplicationId.ToString() == id).ToList();
+            }
+            GetAnswerTypeSettings(model.Question.AnswerTypes);
+            GetMemoTypeSettings(model.Question.MemoTypes);
+            
             string modelString = JsonConvert.SerializeObject(model);
             TempData[sessionName] = modelString;
 
@@ -90,7 +76,7 @@ namespace coffee_shop_backend.Controllers
                 //新增
                 if (model.Info.Id == Guid.Empty)
                 {
-                    Examine examine = new Examine()
+                    Application Application = new Application()
                     {
                         Id = Guid.NewGuid(),
                         Sort = model.Info.Sort,
@@ -98,30 +84,29 @@ namespace coffee_shop_backend.Controllers
                         StartDate = DateTime.Parse(model.Info.StartDate),
                         EndDate = DateTime.Parse(model.Info.EndDate),
                         IsEnabled = model.Info.IsEnabled,
-                        ExamineNo = "",
                         Hits = 0,
                         HeadText = model.Info.HeadText,
                         FooterText = model.Info.FooterText,
                         Creator = "Admin",
                         CreateDate = DateTime.Now,
                     };
-                    _db?.Examines.Add(examine);
+                    _db?.Applications.Add(Application);
                 }
                 //修改
                 else
                 {
-                    Examine? examine = _db?.Examines.FirstOrDefault(x => x.Id == model.Info.Id);
-                    if (examine != null)
+                    Application? Application = _db?.Applications.FirstOrDefault(x => x.Id == model.Info.Id);
+                    if (Application != null)
                     {
-                        examine.Caption = model.Info.Caption;
-                        examine.HeadText = model.Info.HeadText;
-                        examine.FooterText = model.Info.FooterText;
-                        examine.IsEnabled = model.Info.IsEnabled;
-                        examine.StartDate = DateTime.Parse(model.Info.StartDate);
-                        examine.EndDate = DateTime.Parse(model.Info.EndDate);
-                        examine.Sort = model.Info.Sort;
-                        examine.Updator = "Admin";
-                        examine.UpdateDate = DateTime.Now;
+                        Application.Caption = model.Info.Caption;
+                        Application.HeadText = model.Info.HeadText;
+                        Application.FooterText = model.Info.FooterText;
+                        Application.IsEnabled = model.Info.IsEnabled;
+                        Application.StartDate = DateTime.Parse(model.Info.StartDate);
+                        Application.EndDate = DateTime.Parse(model.Info.EndDate);
+                        Application.Sort = model.Info.Sort;
+                        Application.Updator = "Admin";
+                        Application.UpdateDate = DateTime.Now;
                     }
                 }
                 _db?.SaveChanges();
@@ -130,29 +115,163 @@ namespace coffee_shop_backend.Controllers
         }
 
         [HttpPost]
-        [Route("AddToList")]
+        [Route("FormQuestion")]
         [ValidateAntiForgeryToken]
-        public IActionResult AddToList(QuestionContent Question)
+        public IActionResult FormQuestion(QuestionContent Question)
         {
             if (TempData.Peek(sessionName) is string jsonText)
             {
                 QuestionnaireViewModel model = JsonConvert.DeserializeObject<QuestionnaireViewModel>(jsonText)!;
-                if (Question.NewOption.Sort == null) //新增
+                if (!ModelState.IsValid)
                 {
-                    Question.NewOption.Sort = model.Question.AnswerOptions.Any() ? model.Question.AnswerOptions.OrderByDescending(x => x.Sort).FirstOrDefault()!.Sort + 1 : 0;
-                    model.Question.AnswerOptions.Add(Question.NewOption);
+                    return View("Form", model);
+                    ViewBag.Tab = "1";
                 }
-                else //編輯
+                    
+                ApplicationField question = new ApplicationField();
+                //新增
+                if (Question.QuestionId == Guid.Empty)
                 {
-                    AnswerOption option = model.Question.AnswerOptions.FirstOrDefault(x => x.Sort == Question.NewOption.Sort)!;
-                    option.Text = Question.NewOption.Text;
-                    option.MemoType = Question.NewOption.MemoType;
+                    question = new ApplicationField()
+                    {
+                        Id = Guid.NewGuid(),
+                        ApplicationId = model.Info.Id,
+                        FieldName = Question.Caption,
+                        FieldType = (byte)Question.AnswerType,
+                        IsRequired = Question.IsNeedAnswer,
+                        IsIncludedExport = Question.IsIncludedExport,
+                        WordLimit = (short)Question.WordLimit,
+                        FileSizeLimit = (short)Question.FileSizeLimit,
+                        Note = Question.Note,
+                        Creator = "Admin",
+                        CreateDate = DateTime.Now,
+                    };
+                    IEnumerable<ApplicationField> list = _db.ApplicationFields.Where(x => x.ApplicationId == model.Info.Id);
+                    if (list.Any())
+                    {
+                        question.Sort = list.OrderByDescending(x => x.Sort).FirstOrDefault()!.Sort;
+                        question.Sort++;
+                    }
+                    else
+                        question.Sort = 0;
+                    _db.ApplicationFields.Add(question);
+                }
+                //編輯
+                else
+                {
+                    question = _db.ApplicationFields.FirstOrDefault(x => x.Id == Question.QuestionId)!;
+                    question.FieldName = Question.Caption;
+                    question.FieldType = (byte)Question.AnswerType;
+                    question.IsRequired = Question.IsNeedAnswer;
+                    question.IsIncludedExport = Question.IsIncludedExport;
+                    question.WordLimit = (short)Question.WordLimit;
+                    question.FileSizeLimit = (short)Question.FileSizeLimit;
+                    question.Note = Question.Note;
+                    question.Updator = "Admin";
+                    question.UpdateDate = DateTime.Now;
+                }
+
+                
+                if (question.FieldType == (int)AnswerTypeEnum.SingleChoice || question.FieldType == (int)AnswerTypeEnum.MultipleChoice)
+                {
+                    IEnumerable<ApplicationFieldOption> oldAnswer = _db.ApplicationFieldOptions.Where(x => x.ApplicationFieldId == question.Id);
+                    _db.ApplicationFieldOptions.RemoveRange(oldAnswer);
+                    if (model.Question.AnswerOptions.Any())
+                    {
+                        foreach (var item in model.Question.AnswerOptions)
+                        {
+                            ApplicationFieldOption answer = new ApplicationFieldOption()
+                            {
+                                ApplicationFieldId = question.Id,
+                                OptionName = item.Text,
+                                Sort = (short)(item.Sort.HasValue ? item.Sort.Value : 0),
+                                MemoType = (byte)item.MemoType,
+                            };
+                            _db.ApplicationFieldOptions.Add(answer);
+                        }
+                    }
+                }
+                _db.SaveChanges();
+                model.Question = new QuestionContent();
+                GetAnswerTypeSettings(model.Question.AnswerTypes);
+                GetMemoTypeSettings(model.Question.MemoTypes);
+                model.Question.QuestionList = _db.ApplicationFields.Where(x => x.ApplicationId == model.Info.Id).ToList();
+                ModelState.Clear();
+                TempData[sessionName] = JsonConvert.SerializeObject(model);
+                ViewBag.Tab = "1";
+                return View("Form", model);
+            }
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        [Route("EditQuestion")]
+        public IActionResult EditQuestion(string questionId)
+        {
+            if (TempData.Peek(sessionName) is string jsonText)
+            {
+                QuestionnaireViewModel model = JsonConvert.DeserializeObject<QuestionnaireViewModel>(jsonText)!;
+                ApplicationField question = _db.ApplicationFields.Find(Guid.Parse(questionId))!;
+                if (question != null)
+                {
+                    model.Question.QuestionId = question.Id;
+                    model.Question.Caption = question.FieldName;
+                    model.Question.WordLimit = question.WordLimit;
+                    model.Question.FileSizeLimit = question.FileSizeLimit;
+                    model.Question.IsIncludedExport = question.IsIncludedExport;
+                    model.Question.IsNeedAnswer = question.IsRequired;
+                    model.Question.Note = question.Note;
+                    model.Question.AnswerType = question.FieldType;
+                    model.Question.AnswerOptions.Clear();
+                    if (model.Question.AnswerType == (int)AnswerTypeEnum.SingleChoice || model.Question.AnswerType == (int)AnswerTypeEnum.MultipleChoice)
+                    {
+                        IEnumerable<ApplicationFieldOption> answerList = _db.ApplicationFieldOptions.Where(x => x.ApplicationFieldId == question.Id);
+                        if (answerList.Any())
+                        {
+                            foreach (var item in answerList)
+                            {
+                                model.Question.AnswerOptions.Add(new AnswerOption()
+                                {
+                                    Text = item.OptionName,
+                                    MemoType = item.MemoType,
+                                    Sort = item.Sort,
+                                });
+                            }
+                        }
+                    }
                 }
                 TempData[sessionName] = JsonConvert.SerializeObject(model);
                 ViewBag.Tab = "1";
                 return View("Form", model);
             }
             return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        [Route("AddToList")]
+        public JsonResult AddToList(AnswerOption Question)
+        {
+            if (TempData.Peek(sessionName) is string jsonText)
+            {
+                QuestionnaireViewModel model = JsonConvert.DeserializeObject<QuestionnaireViewModel>(jsonText)!;
+                if (Question.Sort == null) //新增
+                {
+                    Question.Sort = model.Question.AnswerOptions.Any() ? model.Question.AnswerOptions.OrderByDescending(x => x.Sort).FirstOrDefault()!.Sort + 1 : 0;
+                    model.Question.AnswerOptions.Add(Question);
+                }
+                else //編輯
+                {
+                    AnswerOption option = model.Question.AnswerOptions.FirstOrDefault(x => x.Sort == Question.Sort)!;
+                    option.Text = Question.Text;
+                    option.MemoType = Question.MemoType;
+                    model.Question.NewOption = new AnswerOption();
+                }
+                ModelState.Clear();
+                TempData[sessionName] = JsonConvert.SerializeObject(model);
+                ViewBag.Tab = "1";
+                return Json(model.Question.AnswerOptions);
+            }
+            return Json("Insert Error");
         }
 
         [HttpGet]
@@ -187,12 +306,36 @@ namespace coffee_shop_backend.Controllers
                     item.Sort = q;
                     q++;
                 }
-
+                model.Question.NewOption = new AnswerOption();
+                ModelState.Clear();
                 TempData[sessionName] = JsonConvert.SerializeObject(model);
                 ViewBag.Tab = "1";
                 return View("Form", model);
             }
             return RedirectToAction("Index");
+        }
+
+        public void GetAnswerTypeSettings(List<SelectListItem> list)
+        {
+            foreach (var item in Enum.GetValues(typeof(AnswerTypeEnum)))
+            {
+                list.Add(new SelectListItem()
+                {
+                    Text = EnumHelper.GetDescription((AnswerTypeEnum)item),
+                    Value = ((int)item).ToString(),
+                });
+            }
+        }
+        public void GetMemoTypeSettings(List<SelectListItem> list)
+        {
+            foreach (var item in Enum.GetValues(typeof(MemoTypeEnum)))
+            {
+                list.Add(new SelectListItem()
+                {
+                    Text = EnumHelper.GetDescription((MemoTypeEnum)item),
+                    Value = ((int)item).ToString(),
+                });
+            }
         }
     }
 }

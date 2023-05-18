@@ -30,6 +30,9 @@
         '| bullist numlist | code | '
         });
 
+        $("[id$=isFile]").hide();
+        $("[id$=isText]").show();
+        $("[id$=isSelect]").hide();
         $('input[name="Question.AnswerType"]').change(function() {
             var value = $('input[name="Question.AnswerType"]:checked').val();
             if (value == @((int)AnswerTypeEnum.SingleLine) || value == @((int)AnswerTypeEnum.MultiLine) || value == @((int)AnswerTypeEnum.Email)){
@@ -37,7 +40,7 @@
                 $("[id$=isText]").show();
                 $("[id$=isSelect]").hide();
             }
-            else if (value == @((int)AnswerTypeEnum.SingleSelect) || value == @((int)AnswerTypeEnum.MultiSelect)){
+            else if (value == @((int)AnswerTypeEnum.SingleChoice) || value == @((int)AnswerTypeEnum.MultipleChoice) || value == @((int)AnswerTypeEnum.DropDownList)){
                 $("[id$=isFile]").hide();
                 $("[id$=isText]").hide();
                 $("[id$=isSelect]").show();
@@ -47,25 +50,35 @@
                 $("[id$=isText]").hide();
                 $("[id$=isSelect]").hide();
             }
-            else if (value == @((int)AnswerTypeEnum.Date) || value == @((int)AnswerTypeEnum.Address)){
+            else if (value == @((int)AnswerTypeEnum.DateObjcet) || value == @((int)AnswerTypeEnum.Address)){
                 $("[id$=isFile]").hide();
                 $("[id$=isText]").hide();
                 $("[id$=isSelect]").hide();
             }
         });
 
-        $('#myForm').submit(function(event) {
-          event.preventDefault(); // 防止表單直接提交
-
-          // 在這裡執行你想要的操作
-
-          // 如果需要提交表單，可以使用以下方法：
-          // $(this).submit();
+        $('#AddToListBtn').click(function() {
+            var text = $('#Question_NewOption_Text').val();
+            var memoType = $('#Question_NewOption_MemoType').val();
+            var sort = $('#Question_NewOption_Sort').val();
+            var list = $('.list');
+            var Question = { "Text": text, "MemoType": memoType, "Sort":sort };
+            console.log(Question);
+            $.ajax({
+                url: "AddToList",
+                type: "GET",
+                dataType: "html",
+                data: Question,
+                contentType: "application/json; charset=utf-8",
+                success: function(response) {
+                    console.log(response);
+                },
+            });
         });
     </script>
 }
 
-<h1>@(Model.Info.Id == Guid.Empty ? "新增" : "修改")問卷</h1>
+<h1>@(model.Info.Id == Guid.Empty ? "新增" : "修改")問卷</h1>
 
 <nav>
   <div class="nav nav-tabs" id="nav-tab" role="tablist">
@@ -159,75 +172,108 @@
   </div>
   <div class="tab-pane fade @(isContent?"show active":"")" id="nav-column" role="tabpanel" aria-labelledby="nav-column-tab">
       <h4>新增題目</h4>
-       <label for="Question_Caption" class="col-form-label">題目</label>
-       <div class="row g-2">
-            <div class="col col-lg-10">
-                @Html.TextBoxFor(model => model.Question.Caption, new { placeholder = "請輸入題目", @class = "form-control"})
-            </div>
-        </div>
-        <label for="Question_IsNeedAnswer" class="col-form-label">是否必填</label>
-        <div class="row g-2">
-            <div class="col col-lg-10">
-                @Html.CheckBoxFor(model => model.Question.IsNeedAnswer)
-            </div>
-        </div>
-        <label for="Question_IsIncludedExport" class="col-form-label">是否列入匯出表單</label>
-        <div class="row g-2">
-            <div class="col col-lg-10">
-                @Html.CheckBoxFor(model => model.Question.IsIncludedExport)
-            </div>
-        </div>
-        <label for="Question_AnswerType" class="col-form-label">答案類型</label>
-        <div>
-            @for (int q = 0; q < Model.Question.AnswerType.Count(); q++)
-            {
-                var item = Model.Question.AnswerType[q];
-                @Html.RadioButtonFor(model => model.Question.AnswerType, item.Value, new { @class = "form-check-input", @id = "Question_AnswerType" + q })
-                <label class="form-check-label" for="Question.AnswerType@(q)">@item.Text</label>
-            }
-        </div>
-        <div id="isSelect">
-            @using (Html.BeginForm("AddToList", "Questionnaire", FormMethod.Post, new { enctype = "multipart/form-data" }))
-            {
-                @Html.AntiForgeryToken()
-                <label for="Question_NewOption" class="col-form-label">答案選項</label>
-                @Html.TextBoxFor(model => model.Question.NewOption.Text, "", new { @class = "form-control"})
-                @Html.DropDownListFor(model => model.Question.NewOption.MemoType, Model.Question.MemoTypes , new {@class = "form-control"})
-                @Html.HiddenFor(model => model.Question.NewOption.Sort, new { @class = "form-control", @readonly = "true" })
-                <input class="btn btn-secondary" type="submit" value="@(isEditMode?"儲存變更":"加入清單")">
-            }
-            <table class="table table-striped table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th>選項</th>
-                        <th>備註</th>
-                        <th>排序</th>
-                        <th>功能列表</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model.Question.AnswerOptions != null && Model.Question.AnswerOptions.Any()){
-                        foreach(var item in Model.Question.AnswerOptions)
-                        {
-                            <tr>
-                                <td>@item.Text</td>
-                                <td>@(EnumHelper.GetDescription((MemoTypeEnum)item.MemoType))</td>
-                                <td>@item.Sort</td>
-                                <td><a class="btn btn-primary" href="@Url.Action("EditSelectOption","Questionnaire", new { Sort = item.Sort })">編輯</a><a class="btn btn-primary" href="@Url.Action("DeleteSelectOption","Questionnaire", new { Sort = item.Sort })">刪除</a></td>
-                            </tr>
-                        }
+      @using (Html.BeginForm("FormQuestion", "Questionnaire", FormMethod.Post, new { enctype = "multipart/form-data", @id = "FormQuestion" })){
+            @Html.AntiForgeryToken()
+            
+            @Html.HiddenFor(model => model.Question.QuestionId, new { @class = "form-control", @readonly = "true" })
+
+                <label for="Question_Caption" class="col-form-label">題目</label>
+                <div class="row g-2">
+                    <div class="col col-lg-10">
+                        @Html.TextBoxFor(model => model.Question.Caption, new { placeholder = "請輸入題目", @class = "form-control"})
+                    </div>
+                </div>
+                <label for="Question_Note" class="col-form-label">備註</label>
+                <div class="row g-2">
+                    <div class="col col-lg-10">
+                        @Html.TextBoxFor(model => model.Question.Note, new { placeholder = "請輸入備註", @class = "form-control"})
+                    </div>
+                </div>
+                <label for="Question_IsNeedAnswer" class="col-form-label">是否必填</label>
+                <div class="row g-2">
+                    <div class="col col-lg-10">
+                        @Html.CheckBoxFor(model => model.Question.IsNeedAnswer)
+                    </div>
+                </div>
+                <label for="Question_IsIncludedExport" class="col-form-label">是否列入匯出表單</label>
+                <div class="row g-2">
+                    <div class="col col-lg-10">
+                        @Html.CheckBoxFor(model => model.Question.IsIncludedExport)
+                    </div>
+                </div>
+                <label for="Question_AnswerType" class="col-form-label">答案類型</label>
+                <div>
+                    @for (int q = 0; q < Model.Question.AnswerTypes.Count(); q++)
+                    {
+                        var item = Model.Question.AnswerTypes[q];
+                        @Html.RadioButtonFor(model => model.Question.AnswerType, item.Value, new { @class = "form-check-input", @id = "Question_AnswerType" + q })
+                        <label class="form-check-label" for="Question.AnswerType@(q)">@item.Text</label>
                     }
-                </tbody>
-            </table>
-        </div>
-        <div id="isFile">
-            <label for="Question_FileSizeLimit" class="col-form-label">檔案大小限制</label>
-            @Html.TextBoxFor(model => model.Question.FileSizeLimit, new { placeholder = "請輸入檔案大小限制", @class = "form-control", type = "number"})
-        </div>
-        <div id="isText">
-            <label for="Question_WordLimit" class="col-form-label">文字長度限制</label>
-            @Html.TextBoxFor(model => model.Question.WordLimit, new { placeholder = "請輸入文字長度限制", @class = "form-control", type = "number"})
-        </div>
+                </div>
+                <div id="isFile">
+                    <label for="Question_FileSizeLimit" class="col-form-label">檔案大小限制</label>
+                    @Html.TextBoxFor(model => model.Question.FileSizeLimit, new { placeholder = "請輸入檔案大小限制", @class = "form-control", type = "number"})
+                </div>
+                <div id="isText">
+                    <label for="Question_WordLimit" class="col-form-label">文字長度限制</label>
+                    @Html.TextBoxFor(model => model.Question.WordLimit, new { placeholder = "請輸入文字長度限制", @class = "form-control", type = "number"})
+                </div>
+            }
+                <div id="isSelect">
+                    <label for="Question_NewOption" class="col-form-label">答案選項</label>
+                    @Html.TextBoxFor(model => model.Question.NewOption.Text, "", new { @class = "form-control", required = true})
+                    @Html.DropDownListFor(model => model.Question.NewOption.MemoType, Model.Question.MemoTypes , new {@class = "form-control"})
+                    @Html.HiddenFor(model => model.Question.NewOption.Sort, new { @class = "form-control", @readonly = "true" })
+                    <button class="btn btn-primary" type="button" id="AddToListBtn">@(isEditMode?"儲存變更":"加入清單")</button>
+                    <table class="table table-striped table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>選項</th>
+                                <th>備註</th>
+                                <th>排序</th>
+                                <th>功能列表</th>
+                            </tr>
+                        </thead>
+                        <tbody class="list">
+                            @if (Model.Question.AnswerOptions != null && Model.Question.AnswerOptions.Any()){
+                                foreach(var item in Model.Question.AnswerOptions)
+                                {
+                                    <tr>
+                                        <td>@item.Text</td>
+                                        <td>@(EnumHelper.GetDescription((MemoTypeEnum)item.MemoType))</td>
+                                        <td>@item.Sort</td>
+                                        <td><a class="btn btn-primary" href="@Url.Action("EditSelectOption","Questionnaire", new { index = item.Sort })">編輯</a><a class="btn btn-primary" href="@Url.Action("DeleteSelectOption","Questionnaire", new { index = item.Sort })">刪除</a></td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <br>
+                <button class="btn btn-secondary" form="FormQuestion" type="submit">@(model.Question.QuestionId == Guid.Empty?"新增題目":"確定修改")</button>
+                <br>
+                <h4>列表</h4>
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <th>題目內容</th>
+                            <th>答案類型</th>
+                            <th>排序</th>
+                            <th>執行動作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach(var item in Model.Question.QuestionList)
+                    {
+                        <tr>
+                            <td>@item.FieldName</td>
+                            <td>@(EnumHelper.GetDescription((AnswerTypeEnum)item.FieldType))</td>
+                            <td>@item.Sort</td>
+                            <td><a class="btn btn-primary" href="@Url.Action("EditQuestion","Questionnaire", new { questionId = item.Id })">編輯</a><a class="btn btn-primary" href="@Url.Action("DeleteQuestion","Questionnaire", new { questionId = item.Id })">刪除</a></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
     </div>
 </div>
 

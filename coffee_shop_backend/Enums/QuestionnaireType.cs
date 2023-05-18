@@ -14,23 +14,25 @@ namespace coffee_shop_backend.Enums
 
     public enum AnswerTypeEnum
     {
-        [Description("分類項目")]
-        Panel = 0,
-        [Description("單選")]
-        SingleSelect = 1,
-        [Description("複選")]
-        MultiSelect = 2,
         [Description("單行文字")]
-        SingleLine = 3,
+        SingleLine = 0,
         [Description("多行文字")]
-        MultiLine = 4,
+        MultiLine = 1,
+        [Description("單選題")]
+        SingleChoice = 2,
+        [Description("複選題")]
+        MultipleChoice = 3,
+        [Description("下拉選單")]
+        DropDownList = 4,
+        [Description("電子信箱")]
+        Email = 5,
         [Description("日期物件")]
-        Date = 5,
-        [Description("Email")]
-        Email = 6,
+        DateObjcet = 6,
         [Description("地址")]
         Address = 7,
         [Description("檔案上傳")]
         File = 8,
+        [Description("身份證字號")]
+        Identity = 9
     }
 }

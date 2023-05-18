@@ -1,0 +1,40 @@
+﻿@model IEnumerable<Application>
+@{
+  
+}
+
+@section Scripts
+{
+
+}
+
+
+<!-- 列表 -->
+<div class="kf-div-table row g-0 align-items-center mt-3" role="table" aria-label="Students" aria-describedby="students_table_desc">
+    <h3 class="sr-only" id="students_table_desc">問卷調查-列表</h3>
+    <div class="rowgroup-thead" role="rowgroup">
+        <div class="kf-div-th row g-0 d-none d-md-flex bg-primary text-center text-white" role="row">
+            <div role="columnheader" class="col-md-2">編號</div>
+            <div role="columnheader" class="col-md">問卷名稱</div>
+            <div role="columnheader" class="col-md-2">日期</div>
+        </div>
+    </div>
+    @if (Model != null && Model.Any())
+    {
+        int rowIndex = 1;
+        <div class="rowgroup-tbody" role="rowgroup">
+            @foreach (Application item in Model)
+            {
+                <div class="row g-0 p-3 p-md-0 align-items-center" role="row">
+                    <div>@((rowIndex++).ToString("000"))</div>
+                    <div><a href="@Url.Action("Detail","QuestionnaireFront", new {id = item.Id})">@item.Caption</a></div>
+                    <div role="cell" class="col-12 col-md-2 text-md-center kf-date text-break">
+                        <i class="fa fa-calendar-alt" aria-hidden="true"></i>
+                        @Html.DisplayFor(x => item.StartDate) ~ @Html.DisplayFor(x => item.EndDate)
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+

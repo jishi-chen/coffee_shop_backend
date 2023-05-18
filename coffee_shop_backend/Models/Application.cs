@@ -3,13 +3,12 @@ using System.Collections.Generic;
 
 namespace coffee_shop_backend.Models
 {
-    public partial class Examine
+    public partial class Application
     {
         public Guid Id { get; set; }
-        public string ExamineNo { get; set; } = null!;
         public string Caption { get; set; } = null!;
         public bool IsEnabled { get; set; }
-        public short Sort { get; set; }
+        public int Sort { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public string? HeadText { get; set; }

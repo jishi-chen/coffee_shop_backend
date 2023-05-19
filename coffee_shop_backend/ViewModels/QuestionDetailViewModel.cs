@@ -1,99 +1,76 @@
 ﻿using coffee_shop_backend.Enums;
+using coffee_shop_backend.Models;
 
 namespace coffee_shop_backend.ViewModels
 {
-    /// <summary> 問卷內頁 ViewModel </summary>
     public class QuestionDetailViewModel
     {
         /// <summary> 問卷代碼 </summary>
         public Guid ID { get; set; }
 
         /// <summary> 標題 </summary>
-        public string Caption { get; set; }
+        public string Caption { get; set; } = string.Empty;
 
         /// <summary> 頁首文字 </summary>
-        public string HeadText { get; set; }
+        public string HeadText { get; set; } = string.Empty;
 
         /// <summary> 頁尾文字 </summary>
-        public string FooterText { get; set; }
-
-        /// <summary> 開始時間 </summary>
-        public DateTime StartDate { get; set; }
-
-        /// <summary> 結束時間 </summary>
-        public DateTime? EndDate { get; set; }
+        public string FooterText { get; set; } = string.Empty;
 
         /// <summary> 問題集 </summary>
-        public List<ExamineQuestionViewModel> Questions { get; set; } = new List<ExamineQuestionViewModel>();
+        public List<ApplicationFieldViewModel> Questions { get; set; } = new List<ApplicationFieldViewModel>();
+        public Dictionary<string, string> ValidResults { get; set; } = new Dictionary<string, string>();
     }
 
-    /// <summary> 問卷問題基礎型別 </summary>
-    public class ExamineQuestionViewModel
+    public class ApplicationFieldViewModel
     {
+
         public string ID { get; set; }
 
-        /// <summary> 問題種類 </summary>
-        public AnswerTypeEnum AnswerType { get; set; }
+        public string FieldName { get; set; } = string.Empty;
 
-        /// <summary> 排序值 </summary>
+        public string Note { get; set; } = string.Empty;
+
+        public AnswerTypeEnum FieldType { get; set; }
+
+        public short WordLimit { get; set; }
+
+        public short RowLimit { get; set; }
+
+        public short FileSizeLimit { get; set; }
         public int Sort { get; set; }
 
-        /// <summary> 問題 </summary>
-        public string Caption { get; set; }
-
-        /// <summary> 是否為必填 </summary>
         public bool IsRequired { get; set; }
+        public bool IsFixed { get; set; }
 
-        /// <summary> 輸入值 </summary>
-        public string Value { get; set; }
+        public List<ApplicationFieldOptionViewModel> Options { get; set; } = new List<ApplicationFieldOptionViewModel>();
 
-        /// <summary> 子題目 </summary>
-        public List<ExamineQuestionViewModel> SubQuestions { get; set; } = new List<ExamineQuestionViewModel>();
+        public string Value { get; set; } = string.Empty;
+        public string MemoValue { get; set; } = string.Empty;
 
-        /// <summary> 父題目 </summary>
-        public ExamineQuestionViewModel ParentQuestion { get; set; } = null;
-
-        /// <summary> 要呈現的錯誤訊息 </summary>
-        public List<string> ErrorMessages { get; set; } = new List<string>();
+        public string ErrMsg { get; set; } = string.Empty;
     }
 
-    /// <summary> 具選項的問卷問題 </summary>
-    public class ExamineSelectQuestionViewModel : ExamineQuestionViewModel
-    {
-        public List<ExamineAnswerViewModel> Answers { get; set; } = new List<ExamineAnswerViewModel>();
-    }
 
-    /// <summary> 備註的種類 </summary>
-    public enum MomoTypeEnum
-    {
-        /// <summary> 無備註 </summary>
-        None = 0,
-
-        /// <summary> 一般備註 </summary>
-        Normal = 1,
-
-        /// <summary> 必填備註 </summary>
-        Required = 2,
-    }
 
     /// <summary> 問卷選項題目 </summary>
-    public class ExamineAnswerViewModel
+    public class ApplicationFieldOptionViewModel
     {
-        public string ID { get; set; }
+        public string ID { get; set; } = string.Empty;
 
         /// <summary> 標題 </summary>
-        public string Caption { get; set; }
+        public string OptionName { get; set; } = string.Empty;
 
         /// <summary> 排序值 </summary>
         public int Sort { get; set; }
 
         /// <summary> 備註種類 </summary>
-        public MomoTypeEnum MemoType { get; set; }
+        public MemoTypeEnum MemoType { get; set; }
 
         /// <summary> 是否已選取 </summary>
         public bool Checked { get; set; }
 
         /// <summary> 輸入的備註 </summary>
-        public string MemoValue { get; set; }
+        public string MemoValue { get; set; } = string.Empty;
     }
 }

@@ -28,7 +28,7 @@ namespace coffee_shop_backend.Controllers
         }
 
         [Route("Form")]
-        public IActionResult Form(string id)
+        public IActionResult Form(string id, string tab)
         {
             QuestionnaireViewModel model = new QuestionnaireViewModel();
             if (!string.IsNullOrEmpty(id))
@@ -52,7 +52,7 @@ namespace coffee_shop_backend.Controllers
             
             string modelString = JsonConvert.SerializeObject(model);
             TempData[sessionName] = modelString;
-
+            ViewBag.Tab = tab;
             return View(model);
         }
 
@@ -124,8 +124,8 @@ namespace coffee_shop_backend.Controllers
                 QuestionnaireViewModel model = JsonConvert.DeserializeObject<QuestionnaireViewModel>(jsonText)!;
                 if (!ModelState.IsValid)
                 {
-                    return View("Form", model);
                     ViewBag.Tab = "1";
+                    return View("Form", model);
                 }
                     
                 ApplicationField question = new ApplicationField();
@@ -182,6 +182,7 @@ namespace coffee_shop_backend.Controllers
                         {
                             ApplicationFieldOption answer = new ApplicationFieldOption()
                             {
+                                Id = Guid.NewGuid(),
                                 ApplicationFieldId = question.Id,
                                 OptionName = item.Text,
                                 Sort = (short)(item.Sort.HasValue ? item.Sort.Value : 0),
@@ -235,11 +236,80 @@ namespace coffee_shop_backend.Controllers
                                     Text = item.OptionName,
                                     MemoType = item.MemoType,
                                     Sort = item.Sort,
-                                });
+                                    MemoText = EnumHelper.GetDescription((MemoTypeEnum)item.MemoType),
+                            });
                             }
                         }
                     }
                 }
+                TempData[sessionName] = JsonConvert.SerializeObject(model);
+                ViewBag.Tab = "1";
+                return View("Form", model);
+            }
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        [Route("DeleteQuestion")]
+        public IActionResult DeleteQuestion(string questionId)
+        {
+            ApplicationField question = _db.ApplicationFields.Find(Guid.Parse(questionId))!;
+            IEnumerable<ApplicationFieldOption> options = _db.ApplicationFieldOptions.Where(x => x.ApplicationFieldId == question.Id);
+            _db.ApplicationFields.Remove(question);
+            _db.ApplicationFieldOptions.RemoveRange(options);
+            _db.SaveChanges();
+            IEnumerable<ApplicationField> questions = _db.ApplicationFields.Where(x => x.ApplicationId == question.ApplicationId).OrderBy(x => x.Sort).ToList();
+            int q = 0;
+            foreach (var item in questions)
+            {
+                item.Sort = q;
+                q++;
+            }
+            _db.SaveChanges();
+            return RedirectToAction("Form", new { id = question.ApplicationId, tab = "1" });
+        }
+
+        [HttpGet]
+        [Route("SetSortUp")]
+        public IActionResult SetSortUp(string questionId)
+        {
+            if (TempData.Peek(sessionName) is string jsonText)
+            {
+                QuestionnaireViewModel model = JsonConvert.DeserializeObject<QuestionnaireViewModel>(jsonText)!;
+                ApplicationField question = _db.ApplicationFields.Find(Guid.Parse(questionId))!;
+                if (question != null)
+                {
+                    question.Sort--;
+                    model.Question.QuestionList.Find(x => x.Id == question.Id)!.Sort -= 1;
+                    ApplicationField before = _db.ApplicationFields.FirstOrDefault(x => x.ApplicationId == question.ApplicationId && x.Sort == question.Sort)!;
+                    before.Sort++;
+                    model.Question.QuestionList.Find(x => x.Id == before.Id)!.Sort += 1;
+                }
+                _db.SaveChanges();
+                TempData[sessionName] = JsonConvert.SerializeObject(model);
+                ViewBag.Tab = "1";
+                return View("Form", model);
+            }
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        [Route("SetSortDown")]
+        public IActionResult SetSortDown(string questionId)
+        {
+            if (TempData.Peek(sessionName) is string jsonText)
+            {
+                QuestionnaireViewModel model = JsonConvert.DeserializeObject<QuestionnaireViewModel>(jsonText)!;
+                ApplicationField question = _db.ApplicationFields.Find(Guid.Parse(questionId))!;
+                if (question != null)
+                {
+                    question.Sort++;
+                    model.Question.QuestionList.Find(x => x.Id == question.Id)!.Sort += 1;
+                    ApplicationField before = _db.ApplicationFields.FirstOrDefault(x => x.ApplicationId == question.ApplicationId && x.Sort == question.Sort)!;
+                    before.Sort--;
+                    model.Question.QuestionList.Find(x => x.Id == before.Id)!.Sort -= 1;
+                }
+                _db.SaveChanges();
                 TempData[sessionName] = JsonConvert.SerializeObject(model);
                 ViewBag.Tab = "1";
                 return View("Form", model);
@@ -257,6 +327,7 @@ namespace coffee_shop_backend.Controllers
                 if (Question.Sort == null) //新增
                 {
                     Question.Sort = model.Question.AnswerOptions.Any() ? model.Question.AnswerOptions.OrderByDescending(x => x.Sort).FirstOrDefault()!.Sort + 1 : 0;
+                    Question.MemoText = EnumHelper.GetDescription((MemoTypeEnum)Question.MemoType);
                     model.Question.AnswerOptions.Add(Question);
                 }
                 else //編輯
@@ -264,42 +335,40 @@ namespace coffee_shop_backend.Controllers
                     AnswerOption option = model.Question.AnswerOptions.FirstOrDefault(x => x.Sort == Question.Sort)!;
                     option.Text = Question.Text;
                     option.MemoType = Question.MemoType;
+                    option.MemoText = EnumHelper.GetDescription((MemoTypeEnum)option.MemoType);
                     model.Question.NewOption = new AnswerOption();
                 }
                 ModelState.Clear();
                 TempData[sessionName] = JsonConvert.SerializeObject(model);
-                ViewBag.Tab = "1";
-                return Json(model.Question.AnswerOptions);
+                return this.Json(model.Question.AnswerOptions);
             }
             return Json("Insert Error");
         }
 
         [HttpGet]
         [Route("EditSelectOption")]
-        public IActionResult EditSelectOption(int index)
+        public JsonResult EditSelectOption(int index)
         {
             if (TempData.Peek(sessionName) is string jsonText)
             {
                 QuestionnaireViewModel model = JsonConvert.DeserializeObject<QuestionnaireViewModel>(jsonText)!;
                 model.Question.NewOption = model.Question.AnswerOptions.FirstOrDefault(x => x.Sort == index)!;
                 TempData[sessionName] = JsonConvert.SerializeObject(model);
-                ViewBag.Tab = "1";
-                ViewBag.IsEditMode = true;
-                return View("Form", model);
+                return this.Json(model.Question.NewOption);
             }
-            return RedirectToAction("Index");
+            return Json("Read Error");
         }
 
         [HttpGet]
         [Route("DeleteSelectOption")]
-        public IActionResult DeleteSelectOption(int index)
+        public JsonResult DeleteSelectOption(int index)
         {
             if (TempData.Peek(sessionName) is string jsonText)
             {
                 QuestionnaireViewModel model = JsonConvert.DeserializeObject<QuestionnaireViewModel>(jsonText)!;
                 AnswerOption option = model.Question.AnswerOptions.FirstOrDefault(x => x.Sort == index)!;
                 model.Question.AnswerOptions.Remove(option);
-                model.Question.AnswerOptions.OrderBy(x => x.Sort);
+                model.Question.AnswerOptions = model.Question.AnswerOptions.OrderBy(x => x.Sort).ToList();
                 int q = 0;
                 foreach (var item in model.Question.AnswerOptions)
                 {
@@ -309,10 +378,9 @@ namespace coffee_shop_backend.Controllers
                 model.Question.NewOption = new AnswerOption();
                 ModelState.Clear();
                 TempData[sessionName] = JsonConvert.SerializeObject(model);
-                ViewBag.Tab = "1";
-                return View("Form", model);
+                return this.Json(model.Question.AnswerOptions);
             }
-            return RedirectToAction("Index");
+            return Json("Delete Error");
         }
 
         public void GetAnswerTypeSettings(List<SelectListItem> list)

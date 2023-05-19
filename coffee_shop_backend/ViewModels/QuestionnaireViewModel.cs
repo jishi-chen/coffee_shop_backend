@@ -42,5 +42,6 @@ namespace coffee_shop_backend.ViewModels
         public string Text { get; set; } = string.Empty;
         public int? Sort { get; set; }
         public int MemoType { get; set; }
+        public string MemoText { get; set; } = string.Empty;
     }
 }

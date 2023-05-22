@@ -33,6 +33,8 @@ namespace coffee_shop_backend.Enums
         [Description("檔案上傳")]
         File = 8,
         [Description("身份證字號")]
-        Identity = 9
+        Identity = 9,
+        [Description("子題目")]
+        Panel = 10
     }
 }

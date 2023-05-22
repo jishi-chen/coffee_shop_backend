@@ -4,7 +4,7 @@
     string optionalItemText = "(選填)";
 }
 
-@using (Html.BeginForm("Form", "QuestionnaireFront", FormMethod.Post, new { enctype = "multipart/form-data" }))
+@using (Html.BeginForm("Detail", "QuestionnaireFront", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
     @Html.AntiForgeryToken()
     <div>@Model.HeadText</div>
@@ -18,8 +18,8 @@
                 case AnswerTypeEnum.Email:
                 case AnswerTypeEnum.SingleLine:
                 case AnswerTypeEnum.Identity:
-                    <div class="formsItem">
-                        <label for="@item.ID" class="col-form-label formsLabel">
+                    <div>
+                        <label for="@item.ID">
                             @item.FieldName
                             @if (item.IsRequired)
                             {
@@ -38,7 +38,7 @@
                             </div>
                             @if (!string.IsNullOrEmpty(item.Note))
                             {
-                                <small class="d-block text-info mt-2">@item.Note</small>
+                                <small class="mt-2">@item.Note</small>
                             }
 
                             @if (Model.ValidResults.ContainsKey(item.ID.ToString()))
@@ -49,8 +49,8 @@
                     </div>
                     break;
                 case AnswerTypeEnum.MultiLine:
-                    <div class="formsItem clearfix">
-                        <label for="@item.ID" class="col-form-label formsLabel">
+                    <div class="formsItem">
+                        <label for="@item.ID">
                             @item.FieldName
                             @if (item.IsRequired)
                             {
@@ -80,8 +80,8 @@
                     </div>
                     break;
                 case AnswerTypeEnum.SingleChoice:
-                    <fieldset class="formsItem clearfix">
-                        <legend class="col-form-label formsLabel">
+                    <fieldset class="formsItem">
+                        <legend class="col-form-label">
                             @item.FieldName
                             @if (item.IsRequired)
                             {
@@ -97,22 +97,22 @@
                                 <div class="col-xl-11">
                                     @foreach (var option in item.Options.OrderBy(x => x.Sort))
                                     {
-                                        <div class="d-inline-flex align-items-center">
+                                        <div class="d-inline-flex">
                                             <div class="col-auto form-check form-check-inline">
                                                 <input type="radio" id="@option.ID" name="@item.ID" class="form-check-input" value="@option.ID" @(item.Value == option.ID.ToString() ? "checked='checked'" : "")>
                                                 <label class="form-check-label" for="@option.ID">@option.OptionName</label>
                                             </div>
                                             @if (option.MemoType == MemoTypeEnum.Normal)
                                             {
-                                                <div class="d-flex align-items-center">
-                                                    <label class="sr-only" for="@(option.ID + "_memo"+option.OptionName)">Example label</label>
+                                                <div class="d-flex">
+                                                    <label style="display: none;" for="@(option.ID + "_memo"+option.OptionName)">Example label</label>
                                                     <input type="text" class="form-control" id="@(option.ID + "_memo"+option.OptionName)" name="@(option.ID + "_memo" + option.OptionName)" value="@(item.Value == option.ID.ToString() ? item.MemoValue : "")" placeholder="@optionalItemText" onchange="MemoChange('@option.ID')">
                                                 </div>
                                             }
                                             else if (option.MemoType == MemoTypeEnum.Required)
                                             {
-                                                <div class="d-flex align-items-center">
-                                                    <label class="sr-only" for="@(option.ID + "_memo"+option.OptionName)">Example label</label>
+                                                <div class="d-flex">
+                                                    <label style="display: none;" for="@(option.ID + "_memo"+option.OptionName)">Example label</label>
                                                     <input type="text" class="form-control" id="@(option.ID + "_memo"+option.OptionName)" name="@(option.ID + "_memo" + option.OptionName)" value="@(item.Value == option.ID.ToString() ? item.MemoValue : "")" placeholder="必填" onchange="MemoChange('@option.ID')">
                                                 </div>
                                             }
@@ -137,7 +137,7 @@
                     </fieldset>
                     break;
                 case AnswerTypeEnum.MultipleChoice:
-                    <fieldset class="formsItem clearfix">
+                    <fieldset class="formsItem">
                         <legend class="col-form-label formsLabel">
                             @item.FieldName
                             @if (item.IsRequired)
@@ -154,22 +154,22 @@
                                 <div class="col-xl-11">
                                     @foreach (var option in item.Options.OrderBy(x => x.Sort))
                                     {
-                                        <div class="d-inline-flex align-items-center">
+                                        <div class="d-inline-flex">
                                             <div class="col-auto form-check form-check-inline">
                                                 <input type="checkbox" id="@option.ID" name="@item.ID" class="form-check-input" value="@option.ID" @(!string.IsNullOrWhiteSpace(item.Value) && item.Value.Contains(option.ID.ToString()) ? "checked='checked'" : "")>
                                                 <label class="form-check-label" for="@option.ID">@option.OptionName</label>
                                             </div>
                                             @if (option.MemoType == MemoTypeEnum.Normal)
                                             {
-                                                <div class="d-flex align-items-center">
-                                                    <label class="sr-only" for="@(option.ID + "_memo"+option.OptionName)">Example label</label>
+                                                <div class="d-flex">
+                                                    <label style="display: none;" for="@(option.ID + "_memo"+option.OptionName)">Example label</label>
                                                     <input type="text" class="form-control" id="@(option.ID + "_memo"+option.OptionName)" name="@(option.ID + "_memo"+option.OptionName)" value="@(item.Value == option.ID.ToString() ? item.MemoValue : "")" placeholder="@optionalItemText" onchange="MemoChange('@option.ID')">
                                                 </div>
                                             }
                                             else if (option.MemoType == MemoTypeEnum.Required)
                                             {
                                                 <div class="d-flex align-items-center">
-                                                    <label class="sr-only" for="@(option.ID + "_memo"+option.OptionName)">Example label</label>
+                                                    <label style="display: none;" for="@(option.ID + "_memo"+option.OptionName)">Example label</label>
                                                     <input type="text" class="form-control" id="@(option.ID + "_memo"+option.OptionName)" name="@(option.ID + "_memo"+option.OptionName)" value="@(item.Value == option.ID.ToString() ? item.MemoValue : "")" placeholder="必填" onchange="MemoChange('@option.ID')">
                                                 </div>
                                             }
@@ -183,7 +183,7 @@
                             </div>
                             @if (!string.IsNullOrEmpty(item.Note))
                             {
-                                <small class="d-block text-info mt-2">@item.Note</small>
+                                <small class="mt-2">@item.Note</small>
                             }
 
                             @if (Model.ValidResults.ContainsKey(item.ID.ToString()))
@@ -214,7 +214,7 @@
                                         <option value="">請選擇</option>
                                         @foreach (var option in item.Options.OrderBy(x => x.Sort))
                                         {
-                                           // <option value="@option.ID" @(item.Value == option.ID.ToString() ? "selected='selected'" : "")>@option.OptionName</option>
+                                            <!option value="@option.ID" @(item.Value == option.ID.ToString() ? "selected='selected'" : "")>@option.OptionName</!option>
                                         }
                                     </select>
                                 </div>
@@ -236,4 +236,6 @@
     }
 
     <div>@Model.FooterText</div>
+
+     <button class="btn btn-secondary" type="submit">送出</button>
 }

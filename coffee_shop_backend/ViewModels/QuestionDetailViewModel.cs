@@ -12,10 +12,10 @@ namespace coffee_shop_backend.ViewModels
         public string Caption { get; set; } = string.Empty;
 
         /// <summary> 頁首文字 </summary>
-        public string HeadText { get; set; } = string.Empty;
+        public string? HeadText { get; set; } = string.Empty;
 
         /// <summary> 頁尾文字 </summary>
-        public string FooterText { get; set; } = string.Empty;
+        public string? FooterText { get; set; } = string.Empty;
 
         /// <summary> 問題集 </summary>
         public List<ApplicationFieldViewModel> Questions { get; set; } = new List<ApplicationFieldViewModel>();
@@ -25,11 +25,11 @@ namespace coffee_shop_backend.ViewModels
     public class ApplicationFieldViewModel
     {
 
-        public string ID { get; set; }
+        public string? ID { get; set; } = string.Empty;
 
         public string FieldName { get; set; } = string.Empty;
 
-        public string Note { get; set; } = string.Empty;
+        public string? Note { get; set; } = string.Empty;
 
         public AnswerTypeEnum FieldType { get; set; }
 
@@ -45,9 +45,9 @@ namespace coffee_shop_backend.ViewModels
 
         public List<ApplicationFieldOptionViewModel> Options { get; set; } = new List<ApplicationFieldOptionViewModel>();
 
-        public string Value { get; set; } = string.Empty;
-        public string MemoValue { get; set; } = string.Empty;
-
+        public string? Value { get; set; } = string.Empty;
+        public string? MemoValue { get; set; } = string.Empty;
+        public string? Remark { get; set; } = string.Empty;
         public string ErrMsg { get; set; } = string.Empty;
     }
 
@@ -71,6 +71,6 @@ namespace coffee_shop_backend.ViewModels
         public bool Checked { get; set; }
 
         /// <summary> 輸入的備註 </summary>
-        public string MemoValue { get; set; } = string.Empty;
+        public string? MemoValue { get; set; } = string.Empty;
     }
 }

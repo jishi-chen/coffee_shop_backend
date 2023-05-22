@@ -28,7 +28,7 @@ namespace coffee_shop_backend.Controllers
         }
 
         [Route("Form")]
-        public IActionResult Form(string id, string tab)
+        public IActionResult Form(string id, string parentId, string tab)
         {
             QuestionnaireViewModel model = new QuestionnaireViewModel();
             if (!string.IsNullOrEmpty(id))

@@ -37,11 +37,4 @@ namespace coffee_shop_backend.ViewModels
         public List<AnswerOption> AnswerOptions { get; set; } = new List<AnswerOption>();
         public List<ApplicationField> QuestionList { get; set; } = new List<ApplicationField>();
     }
-    public class AnswerOption
-    {
-        public string Text { get; set; } = string.Empty;
-        public int? Sort { get; set; }
-        public int MemoType { get; set; }
-        public string MemoText { get; set; } = string.Empty;
-    }
 }

@@ -22,6 +22,10 @@ namespace coffee_shop_backend.Models
         public virtual DbSet<ApplicationField> ApplicationFields { get; set; } = null!;
         public virtual DbSet<ApplicationFieldOption> ApplicationFieldOptions { get; set; } = null!;
         public virtual DbSet<ApplicationRecord> ApplicationRecords { get; set; } = null!;
+        public virtual DbSet<Document> Documents { get; set; } = null!;
+        public virtual DbSet<DocumentField> DocumentFields { get; set; } = null!;
+        public virtual DbSet<DocumentFieldOption> DocumentFieldOptions { get; set; } = null!;
+        public virtual DbSet<DocumentRecord> DocumentRecords { get; set; } = null!;
         public virtual DbSet<MemberInfo> MemberInfos { get; set; } = null!;
         public virtual DbSet<Reg> Regs { get; set; } = null!;
 
@@ -124,6 +128,66 @@ namespace coffee_shop_backend.Models
                 entity.Property(e => e.ApplicationId).HasColumnName("ApplicationID");
 
                 entity.Property(e => e.FilledText).HasMaxLength(1000);
+
+                entity.Property(e => e.Remark).HasMaxLength(1000);
+            });
+
+            modelBuilder.Entity<Document>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.Caption).HasMaxLength(50);
+
+                entity.Property(e => e.CreateDate).HasColumnType("datetime");
+
+                entity.Property(e => e.Creator).HasMaxLength(20);
+
+                entity.Property(e => e.EndDate).HasColumnType("datetime");
+
+                entity.Property(e => e.StartDate).HasColumnType("datetime");
+
+                entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+
+                entity.Property(e => e.Updator).HasMaxLength(20);
+            });
+
+            modelBuilder.Entity<DocumentField>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.CreateDate).HasColumnType("datetime");
+
+                entity.Property(e => e.Creator).HasMaxLength(50);
+
+                entity.Property(e => e.FieldName).HasMaxLength(50);
+
+                entity.Property(e => e.FileExtension)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Note).HasMaxLength(100);
+
+                entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+
+                entity.Property(e => e.Updator).HasMaxLength(50);
+            });
+
+            modelBuilder.Entity<DocumentFieldOption>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.OptionName).HasMaxLength(50);
+            });
+
+            modelBuilder.Entity<DocumentRecord>(entity =>
+            {
+                entity.HasKey(e => e.SeqNo);
+
+                entity.Property(e => e.SeqNo).ValueGeneratedNever();
+
+                entity.Property(e => e.FilledText).HasColumnType("ntext");
+
+                entity.Property(e => e.MemoText).HasMaxLength(100);
 
                 entity.Property(e => e.Remark).HasMaxLength(1000);
             });

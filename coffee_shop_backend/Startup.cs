@@ -8,6 +8,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using coffee_shop_backend.Interface;
+using coffee_shop_backend.Repository;
 
 namespace coffee_shop_backend
 {
@@ -53,6 +55,7 @@ namespace coffee_shop_backend
             services.AddLocalization(options => options.ResourcesPath = "Resources");
             services.AddMemoryCache();
             services.AddSession();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             // Entity Framework
             services.AddDbContext<ModelContext>(options =>

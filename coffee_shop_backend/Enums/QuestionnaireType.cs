@@ -34,7 +34,7 @@ namespace coffee_shop_backend.Enums
         File = 8,
         [Description("身份證字號")]
         Identity = 9,
-        [Description("子題目")]
+        [Description("父題目")]
         Panel = 10
     }
 }

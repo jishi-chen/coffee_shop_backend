@@ -1,4 +1,5 @@
-﻿using coffee_shop_backend.Interface;
+﻿using coffee_shop_backend.Enums;
+using coffee_shop_backend.Interface;
 using coffee_shop_backend.Models;
 using coffee_shop_backend.ViewModels;
 using Dapper;
@@ -58,18 +59,20 @@ select @@identity Id ";
             string sql = $@"
 update DocumentFields set
 ParentId=@ParentId, FieldName=@FieldName, Note=@Note, FieldType=@FieldType, WordLimit=@WordLimit, RowLimit=@RowLimit, FileSizeLimit=@FileSizeLimit, 
-FileExtension=@FileExtension, IsRequired=@IsRequired, IsIncludedExport=@IsIncludedExport, IsEditable=@IsEditable, Sort=@Sort, Updator=@Updator, UpdateDate=@UpdateDate 
+FileExtension=@FileExtension, IsRequired=@IsRequired, IsIncludedExport=@IsIncludedExport, IsEditable=@IsEditable, Updator=@Updator, UpdateDate=@UpdateDate 
 where Id=@Id ";
             Connection.Execute(sql, field, Transaction);
         }
         public void DeleteFieldOptions(string fieldId)
         {
-            string sql = $@"";
-            Connection.Execute(sql, new {}, Transaction);
+            string sql = $@" delete from DocumentFieldOptions where DocumentFieldId=@DocumentFieldId ";
+            Connection.Execute(sql, new { DocumentFieldId  = fieldId }, Transaction);
         }
         public void InsertFieldOption(DocumentFieldOption option)
         {
-            string sql = $@"";
+            string sql = $@"
+insert into DocumentFieldOptions (DocumentFieldId, OptionName, MemoType, Sort) 
+values (@DocumentFieldId, @OptionName, @MemoType, @Sort) ";
             Connection.Execute(sql, option, Transaction);
         }
         public DocumentField GetDocumentField(string fieldId)
@@ -77,10 +80,25 @@ where Id=@Id ";
             string sql = $@" select * from DocumentFields where Id=@Id ";
             return Connection.QuerySingle<DocumentField>(sql, new { Id = fieldId }, Transaction);
         }
+        public DocumentField GetDocumentField(string documentId, int sort)
+        {
+            string sql = $@" select top 1 * from DocumentFields where DocumentId=@DocumentId and Sort=@Sort ";
+            return Connection.QuerySingle<DocumentField>(sql, new { DocumentId = documentId, Sort = sort }, Transaction);
+        }
         public IEnumerable<DocumentFieldOption> GetFieldOption(string fieldId)
         {
             string sql = $@" select * from DocumentFieldOptions where DocumentFieldId=@DocumentFieldId ";
             return Connection.Query<DocumentFieldOption>(sql, new { DocumentFieldId = fieldId }, Transaction);
+        }
+        public void DeleteField(string fieldId)
+        {
+            string sql = $@" delete from DocumentFields where Id=@Id ";
+            Connection.Execute(sql, new { Id = fieldId }, Transaction);
+        }
+        public void UpdateFieldSort(IEnumerable<DocumentField> fields)
+        {
+            string sql = $@" update DocumentFields set Sort=@Sort where Id=@Id ";
+            Connection.Execute(sql, fields, Transaction);
         }
     }
 }

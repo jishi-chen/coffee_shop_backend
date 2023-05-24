@@ -4,364 +4,378 @@
     var infoPage = Model.InfoPage;
     var questionPage = Model.QuestionPage;
     bool isContent = ViewBag.Tab == "1";
-    bool isEditMode = ViewBag.IsEditMode is bool? ViewBag.IsEditMode :false;
+    bool isEditMode = ViewBag.IsEditMode is bool ? ViewBag.IsEditMode : false;
     DocumentViewModel model = Model;
 }
 @section Scripts {
-    <script type="text/javascript" src="~/js/tinymce/tinymce.min.js"></script>
-    <script>
-        tinymce.init({
-        selector: '#InfoPage_HeadText #InfoPage_FooterText',
-        language:'zh_TW',
-        height: 300,
-        skin: 'lightgray',
-        menubar: false,
+<script type="text/javascript" src="~/js/tinymce/tinymce.min.js"></script>
+<script>
+    tinymce.init({
+    selector: '.edittextarea',
+    language:'zh_TW',
+    height: 300,
+    skin: 'lightgray',
+    menubar: false,
 
-        content_style: 'body { line-height: 1.5 !important; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji" !important; } p { margin-top: 0 !important; margin-bottom: 0 !important; }',
-        fontsize_formats: "8pt 10pt 12pt 14pt 16pt 18pt 20pt 22pt 24pt 28pt 32pt 36pt 48pt 60pt 72pt",
-        font_formats: "微軟正黑體=微軟正黑體; 微軟正黑體 Light=微軟正黑體 Light; 新細明體=新細明體; 細明體=細明體; 標楷體=標楷體; Andale Mono=andale mono,times; Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats;",
-        default_link_target: '_blank',
-        target_list: false,
-        link_title: false,
-        paste_enable_default_filters: false,
-        
-        plugins: 'advlist lists link code autosave emoticons paste table textcolor',
-        toolbar: 'restoredraft | undo redo | fontsizeselect fontselect | bold italic underline forecolor backcolor | ' +
-        'alignleft aligncenter alignright | emoticons link table |' +
-        '| bullist numlist | code | '
-        });
+    content_style: 'body { line-height: 1.5 !important; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji" !important; } p { margin-top: 0 !important; margin-bottom: 0 !important; }',
+    fontsize_formats: "8pt 10pt 12pt 14pt 16pt 18pt 20pt 22pt 24pt 28pt 32pt 36pt 48pt 60pt 72pt",
+    font_formats: "微軟正黑體=微軟正黑體; 微軟正黑體 Light=微軟正黑體 Light; 新細明體=新細明體; 細明體=細明體; 標楷體=標楷體; Andale Mono=andale mono,times; Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats;",
+    default_link_target: '_blank',
+    target_list: false,
+    link_title: false,
+    paste_enable_default_filters: false,
 
-        $(document).ready(function() {
+    plugins: 'advlist lists link code autosave emoticons paste table textcolor',
+    toolbar: 'restoredraft | undo redo | fontsizeselect fontselect | bold italic underline forecolor backcolor | ' +
+    'alignleft aligncenter alignright | emoticons link table |' +
+    '| bullist numlist | code | '
+    });
+
+    $(document).ready(function() {
+        SetAnswerType();
+        $('input[name="QuestionPage.AnswerType"]').change(function() {
             SetAnswerType();
-            $('input[name="QuestionPage.AnswerType"]').change(function() {
-                SetAnswerType();
-            });
         });
+    });
 
-        function SetAnswerType(){
-            var value = $('input[name="QuestionPage.AnswerType"]:checked').val();
-            if (value == @((int)AnswerTypeEnum.SingleLine) || value == @((int)AnswerTypeEnum.MultiLine) || value == @((int)AnswerTypeEnum.Email)){
-                $("[id$=isFile]").hide();
-                $("[id$=isText]").show();
-                $("[id$=isSelect]").hide();
-            }
-            else if (value == @((int)AnswerTypeEnum.SingleChoice) || value == @((int)AnswerTypeEnum.MultipleChoice) || value == @((int)AnswerTypeEnum.DropDownList)){
-                $("[id$=isFile]").hide();
-                $("[id$=isText]").hide();
-                $("[id$=isSelect]").show();
-            }
-            else if (value == @((int)AnswerTypeEnum.File)){
-                $("[id$=isFile]").show();
-                $("[id$=isText]").hide();
-                $("[id$=isSelect]").hide();
-            }
-            else if (value == @((int)AnswerTypeEnum.DateObjcet) || value == @((int)AnswerTypeEnum.Address) || value == @((int)AnswerTypeEnum.Identity) || value == @((int)AnswerTypeEnum.Panel)){
-                $("[id$=isFile]").hide();
-                $("[id$=isText]").hide();
-                $("[id$=isSelect]").hide();
-            }
+    function SetAnswerType(){
+        var value = $('input[name="QuestionPage.AnswerType"]:checked').val();
+        if (value == @((int)AnswerTypeEnum.SingleLine) || value == @((int)AnswerTypeEnum.MultiLine) || value == @((int)AnswerTypeEnum.Email)){
+            $("[id$=isFile]").hide();
+            $("[id$=isText]").show();
+            $("[id$=isSelect]").hide();
         }
+        else if (value == @((int)AnswerTypeEnum.SingleChoice) || value == @((int)AnswerTypeEnum.MultipleChoice) || value == @((int)AnswerTypeEnum.DropDownList)){
+            $("[id$=isFile]").hide();
+            $("[id$=isText]").hide();
+            $("[id$=isSelect]").show();
+        }
+        else if (value == @((int)AnswerTypeEnum.File)){
+            $("[id$=isFile]").show();
+            $("[id$=isText]").hide();
+            $("[id$=isSelect]").hide();
+        }
+        else if (value == @((int)AnswerTypeEnum.DateObjcet) || value == @((int)AnswerTypeEnum.Address) || value == @((int)AnswerTypeEnum.Identity) || value == @((int)AnswerTypeEnum.Panel)){
+            $("[id$=isFile]").hide();
+            $("[id$=isText]").hide();
+            $("[id$=isSelect]").hide();
+        }
+    }
 
-        $('#InsertOption').click(function() {
-            $(this).text("加入清單");
-            var text = $('#QuestionPage_NewOption_Text').val();
-            var memoType = $('#QuestionPage_NewOption_MemoType').val();
-            var sort = $('#QuestionPage_NewOption_Sort').val();
-            var list = $('.option-list');
-            var Question = { "Text": text, "MemoType": memoType, "Sort":sort };
-            if (text.length <= 0){
-                alert("選項名稱不可空白");
-                return;
-            }
-            $.ajax({
-                url: "InsertOption",
-                type: "GET",
-                dataType: "html",
-                data: Question,
-                contentType: "application/json; charset=utf-8",
-                success: function(data) {
-                    data = JSON.parse(data);
-                    list.empty();
-                    $.each(data, function(i, item) {
-                        console.log(item);
-                        var tr = $('<tr></tr>');
-                        tr.append($('<td></td>').text(item.text));
-                        tr.append($('<td></td>').text(item.memoText));
-                        tr.append($('<td></td>').text(item.sort));
-                        tr.append($('<td></td>').append($('<button class="btn btn-primary EditOption" data-sort="'+item.sort+'">編輯</button>' 
-                        + '<button class="btn btn-primary DeleteOption" data-sort="'+item.sort+'">刪除</button>')));
-                        list.append(tr);
-                    });
-                    $('#QuestionPage_NewOption_Text').val("");
-                    $('#QuestionPage_NewOption_MemoType').val(0);
-                    $('#QuestionPage_NewOption_Sort').val("");
-                },
-            });
+    $('#InsertOption').click(function() {
+        $(this).text("加入清單");
+        var text = $('#QuestionPage_NewOption_Text').val();
+        var memoType = $('#QuestionPage_NewOption_MemoType').val();
+        var sort = $('#QuestionPage_NewOption_Sort').val();
+        var list = $('.option-list');
+        var Question = { "Text": text, "MemoType": memoType, "Sort":sort };
+        if (text.length <= 0){
+            alert("選項名稱不可空白");
+            return;
+        }
+        $.ajax({
+            url: "InsertOption",
+            type: "GET",
+            dataType: "html",
+            data: Question,
+            contentType: "application/json; charset=utf-8",
+            success: function(data) {
+                data = JSON.parse(data);
+                list.empty();
+                $.each(data, function(i, item) {
+                    var tr = $('<tr></tr>');
+                    tr.append($('<td></td>').text(item.text));
+                    tr.append($('<td></td>').text(item.memoText));
+                    tr.append($('<td></td>').text(item.sort));
+                    tr.append($('<td></td>').append($('<button class="btn btn-primary EditOption" data-sort="'+item.sort+'">編輯</button>'
+                    + '<button class="btn btn-primary DeleteOption" data-sort="'+item.sort+'">刪除</button>')));
+                    list.append(tr);
+                });
+                $('#QuestionPage_NewOption_Text').val("");
+                $('#QuestionPage_NewOption_MemoType').val(0);
+                $('#QuestionPage_NewOption_Sort').val("");
+            },
         });
+    });
 
-        $(document).on('click', '.EditOption', function() {
-            $('#InsertOption').text("儲存變更");
-            var sortValue = $(this).data('sort');
-            $.ajax({
-                url: "EditOption",
-                type: "GET",
-                dataType: "html",
-                data: { index: sortValue },
-                contentType: "application/json; charset=utf-8",
-                success: function(data) {
-                    data = JSON.parse(data);
-                    $('#QuestionPage_NewOption_Text').val(data.text);
-                    $('#QuestionPage_NewOption_MemoType').val(data.memoType);
-                    $('#QuestionPage_NewOption_Sort').val(data.sort);
-                },
-            });
+    $(document).on('click', '.EditOption', function() {
+        $('#InsertOption').text("儲存變更");
+        var sortValue = $(this).data('sort');
+        $.ajax({
+            url: "EditOption",
+            type: "GET",
+            dataType: "html",
+            data: { index: sortValue },
+            contentType: "application/json; charset=utf-8",
+            success: function(data) {
+                data = JSON.parse(data);
+                $('#QuestionPage_NewOption_Text').val(data.text);
+                $('#QuestionPage_NewOption_MemoType').val(data.memoType);
+                $('#QuestionPage_NewOption_Sort').val(data.sort);
+            },
         });
+    });
 
-        $(document).on('click', '.DeleteOption', function() {
-            $('#InsertOption').text("加入清單");
-            var sortValue = $(this).data('sort');
-            var list = $('.option-list');
-            $.ajax({
-                url: "DeleteOption",
-                type: "GET",
-                dataType: "html",
-                data: { index: sortValue },
-                contentType: "application/json; charset=utf-8",
-                success: function(data) {
-                    data = JSON.parse(data);
-                    list.empty();
-                    $.each(data, function(i, item) {
-                        var tr = $('<tr></tr>');
-                        tr.append($('<td></td>').text(item.text));
-                        tr.append($('<td></td>').text(item.memoText));
-                        tr.append($('<td></td>').text(item.sort));
-                        tr.append($('<td></td>').append($('<button class="btn btn-primary EditOption" data-sort="'+item.sort+'">編輯</button>' 
-                        + '<button class="btn btn-primary DeleteOption" data-sort="'+item.sort+'">刪除</button>')));
-                        list.append(tr);
-                    });
-                    $('#QuestionPage_NewOption_Text').val("");
-                    $('#QuestionPage_NewOption_MemoType').val(0);
-                    $('#QuestionPage_NewOption_Sort').val("");
-                },
-            });
+    $(document).on('click', '.DeleteOption', function() {
+        $('#InsertOption').text("加入清單");
+        var sortValue = $(this).data('sort');
+        var list = $('.option-list');
+        $.ajax({
+            url: "DeleteOption",
+            type: "GET",
+            dataType: "html",
+            data: { index: sortValue },
+            contentType: "application/json; charset=utf-8",
+            success: function(data) {
+                data = JSON.parse(data);
+                list.empty();
+                $.each(data, function(i, item) {
+                    var tr = $('<tr></tr>');
+                    tr.append($('<td></td>').text(item.text));
+                    tr.append($('<td></td>').text(item.memoText));
+                    tr.append($('<td></td>').text(item.sort));
+                    tr.append($('<td></td>').append($('<button class="btn btn-primary EditOption" data-sort="'+item.sort+'">編輯</button>'
+                    + '<button class="btn btn-primary DeleteOption" data-sort="'+item.sort+'">刪除</button>')));
+                    list.append(tr);
+                });
+                $('#QuestionPage_NewOption_Text').val("");
+                $('#QuestionPage_NewOption_MemoType').val(0);
+                $('#QuestionPage_NewOption_Sort').val("");
+            },
         });
-    </script>
+    });
+</script>
 }
 
 <h1>@(string.IsNullOrEmpty(infoPage.Id) ? "新增" : "修改")問卷</h1>
 
 <nav>
-  <div class="nav nav-tabs" id="nav-tab" role="tablist">
-    <button class="nav-link @(isContent?"":"active")" id="nav-base-tab" data-bs-toggle="tab" data-bs-target="#nav-base" type="button" role="tab" aria-controls="nav-base" aria-selected="@(!isContent)">基本資料</button>
-    <button class="nav-link @(isContent?"active":"") @(string.IsNullOrEmpty(infoPage.Id)?"disabled":"")" id="nav-column-tab" data-bs-toggle="tab" data-bs-target="#nav-column" type="button" role="tab" aria-controls="nav-column" aria-selected="@(isContent)">欄位內容</button>
-  </div>
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <button class="nav-link @(isContent?"":"active")" id="nav-base-tab" data-bs-toggle="tab" data-bs-target="#nav-base" type="button" role="tab" aria-controls="nav-base" aria-selected="@(!isContent)">基本資料</button>
+        <button class="nav-link @(isContent?"active":"") @(string.IsNullOrEmpty(infoPage.Id)?"disabled":"")" id="nav-column-tab" data-bs-toggle="tab" data-bs-target="#nav-column" type="button" role="tab" aria-controls="nav-column" aria-selected="@(isContent)">欄位內容</button>
+    </div>
 </nav>
 
 <div class="tab-content" id="nav-tabContent">
-  <div class="tab-pane fade @(isContent?"":"show active")" id="nav-base" role="tabpanel" aria-labelledby="nav-base-tab">
-      <div class="container">
-    <div class="row py-2">
-        @using (Html.BeginForm("Form", "Document", FormMethod.Post, new { enctype = "multipart/form-data" })){
-            @Html.AntiForgeryToken()
-
-            @Html.HiddenFor(model => Model.InfoPage.Id, new { @class = "form-control", @readonly = "true" })
-
-            <div>
-                <label for="InfoPage_Caption" class="col-form-label">標題</label>
-                <div class="row g-2">
-                    <div class="col col-lg-10">
+    <div class="tab-pane fade @(isContent?"":"show active")" id="nav-base" role="tabpanel" aria-labelledby="nav-base-tab">
+        <div class="container">
+            @using (Html.BeginForm("Form", "Document", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => Model.InfoPage.Id, new { @class = "form-control", @readonly = "true" })
+                <div class="row mb-2 py-2">
+                    <label for="InfoPage_Caption" class="col-sm-2 col-form-label">標題</label>
+                    <div class="col-sm-10">
                         @Html.TextBoxFor(model => Model.InfoPage.Caption, new { placeholder = "請輸入標題", @class = "form-control"})
                     </div>
+                    <small class="text-info">註:上限50 字</small>
+                    @Html.ValidationMessageFor(model => Model.InfoPage.Caption, "", new { @class = "text-danger" })
                 </div>
-                <small class="text-info mt-2">註 : 文字上限300 字</small>
-                @Html.ValidationMessageFor(model => Model.InfoPage.Caption, "", new { @class = "text-danger" })
-            </div>
 
-            <div>
-                <label for="InfoPage_Sort" class="col-form-label">排序</label>
-                <div class="row g-2">
-                    <div class="col col-lg-10">
-                        @Html.TextBoxFor(model => Model.InfoPage.Sort, new { placeholder = "請輸入排序", @class = "form-control", type = "number"})
+                <div class="row mb-2 py-2">
+                    <label for="InfoPage_Sort" class="col-sm-2 col-form-label">排序</label>
+                    <div class="col-sm-auto">
+                        @Html.TextBoxFor(model => Model.InfoPage.Sort, new { placeholder = "請輸入排序", @class = "form-control", type = "number", min = 0 })
                     </div>
+                    @Html.ValidationMessageFor(model => Model.InfoPage.Sort, "", new { @class = "text-danger" })
                 </div>
-                <small class="text-info mt-2">註 : 限填不大於100數字</small>
-                @Html.ValidationMessageFor(model => Model.InfoPage.Sort, "", new { @class = "text-danger" })
-            </div>
-            
-            <div>
-                <label for="InfoPage_IsEnabled" class="col-form-label">啟用狀態</label>
-                <div class="row g-2">
-                    <div class="col col-lg-10">
+
+                <div class="row mb-2 py-2">
+                    <label for="InfoPage_IsEnabled" class="col-sm-2 col-form-label">啟用狀態</label>
+                    <div class="col-sm-auto">
                         @Html.CheckBoxFor(model => Model.InfoPage.IsEnabled)
                     </div>
+                    @Html.ValidationMessageFor(model => Model.InfoPage.Sort, "", new { @class = "text-danger" })
                 </div>
-                @Html.ValidationMessageFor(model => Model.InfoPage.Sort, "", new { @class = "text-danger" })
-            </div>
-            <div>
-                <label for="InfoPage_StartDate" class="col-form-label">開放填寫日期</label>
-                <div class="row g-2">
-                    <div class="col col-lg-10">
+                <div class="row mb-2 py-2">
+                    <label for="InfoPage_StartDate" class="col-sm-2 col-form-label">開放填寫日期</label>
+                    <div class="col-sm-auto">
                         @Html.TextBoxFor(model => Model.InfoPage.StartDate,"{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
-                        ～
+                    </div>
+                    ～
+                    <div class="col-sm-auto">
                         @Html.TextBoxFor(model => Model.InfoPage.EndDate,"{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
                     </div>
+                    @Html.ValidationMessageFor(model => Model.InfoPage.StartDate, "", new { @class = "text-danger" })
+                    @Html.ValidationMessageFor(model => Model.InfoPage.EndDate, "", new { @class = "text-danger" })
                 </div>
-                @Html.ValidationMessageFor(model => Model.InfoPage.StartDate, "", new { @class = "text-danger" })
-                @Html.ValidationMessageFor(model => Model.InfoPage.EndDate, "", new { @class = "text-danger" })
-            </div>
 
-            <div>
-                <label for="InfoPage_HeadText" class="col-form-label">表頭</label>
-                <div class="row g-2">
-                    <div class="col col-lg-10">
-                        @Html.TextAreaFor(model => Model.InfoPage.HeadText, new { placeholder = "請輸入表頭", @class = "form-control", maxlength = 2000, rows = 5 })
+                <div class="row mb-2 py-2">
+                    <label for="InfoPage_HeadText" class="col-sm-2 col-form-label">表頭</label>
+                    <div class="col-sm-10">
+                        @Html.TextAreaFor(model => Model.InfoPage.HeadText, new { placeholder = "請輸入表頭", @class = "form-control edittextarea", maxlength = 2000, rows = 5 })
+                    </div>
+                    @Html.ValidationMessageFor(model => Model.InfoPage.HeadText, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="row mb-2 py-2">
+                    <label for="InfoPage_FooterText" class="col-sm-2 col-form-label">表尾</label>
+                    <div class="col-sm-10">
+                        @Html.TextAreaFor(model => Model.InfoPage.FooterText, new { placeholder = "請輸入表尾", @class = "form-control edittextarea", maxlength = 2000, rows = 5 })
+                    </div>
+                    @Html.ValidationMessageFor(model => Model.InfoPage.FooterText, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="row mb-2 py-2 justify-content-end">
+                    <div class="col-sm-auto">
+                        <input class="btn btn-danger" type="submit" value="確定儲存">
                     </div>
                 </div>
-                @Html.ValidationMessageFor(model => Model.InfoPage.HeadText, "", new { @class = "text-danger" })
-            </div>
-
-            <div>
-                <label for="InfoPage_FooterText" class="col-form-label">表尾</label>
-                <div class="row g-2">
-                    <div class="col col-lg-10">
-                        @Html.TextAreaFor(model => Model.InfoPage.FooterText, new { placeholder = "請輸入表尾", @class = "form-control", maxlength = 2000, rows = 5 })
-                    </div>
-                </div>
-                @Html.ValidationMessageFor(model => Model.InfoPage.FooterText, "", new { @class = "text-danger" })
-            </div>
-
-            <div>
-                <input class="btn btn-danger" type="reset" value="清除">
-                <input class="btn btn-secondary" type="submit" value="確定儲存">
-            </div>
-        }
+            }
         </div>
     </div>
-  </div>
-  <div class="tab-pane fade @(isContent?"show active":"")" id="nav-column" role="tabpanel" aria-labelledby="nav-column-tab">
-      <h4>新增題目</h4>
-      @using (Html.BeginForm("InsertField", "Document", FormMethod.Post, new { enctype = "multipart/form-data", @id = "InsertField" })){
-            @Html.AntiForgeryToken()
-            
-            @Html.HiddenFor(model => Model.QuestionPage.DocumentFieldId, new { @class = "form-control", @readonly = "true" })
 
-                <label for="QuestionPage_Caption" class="col-form-label">題目</label>
-                <div class="row g-2">
-                    <div class="col col-lg-10">
+    <div class="tab-pane fade @(isContent?"show active":"")" id="nav-column" role="tabpanel" aria-labelledby="nav-column-tab">
+        <div class="container">
+            <h4>新增題目</h4>
+            @using (Html.BeginForm("InsertField", "Document", FormMethod.Post, new { enctype = "multipart/form-data", @id = "InsertField" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => Model.QuestionPage.DocumentFieldId, new { @class = "form-control", @readonly = "true" })
+                <div class="row mb-2 py-2">
+                    <label for="QuestionPage_Caption" class="col-sm-auto col-form-label">題目</label>
+                    <div class="col-sm-10">
                         @Html.TextBoxFor(model => Model.QuestionPage.Caption, new { placeholder = "請輸入題目", @class = "form-control"})
                     </div>
+                    <small class="text-info">註:上限50 字</small>
                 </div>
-                <label for="QuestionPage_Note" class="col-form-label">備註</label>
-                <div class="row g-2">
-                    <div class="col col-lg-10">
+                <div class="row mb-2 py-2">
+                    <label for="QuestionPage_Note" class="col-sm-auto col-form-label">備註</label>
+                    <div class="col-sm-10">
                         @Html.TextBoxFor(model => Model.QuestionPage.Note, new { placeholder = "請輸入備註", @class = "form-control"})
                     </div>
                 </div>
-                <label for="QuestionPage_IsNeedAnswer" class="col-form-label">是否必填</label>
-                <div class="row g-2">
-                    <div class="col col-lg-10">
+                <div class="row mb-2 py-2">
+                    <label for="QuestionPage_ParentFieldList" class="col-sm-auto col-form-label">選擇父題目</label>
+                    <div class="col-sm-auto">
+                        @Html.DropDownListFor(model => Model.QuestionPage.ParentFieldList, questionPage.ParentFieldList, new { @class = "form-control"})
+                    </div>
+                </div>
+                <div class="row mb-2 py-2">
+                    <div class="col-sm-auto align-items-center">
                         @Html.CheckBoxFor(model => Model.QuestionPage.IsRequired)
+                        <label for="QuestionPage_IsRequired" class="col-sm-auto col-form-label">是否必填</label>
                     </div>
-                </div>
-                <label for="QuestionPage_IsIncludedExport" class="col-form-label">是否列入匯出表單</label>
-                <div class="row g-2">
-                    <div class="col col-lg-10">
+                    <div class="col-sm-auto align-items-center">
                         @Html.CheckBoxFor(model => Model.QuestionPage.IsIncludedExport)
+                        <label for="QuestionPage_IsIncludedExport" class="col-sm-auto col-form-label">是否列入匯出表單</label>
                     </div>
-                </div>
-                <label for="QuestionPage_IsIncludedExport" class="col-form-label">是否可編輯</label>
-                <div class="row g-2">
-                    <div class="col col-lg-10">
+                    <div class="col-sm-auto align-items-center">
                         @Html.CheckBoxFor(model => Model.QuestionPage.IsEditable)
+                        <label for="QuestionPage_IsEditable" class="col-sm-auto col-form-label">是否可編輯</label>
                     </div>
                 </div>
-                <label for="QuestionPage_AnswerType" class="col-form-label">答案類型</label>
-                <div>
-                    @for (int q = 0; q < questionPage.AnswerTypeList.Count(); q++)
-                    {
-                        var item = questionPage.AnswerTypeList[q];
-                        @Html.RadioButtonFor(model => Model.QuestionPage.AnswerType, item.Value, new { @class = "form-check-input", @id = "QuestionPage_AnswerType" + q })
-                        <label class="form-check-label" for="Question.AnswerType@(q)">@item.Text</label>
-                    }
+                <div class="row mb-2">
+                    <label for="QuestionPage_AnswerType" class="col-sm-auto col-form-label">答案類型</label>
+                    <div class="col-sm-10">
+                        @for (int q = 0; q < Model.QuestionPage.AnswerTypeList.Count(); q++)
+                        {
+                            var item = Model.QuestionPage.AnswerTypeList[q];
+                            <div class="col-sm-auto">
+                                @{
+                                    @Html.RadioButtonFor(model => Model.QuestionPage.AnswerType, item.Value, new { @class = "form-check-input", @id = "QuestionPage_AnswerType" + q })
+                                }
+                                <label class="form-check-label" for="QuestionPage_AnswerType@(q)">@item.Text</label>
+                            </div>
+                        }
+                    </div>
                 </div>
-                <div id="isFile">
-                    <label for="QuestionPage_FileSizeLimit" class="col-form-label">檔案大小限制</label>
-                    @Html.TextBoxFor(model => Model.QuestionPage.FileSizeLimit, new { placeholder = "請輸入檔案大小限制", @class = "form-control", type = "number"})
-                    <label for="QuestionPage_FileExtension" class="col-form-label">副檔名限制</label>
-                    @Html.TextBoxFor(model => Model.QuestionPage.FileExtension, new { placeholder = "請輸入副檔名限制", @class = "form-control" })
+                <div class="row mb-2 py-2" id="isFile">
+                    <div class="col-sm-3">
+                        <label for="QuestionPage_FileSizeLimit" class="col-sm-auto col-form-label">檔案大小限制(mb)</label>
+                        @Html.TextBoxFor(model => Model.QuestionPage.FileSizeLimit, new { placeholder = "請輸入檔案大小限制", @class = "form-control", type = "number", min = 0 })
+                    </div>
+                    <div class="col-sm-9">
+                        <label for="QuestionPage_FileExtension" class="col-sm-auto col-form-label">副檔名限制 (ex: pdf,jpg)</label>
+                        @Html.TextBoxFor(model => Model.QuestionPage.FileExtension, new { placeholder = "請輸入副檔名限制", @class = "form-control" })
+                    </div>
                 </div>
-                <div id="isText">
-                    <label for="QuestionPage_WordLimit" class="col-form-label">文字長度限制</label>
-                    @Html.TextBoxFor(model => Model.QuestionPage.WordLimit, new { placeholder = "請輸入文字長度限制", @class = "form-control", type = "number"})
+                <div class="row mb-2 py-2" id="isText">
+                    <label for="QuestionPage_WordLimit" class="col-sm-auto col-form-label">文字長度限制</label>
+                    <div class="col-sm-auto">
+                        @Html.TextBoxFor(model => Model.QuestionPage.WordLimit, new { placeholder = "請輸入文字長度限制", @class = "form-control", type = "number", min = 0 })
+                    </div>
                 </div>
             }
-                <div id="isSelect">
-                    <label for="QuestionPage_NewOption" class="col-form-label">答案選項</label>
+            <div class="row mb-2 py-2" id="isSelect">
+                <label for="QuestionPage_NewOption" class="col-sm-auto col-form-label">答案選項</label>
+                <div class="col-sm-auto p-3">
                     @Html.TextBoxFor(model => Model.QuestionPage.NewOption.Text, "", new { @class = "form-control", required = true})
                     @Html.DropDownListFor(model => Model.QuestionPage.NewOption.MemoType, questionPage.MemoTypeList , new {@class = "form-control"})
                     @Html.HiddenFor(model => Model.QuestionPage.NewOption.Sort, new { @class = "form-control", @readonly = "true" })
                     <button class="btn btn-primary" type="button" id="InsertOption">加入清單</button>
+                </div>
+                <div class="col-sm-auto">
                     <table class="table table-striped table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
-                                <th>選項</th>
-                                <th>備註</th>
-                                <th>排序</th>
-                                <th>功能列表</th>
+                                <th scope="col">選項</th>
+                                <th scope="col">備註</th>
+                                <th scope="col">排序</th>
+                                <th scope="col">功能列表</th>
                             </tr>
                         </thead>
                         <tbody class="option-list">
-                            @if (questionPage.OptionList != null && questionPage.OptionList.Any()){
-                                foreach(var item in questionPage.OptionList)
+                            @if (Model.QuestionPage.OptionList != null && Model.QuestionPage.OptionList.Any())
+                            {
+                                foreach (var item in Model.QuestionPage.OptionList)
                                 {
                                     <tr>
                                         <td>@item.Text</td>
                                         <td>@(EnumHelper.GetDescription((MemoTypeEnum)item.MemoType))</td>
                                         <td>@item.Sort</td>
-                                        <td><button class="btn btn-primary EditOption" data-sort="@(item.Sort)">編輯</button>
-                                            <button class="btn btn-primary DeleteOption" data-sort="@(item.Sort)">刪除</button></td>
+                                        <td>
+                                            <button class="btn btn-primary EditOption" data-sort="@(item.Sort)">編輯</button>
+                                            <button class="btn btn-primary DeleteOption" data-sort="@(item.Sort)">刪除</button>
+                                        </td>
                                     </tr>
                                 }
                             }
                         </tbody>
                     </table>
                 </div>
-                <br>
-                <button class="btn btn-secondary" form="InsertField" type="submit">@(string.IsNullOrEmpty(questionPage.DocumentFieldId)?"新增題目":"確定修改")</button>
-                <br>
-                <h4>列表</h4>
-                <table border="1">
-                    <thead>
-                        <tr>
-                            <th>題目內容</th>
-                            <th>答案類型</th>
-                            <th>排序</th>
-                            <th>執行動作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    @foreach(var item in questionPage.FieldList)
+            </div>
+            <div class="row mb-2 py-2 justify-content-end">
+                <div class="col-sm-auto">
+                    <button class="btn btn-danger" form="InsertField" type="submit">@(string.IsNullOrEmpty(questionPage.DocumentFieldId)?"新增題目":"確定修改")</button>
+                </div>
+            </div>
+
+            <h4>題目列表</h4>
+            <table class="table table-striped table-bordered table-hover table-responsive">
+                <thead class="thead-light">
+                    <tr>
+                        <th scope="col">題目內容</th>
+                        <th scope="col">答案類型</th>
+                        <th scope="col">排序</th>
+                        <th scope="col">執行動作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in questionPage.FieldList)
                     {
                         int count = questionPage.FieldList.Count();
                         <tr>
                             <td>@item.FieldName</td>
                             <td>@(EnumHelper.GetDescription((AnswerTypeEnum)item.FieldType))</td>
                             <td>@item.Sort</td>
-                            <td><a class="btn btn-primary" href="@Url.Action("EditField","Document", new { fieldId = item.Id })">編輯</a>
+                            <td>
+                                <a class="btn btn-primary" href="@Url.Action("EditField","Document", new { fieldId = item.Id })">編輯</a>
                                 <a class="btn btn-primary" href="@Url.Action("DeleteField","Document", new { fieldId = item.Id })">刪除</a>
-                                @if(item.Sort != 0 && count > 1)
+                                @if (item.Sort != 0 && count > 1)
                                 {
-                                    <a class="btn btn-primary" href="@Url.Action("SetSortUp","Document", new { fieldId = item.Id })"><i class="bi bi-arrow-up-circle-fill"></i></a>
+                                    <a class="btn btn-primary" href="@Url.Action("SetFieldSort","Document", new { fieldId = item.Id, direction = true })"><i class="bi bi-arrow-up-circle-fill"></i></a>
                                 }
                                 @if (item.Sort != count - 1 && count > 1)
                                 {
-                                    <a class="btn btn-primary" href="@Url.Action("SetSortDown","Document", new { fieldId = item.Id })"><i class="bi bi-arrow-down-circle-fill"></i></a>
+                                    <a class="btn btn-primary" href="@Url.Action("SetFieldSort","Document", new { fieldId = item.Id, direction = false })"><i class="bi bi-arrow-down-circle-fill"></i></a>
                                 }
                             </td>
                         </tr>
                     }
-                    </tbody>
-                </table>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 

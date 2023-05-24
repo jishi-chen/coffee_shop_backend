@@ -38,7 +38,14 @@ namespace coffee_shop_backend.Controllers
             if (!string.IsNullOrEmpty(id))
             {
                 model.InfoPage = _unitOfWork.DocumentRepository.GetInfoPage(id);
-                model.QuestionPage.FieldList = _unitOfWork.DocumentRepository.GetQuestionFieldList(id).ToList();
+                model.QuestionPage.FieldList = _unitOfWork.DocumentRepository.GetQuestionFieldList(id).OrderBy(x => x.Sort).ToList();
+                var parentList = model.QuestionPage.FieldList.Where(x => x.FieldType == (int)AnswerTypeEnum.Panel).Select(x => new SelectListItem
+                {
+                    Text = x.FieldName,
+                    Value = x.Id,
+                }).ToList();
+                model.QuestionPage.ParentFieldList.Add(new SelectListItem { Text = "---請選擇---", Value = null });
+                model.QuestionPage.ParentFieldList.AddRange(parentList);
                 _unitOfWork.Dispose();
             }
             GetAnswerTypeSettings(model.QuestionPage.AnswerTypeList);
@@ -94,7 +101,7 @@ namespace coffee_shop_backend.Controllers
                     _unitOfWork.DocumentRepository.UpdateDocument(document);
                     _unitOfWork.Complete();
                 }
-                return RedirectToAction("Index");
+                return RedirectToAction("Form", new { id = model.InfoPage.Id, tab = "0" } );
             }
         }
 
@@ -168,15 +175,8 @@ namespace coffee_shop_backend.Controllers
                     }
                 }
                 _unitOfWork.Complete();
-                model.QuestionPage = new DocumentQuestionPage();
-                GetAnswerTypeSettings(model.QuestionPage.AnswerTypeList);
-                GetMemoTypeSettings(model.QuestionPage.AnswerTypeList);
-                model.QuestionPage.FieldList = _unitOfWork.DocumentRepository.GetQuestionFieldList(model.InfoPage.Id).ToList();
-                _unitOfWork.Dispose();
                 ModelState.Clear();
-                TempData[sessionName] = JsonConvert.SerializeObject(model);
-                ViewBag.Tab = "1";
-                return View("Form", model);
+                return RedirectToAction("Form", new { id = model.InfoPage.Id, tab = "1" });
             }
             return RedirectToAction("Index");
         }
@@ -227,6 +227,26 @@ namespace coffee_shop_backend.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpGet]
+        [Route("DeleteField")]
+        public IActionResult DeleteField(string fieldId)
+        {
+            DocumentField field = _unitOfWork.DocumentRepository.GetDocumentField(fieldId);
+            _unitOfWork.DocumentRepository.DeleteField(fieldId);
+            _unitOfWork.DocumentRepository.DeleteFieldOptions(fieldId);
+            IEnumerable<DocumentField> fields = _unitOfWork.DocumentRepository.GetQuestionFieldList(field.DocumentId);
+            int q = 0;
+            foreach (var item in fields)
+            {
+                item.Sort = q;
+                q++;
+            }
+            _unitOfWork.DocumentRepository.UpdateFieldSort(fields);
+            _unitOfWork.Complete();
+            return RedirectToAction("Form", new { id = field.DocumentId, tab = "1" });
+        }
+
+
         #endregion
 
         #region 選擇題選項
@@ -238,7 +258,20 @@ namespace coffee_shop_backend.Controllers
             if (TempData.Peek(sessionName) is string jsonText)
             {
                 DocumentViewModel model = JsonConvert.DeserializeObject<DocumentViewModel>(jsonText)!;
-
+                if (Question.Sort == null) //新增
+                {
+                    Question.Sort = model.QuestionPage.OptionList.Any() ? model.QuestionPage.OptionList.OrderByDescending(x => x.Sort).FirstOrDefault()!.Sort + 1 : 0;
+                    Question.MemoText = EnumHelper.GetDescription((MemoTypeEnum)Question.MemoType);
+                    model.QuestionPage.OptionList.Add(Question);
+                }
+                else //編輯
+                {
+                    AnswerOption option = model.QuestionPage.OptionList.FirstOrDefault(x => x.Sort == Question.Sort)!;
+                    option.Text = Question.Text;
+                    option.MemoType = Question.MemoType;
+                    option.MemoText = EnumHelper.GetDescription((MemoTypeEnum)option.MemoType);
+                    model.QuestionPage.NewOption = new AnswerOption();
+                }
                 ModelState.Clear();
                 TempData[sessionName] = JsonConvert.SerializeObject(model);
                 return this.Json(model.QuestionPage.OptionList);
@@ -255,7 +288,7 @@ namespace coffee_shop_backend.Controllers
                 DocumentViewModel model = JsonConvert.DeserializeObject<DocumentViewModel>(jsonText)!;
                 model.QuestionPage.NewOption = model.QuestionPage.OptionList.FirstOrDefault(x => x.Sort == index)!;
                 TempData[sessionName] = JsonConvert.SerializeObject(model);
-                return this.Json(model.QuestionPage.OptionList);
+                return this.Json(model.QuestionPage.NewOption);
             }
             return Json("Read Error");
         }
@@ -282,6 +315,40 @@ namespace coffee_shop_backend.Controllers
                 return this.Json(model.QuestionPage.OptionList);
             }
             return Json("Delete Error");
+        }
+
+        #endregion
+
+        #region 調整排序
+
+        [HttpGet]
+        [Route("SetFieldSort")]
+        public IActionResult SetFieldSort(string fieldId, bool direction)
+        {
+            int d = direction ? -1 : 1;
+            if (TempData.Peek(sessionName) is string jsonText)
+            {
+                DocumentViewModel model = JsonConvert.DeserializeObject<DocumentViewModel>(jsonText)!;
+                DocumentField field = _unitOfWork.DocumentRepository.GetDocumentField(fieldId);
+                if (field != null)
+                {
+                    field.Sort += d;
+                    model.QuestionPage.FieldList.FirstOrDefault(x => x.Id == field.Id)!.Sort += d;
+                    DocumentField changedField = _unitOfWork.DocumentRepository.GetDocumentField(field.DocumentId, field.Sort)!;
+                    changedField.Sort -= d;
+                    model.QuestionPage.FieldList.FirstOrDefault(x => x.Id == changedField.Id)!.Sort -= d;
+                    List<DocumentField> updateFields = new List<DocumentField>();
+                    updateFields.Add(field);
+                    updateFields.Add(changedField);
+                    _unitOfWork.DocumentRepository.UpdateFieldSort(updateFields);
+                }
+                model.QuestionPage.FieldList = model.QuestionPage.FieldList.OrderBy(x => x.Sort).ToList();
+                _unitOfWork.Complete();
+                TempData[sessionName] = JsonConvert.SerializeObject(model);
+                ViewBag.Tab = "1";
+                return View("Form", model);
+            }
+            return RedirectToAction("Index");
         }
 
         #endregion

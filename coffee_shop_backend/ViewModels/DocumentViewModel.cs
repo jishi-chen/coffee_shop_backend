@@ -26,9 +26,9 @@ namespace coffee_shop_backend.ViewModels
         public string? DocumentFieldId { get; set; }
         public string? ParentId { get; set; }
         public string Caption { get; set; } = string.Empty;
-        public bool IsRequired { get; set; }
-        public bool IsIncludedExport { get; set; }
-        public bool IsEditable { get; set; }
+        public bool IsRequired { get; set; } = true;
+        public bool IsIncludedExport { get; set; } = true;
+        public bool IsEditable { get; set; } = true;
         public string? Note { get; set; }
         public int FileSizeLimit { get; set; } = 0;
         public int WordLimit { get; set; } = 0;
@@ -39,6 +39,7 @@ namespace coffee_shop_backend.ViewModels
         public List<DocumentField> FieldList { get; set; } = new List<DocumentField>();
         public List<SelectListItem> AnswerTypeList { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> MemoTypeList { get; set; } = new List<SelectListItem>();
+        public List<SelectListItem> ParentFieldList { get; set; } = new List<SelectListItem>();
     }
 
     public class AnswerOption

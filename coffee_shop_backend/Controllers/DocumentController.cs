@@ -38,13 +38,13 @@ namespace coffee_shop_backend.Controllers
             if (!string.IsNullOrEmpty(id))
             {
                 model.InfoPage = _unitOfWork.DocumentRepository.GetInfoPage(id);
-                model.QuestionPage.FieldList = _unitOfWork.DocumentRepository.GetQuestionFieldList(id).OrderBy(x => x.Sort).ToList();
+                model.QuestionPage.FieldList = _unitOfWork.DocumentRepository.GetQuestionFieldList(id).ToList();
                 var parentList = model.QuestionPage.FieldList.Where(x => x.FieldType == (int)AnswerTypeEnum.Panel).Select(x => new SelectListItem
                 {
                     Text = x.FieldName,
                     Value = x.Id,
                 }).ToList();
-                model.QuestionPage.ParentFieldList.Add(new SelectListItem { Text = "---請選擇---", Value = null });
+                model.QuestionPage.ParentFieldList.Add(new SelectListItem { Text = "---請選擇---", Value = string.Empty });
                 model.QuestionPage.ParentFieldList.AddRange(parentList);
                 _unitOfWork.Dispose();
             }
@@ -121,27 +121,26 @@ namespace coffee_shop_backend.Controllers
                     ViewBag.Tab = "1";
                     return View("Form", model);
                 }
-
-                DocumentField field = new DocumentField()
-                {
-                    Id = model.QuestionPage.DocumentFieldId!,
-                    DocumentId = model.InfoPage.Id!,
-                    FieldName = Question.Caption,
-                    FieldType = (byte)Question.AnswerType,
-                    IsRequired = Question.IsRequired,
-                    IsIncludedExport = Question.IsIncludedExport,
-                    IsEditable = Question.IsEditable,
-                    WordLimit = Question.WordLimit,
-                    FileSizeLimit = Question.FileSizeLimit,
-                    FileExtension = Question.FileExtension,
-                    Note = Question.Note,
-                };
+                DocumentField field = _unitOfWork.DocumentRepository.GetDocumentField(model.QuestionPage.DocumentFieldId!);
+                var oldParentId = field.ParentId!;
+                field.Id = model.QuestionPage.DocumentFieldId!;
+                field.ParentId = Question.ParentId;
+                field.DocumentId = model.InfoPage.Id!;
+                field.FieldName = Question.Caption;
+                field.FieldType = (byte)Question.AnswerType;
+                field.IsRequired = Question.IsRequired;
+                field.IsIncludedExport = Question.IsIncludedExport;
+                field.IsEditable = Question.IsEditable;
+                field.WordLimit = Question.WordLimit;
+                field.FileSizeLimit = Question.FileSizeLimit;
+                field.FileExtension = Question.FileExtension;
+                field.Note = Question.Note;
+                var list = model.QuestionPage.FieldList.Where(x => x.ParentId == Question.ParentId).ToList();
                 //新增
                 if (string.IsNullOrEmpty(Question.DocumentFieldId))
                 {
                     field.Creator = "Admin";
                     field.CreateDate = DateTime.Now;
-                    var list = model.QuestionPage.FieldList.Where(x => x.ParentId == Question.ParentId);
                     if (list.Any())
                         field.Sort = list.OrderByDescending(x => x.Sort).FirstOrDefault()!.Sort +1;
                     else
@@ -153,8 +152,16 @@ namespace coffee_shop_backend.Controllers
                 {
                     field.Updator = "Admin";
                     field.UpdateDate = DateTime.Now;
+                    //更換父題目要更改排序值
+                    if (field.ParentId != model.QuestionPage.FieldList.FirstOrDefault(x => x.Id == field.Id)!.ParentId)
+                    {
+                        if (list.Any())
+                            field.Sort = list.OrderByDescending(x => x.Sort).FirstOrDefault()!.Sort + 1;
+                        else
+                            field.Sort = 0;
+                    }
                     _unitOfWork.DocumentRepository.UpdateDocumentField(field);
-
+                    ResetFieldSort(field.DocumentId, oldParentId);
                 }
                 if (field.FieldType == (int)AnswerTypeEnum.SingleChoice || field.FieldType == (int)AnswerTypeEnum.MultipleChoice)
                 {
@@ -191,6 +198,7 @@ namespace coffee_shop_backend.Controllers
                 DocumentField field = _unitOfWork.DocumentRepository.GetDocumentField(fieldId);
                 if (field != null)
                 {
+                    model.QuestionPage.ParentId = field.ParentId;
                     model.QuestionPage.DocumentFieldId = field.Id;
                     model.QuestionPage.Caption = field.FieldName;
                     model.QuestionPage.WordLimit = field.WordLimit;
@@ -234,14 +242,7 @@ namespace coffee_shop_backend.Controllers
             DocumentField field = _unitOfWork.DocumentRepository.GetDocumentField(fieldId);
             _unitOfWork.DocumentRepository.DeleteField(fieldId);
             _unitOfWork.DocumentRepository.DeleteFieldOptions(fieldId);
-            IEnumerable<DocumentField> fields = _unitOfWork.DocumentRepository.GetQuestionFieldList(field.DocumentId);
-            int q = 0;
-            foreach (var item in fields)
-            {
-                item.Sort = q;
-                q++;
-            }
-            _unitOfWork.DocumentRepository.UpdateFieldSort(fields);
+            ResetFieldSort(field.DocumentId, field.ParentId);
             _unitOfWork.Complete();
             return RedirectToAction("Form", new { id = field.DocumentId, tab = "1" });
         }
@@ -333,20 +334,15 @@ namespace coffee_shop_backend.Controllers
                 if (field != null)
                 {
                     field.Sort += d;
-                    model.QuestionPage.FieldList.FirstOrDefault(x => x.Id == field.Id)!.Sort += d;
-                    DocumentField changedField = _unitOfWork.DocumentRepository.GetDocumentField(field.DocumentId, field.Sort)!;
+                    DocumentField changedField = _unitOfWork.DocumentRepository.GetDocumentField(field.DocumentId,field.ParentId, field.Sort)!;
                     changedField.Sort -= d;
-                    model.QuestionPage.FieldList.FirstOrDefault(x => x.Id == changedField.Id)!.Sort -= d;
                     List<DocumentField> updateFields = new List<DocumentField>();
                     updateFields.Add(field);
                     updateFields.Add(changedField);
                     _unitOfWork.DocumentRepository.UpdateFieldSort(updateFields);
                 }
-                model.QuestionPage.FieldList = model.QuestionPage.FieldList.OrderBy(x => x.Sort).ToList();
                 _unitOfWork.Complete();
-                TempData[sessionName] = JsonConvert.SerializeObject(model);
-                ViewBag.Tab = "1";
-                return View("Form", model);
+                return RedirectToAction("Form", new { id = model.InfoPage.Id, tab = "1" });
             }
             return RedirectToAction("Index");
         }
@@ -375,6 +371,18 @@ namespace coffee_shop_backend.Controllers
                     Value = ((int)item).ToString(),
                 });
             }
+        }
+
+        public void ResetFieldSort(string documentId, string parentId)
+        {
+            IEnumerable<DocumentField> fields = _unitOfWork.DocumentRepository.GetQuestionFieldList(documentId, parentId);
+            int q = 0;
+            foreach (var item in fields)
+            {
+                item.Sort = q;
+                q++;
+            }
+            _unitOfWork.DocumentRepository.UpdateFieldSort(fields);
         }
     }
 }

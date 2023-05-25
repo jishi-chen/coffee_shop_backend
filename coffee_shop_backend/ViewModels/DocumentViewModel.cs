@@ -40,6 +40,7 @@ namespace coffee_shop_backend.ViewModels
         public List<SelectListItem> AnswerTypeList { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> MemoTypeList { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> ParentFieldList { get; set; } = new List<SelectListItem>();
+        public int Layer { get; set; } = 0;
     }
 
     public class AnswerOption
@@ -49,4 +50,6 @@ namespace coffee_shop_backend.ViewModels
         public int MemoType { get; set; }
         public string MemoText { get; set; } = string.Empty;
     }
+
+
 }

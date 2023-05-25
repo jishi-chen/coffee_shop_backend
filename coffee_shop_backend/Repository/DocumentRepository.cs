@@ -25,8 +25,18 @@ namespace coffee_shop_backend.Repository
         }
         public IEnumerable<DocumentField> GetQuestionFieldList(string documentId)
         {
-            string sql = $@" select * from DocumentFields where DocumentId=@DocumentId ";
+            string sql = $@" select * from DocumentFields where DocumentId=@DocumentId order by Sort ";
             return Connection.Query<DocumentField>(sql, new { DocumentId = documentId }, Transaction);
+        }
+        public IEnumerable<DocumentField> GetQuestionFieldList(string documentId, string parentId)
+        {
+            string sql = $@" select * from DocumentFields where DocumentId=@DocumentId ";
+            if (!string.IsNullOrEmpty(parentId))
+                sql += " and ParentId=@ParentId ";
+            else
+                sql += " and ParentId is null ";
+            sql += " order by Sort ";
+            return Connection.Query<DocumentField>(sql, new { DocumentId = documentId, ParentId = parentId }, Transaction);
         }
         public void InsertDocument(Document document)
         {
@@ -58,7 +68,7 @@ select @@identity Id ";
         {
             string sql = $@"
 update DocumentFields set
-ParentId=@ParentId, FieldName=@FieldName, Note=@Note, FieldType=@FieldType, WordLimit=@WordLimit, RowLimit=@RowLimit, FileSizeLimit=@FileSizeLimit, 
+ParentId=@ParentId, FieldName=@FieldName, Note=@Note, FieldType=@FieldType, WordLimit=@WordLimit, RowLimit=@RowLimit, FileSizeLimit=@FileSizeLimit, Sort=@Sort, 
 FileExtension=@FileExtension, IsRequired=@IsRequired, IsIncludedExport=@IsIncludedExport, IsEditable=@IsEditable, Updator=@Updator, UpdateDate=@UpdateDate 
 where Id=@Id ";
             Connection.Execute(sql, field, Transaction);
@@ -77,13 +87,17 @@ values (@DocumentFieldId, @OptionName, @MemoType, @Sort) ";
         }
         public DocumentField GetDocumentField(string fieldId)
         {
+            if (string.IsNullOrEmpty(fieldId))
+                return new DocumentField();
             string sql = $@" select * from DocumentFields where Id=@Id ";
             return Connection.QuerySingle<DocumentField>(sql, new { Id = fieldId }, Transaction);
         }
-        public DocumentField GetDocumentField(string documentId, int sort)
+        public DocumentField GetDocumentField(string documentId,string parentId, int sort)
         {
             string sql = $@" select top 1 * from DocumentFields where DocumentId=@DocumentId and Sort=@Sort ";
-            return Connection.QuerySingle<DocumentField>(sql, new { DocumentId = documentId, Sort = sort }, Transaction);
+            if (!string.IsNullOrEmpty(parentId))
+                sql += " and ParentId=@ParentId ";
+            return Connection.QuerySingle<DocumentField>(sql, new { DocumentId = documentId, ParentId = parentId, Sort = sort }, Transaction);
         }
         public IEnumerable<DocumentFieldOption> GetFieldOption(string fieldId)
         {

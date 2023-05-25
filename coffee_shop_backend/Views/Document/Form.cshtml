@@ -6,6 +6,17 @@
     bool isContent = ViewBag.Tab == "1";
     bool isEditMode = ViewBag.IsEditMode is bool ? ViewBag.IsEditMode : false;
     DocumentViewModel model = Model;
+    if (questionPage.AnswerType == (int)AnswerTypeEnum.Panel)
+    {
+        //若編輯狀態下，類別為父題目且底下有子題目，則無法更改類別
+        if (!string.IsNullOrEmpty(questionPage.DocumentFieldId) && questionPage.FieldList.Any(x => x.ParentId == questionPage.DocumentFieldId))
+        {
+            Model.QuestionPage.AnswerTypeList.Clear();
+            Model.QuestionPage.AnswerTypeList.Add(new SelectListItem { Text = EnumHelper.GetDescription(AnswerTypeEnum.Panel), Value = ((int)AnswerTypeEnum.Panel).ToString() });
+        }
+        //父題目不可歸類給自己
+        Model.QuestionPage.ParentFieldList.RemoveAll(x => x.Value == questionPage.DocumentFieldId);
+    }
 }
 @section Scripts {
 <script type="text/javascript" src="~/js/tinymce/tinymce.min.js"></script>
@@ -246,9 +257,9 @@
                     </div>
                 </div>
                 <div class="row mb-2 py-2">
-                    <label for="QuestionPage_ParentFieldList" class="col-sm-auto col-form-label">選擇父題目</label>
+                    <label for="QuestionPage_ParentId" class="col-sm-auto col-form-label">選擇父題目</label>
                     <div class="col-sm-auto">
-                        @Html.DropDownListFor(model => Model.QuestionPage.ParentFieldList, questionPage.ParentFieldList, new { @class = "form-control"})
+                        @Html.DropDownListFor(model => Model.QuestionPage.ParentId, questionPage.ParentFieldList, new { @class = "form-control"})
                     </div>
                 </div>
                 <div class="row mb-2 py-2">
@@ -352,27 +363,53 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in questionPage.FieldList)
-                    {
-                        int count = questionPage.FieldList.Count();
+                    @Html.Partial("_FormPartial",  Model.QuestionPage)
+                    @*                    @foreach (var item in mainFieldList)
+                        {
+                        int count = mainFieldList.Count();
                         <tr>
-                            <td>@item.FieldName</td>
-                            <td>@(EnumHelper.GetDescription((AnswerTypeEnum)item.FieldType))</td>
-                            <td>@item.Sort</td>
-                            <td>
-                                <a class="btn btn-primary" href="@Url.Action("EditField","Document", new { fieldId = item.Id })">編輯</a>
-                                <a class="btn btn-primary" href="@Url.Action("DeleteField","Document", new { fieldId = item.Id })">刪除</a>
-                                @if (item.Sort != 0 && count > 1)
-                                {
-                                    <a class="btn btn-primary" href="@Url.Action("SetFieldSort","Document", new { fieldId = item.Id, direction = true })"><i class="bi bi-arrow-up-circle-fill"></i></a>
-                                }
-                                @if (item.Sort != count - 1 && count > 1)
-                                {
-                                    <a class="btn btn-primary" href="@Url.Action("SetFieldSort","Document", new { fieldId = item.Id, direction = false })"><i class="bi bi-arrow-down-circle-fill"></i></a>
-                                }
-                            </td>
+                        <td>@item.FieldName</td>
+                        <td>@(EnumHelper.GetDescription((AnswerTypeEnum)item.FieldType))</td>
+                        <td>@item.Sort</td>
+                        <td>
+                        <a class="btn btn-primary" href="@Url.Action("EditField","Document", new { fieldId = item.Id })">編輯</a>
+                        @if (item.FieldType != (int)AnswerTypeEnum.Panel || !questionPage.FieldList.Where(x => x.ParentId == item.Id).Any())
+                        {
+                        <a class="btn btn-primary" href="@Url.Action("DeleteField","Document", new { fieldId = item.Id })">刪除</a>
+                        }
+                        @if (item.Sort != 0 && count > 1)
+                        {
+                        <a class="btn btn-primary" href="@Url.Action("SetFieldSort","Document", new { fieldId = item.Id, direction = true })"><i class="bi bi-arrow-up-circle-fill"></i></a>
+                        }
+                        @if (item.Sort != count - 1 && count > 1)
+                        {
+                        <a class="btn btn-primary" href="@Url.Action("SetFieldSort","Document", new { fieldId = item.Id, direction = false })"><i class="bi bi-arrow-down-circle-fill"></i></a>
+                        }
+                        </td>
                         </tr>
-                    }
+                        var subList = subFieldList.Where(x => x.ParentId == item.Id).OrderBy(x => x.Sort);
+                        @foreach (var subItem in subList)
+                        {
+                        int subCount = subList.Count();
+                        <tr>
+                        <td>--- @subItem.FieldName</td>
+                        <td>--- @(EnumHelper.GetDescription((AnswerTypeEnum)subItem.FieldType))</td>
+                        <td>--- @subItem.Sort</td>
+                        <td>
+                        <a class="btn btn-primary" href="@Url.Action("EditField","Document", new { fieldId = subItem.Id })">編輯</a>
+                        <a class="btn btn-primary" href="@Url.Action("DeleteField","Document", new { fieldId = subItem.Id })">刪除</a>
+                        @if (subItem.Sort != 0 && subCount > 1)
+                        {
+                        <a class="btn btn-primary" href="@Url.Action("SetFieldSort","Document", new { fieldId = subItem.Id, direction = true })"><i class="bi bi-arrow-up-circle-fill"></i></a>
+                        }
+                        @if (subItem.Sort != subCount - 1 && subCount > 1)
+                        {
+                        <a class="btn btn-primary" href="@Url.Action("SetFieldSort","Document", new { fieldId = subItem.Id, direction = false })"><i class="bi bi-arrow-down-circle-fill"></i></a>
+                        }
+                        </td>
+                        </tr>
+                        }
+                        }*@
                 </tbody>
             </table>
         </div>

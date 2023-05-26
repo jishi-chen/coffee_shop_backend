@@ -5,21 +5,8 @@ namespace coffee_shop_backend.ViewModels
 {
     public class DocumentViewModel
     {
-        public DocumentInfoPage InfoPage { get; set; } = new DocumentInfoPage();
+        public Document InfoPage { get; set; } = new Document();
         public DocumentQuestionPage QuestionPage { get; set; } = new DocumentQuestionPage();
-    }
-
-    public class DocumentInfoPage
-    {
-        public string? Id { get; set; } = string.Empty;
-        public string CsId { get; set; } = string.Empty;
-        public string Caption { get; set; } = null!;
-        public bool IsEnabled { get; set; }
-        public int Sort { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public string? HeadText { get; set; }
-        public string? FooterText { get; set; }
     }
     public class DocumentQuestionPage
     {

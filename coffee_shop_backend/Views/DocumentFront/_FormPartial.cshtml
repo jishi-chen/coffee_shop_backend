@@ -1,0 +1,232 @@
+﻿@model DocumentFormViewModel
+@{
+    string fileFolder = $"~/wwwroot/upload/document";
+    string optionalItemText = "(選填)";
+    string requiredItemText = "(必填)";
+    var baseList = new List<DocumentFieldViewModel>();
+    int index = 1;
+    if (Model.Fields.Any())
+    {
+        var parentId = Model.Fields.First().ParentId;
+        baseList = Model.Fields.Where(x => x.ParentId == parentId).OrderBy(x => x.Sort).ToList();
+        Model.Fields.RemoveAll(x => x.ParentId == parentId);
+    }
+}
+
+<table class="table table-striped table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+    <thead>
+        <tr>
+            <th scope="col" width="8%">序號</th>
+            <th scope="col" width="77%">內容</th>
+            <th scope="col" width="15%">補充說明</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in baseList)
+        {
+            <tr>
+                <td>@index</td>
+                <td>
+                    @switch (item.FieldType)
+                    {
+                        case AnswerTypeEnum.Panel:
+                            <div class="row">
+                                <h3>@item.FieldName</h3>
+                                @{
+                                    Model.Fields = Model.Fields.OrderByDescending(x => x.ParentId == item.Id).ToList();
+                                }
+                                @Html.Partial("_FormPartial", Model)
+                            </div>
+                            break;
+                        case AnswerTypeEnum.Email:
+                        case AnswerTypeEnum.SingleLine:
+                        case AnswerTypeEnum.Identity:
+                            <div class="row">
+                                <label for="@item.Id">
+                                    @item.FieldName
+                                    <abbr class="text-nowrap">@(item.IsRequired?requiredItemText:optionalItemText)</abbr>
+                                </label>
+                                <div class="form-group">
+                                    <div class="row g-2">
+                                        <div class="col-md-10">
+                                            <input id="@item.Id" name="@item.Id" class="form-control" type="text" placeholder="@("請輸入" + item.FieldName + (item.IsRequired ? "(必填)" : ""))" @(item.WordLimit == 0 ? "" : "maxlength=" + item.WordLimit + "") value="@item.Value">
+                                        </div>
+                                    </div>
+                                    <small class="text-danger">@item.Note</small>
+                                    @if (Model.ValidResults.ContainsKey(item.Id.ToString()))
+                                    {
+                                        <div class="invalid-feedback" style="display: block;" asp-validation-for="@item.Id">@Model.ValidResults[item.Id.ToString()]</div>
+                                    }
+                                </div>
+                            </div>
+                            break;
+                        case AnswerTypeEnum.MultiLine:
+                            <div class="row">
+                                <label for="@item.Id">
+                                    @item.FieldName
+                                    <abbr class="text-nowrap">@(item.IsRequired?requiredItemText:optionalItemText)</abbr>
+                                </label>
+                                <div class="form-group">
+                                    <div class="row g-2">
+                                        <div class="col col-lg-10">
+                                            <textarea class="form-control" id="@item.Id" name="@item.Id" rows="@item.RowLimit" placeholder="@("請輸入" + item.FieldName + (item.IsRequired ? "(必填)" : ""))">@item.Value</textarea>
+                                        </div>
+                                    </div>
+                                    <small class="text-danger">@item.Note</small>
+                                    @if (Model.ValidResults.ContainsKey(item.Id.ToString()))
+                                    {
+                                        <div class="invalid-feedback" style="display: block;" asp-validation-for="@item.Id">@Model.ValidResults[item.Id.ToString()]</div>
+                                    }
+                                </div>
+                            </div>
+                            break;
+                        case AnswerTypeEnum.SingleChoice:
+                            <fieldset class="row">
+                                <legend class="col-form-label">
+                                    @item.FieldName
+                                    <abbr class="text-nowrap">@(item.IsRequired?requiredItemText:optionalItemText)</abbr>
+                                </legend>
+                                <div class="form-group">
+                                    <div class="row g-2">
+                                        <div class="col-xl-11">
+                                            @foreach (var option in item.Options.OrderBy(x => x.Sort))
+                                            {
+                                                <div class="d-inline-flex">
+                                                    <div class="col-auto form-check form-check-inline">
+                                                        <input type="radio" id="@option.Id" name="@item.Id" class="form-check-input" value="@option.Id" @(item.Value == option.Id.ToString() ? "checked='checked'" : "")>
+                                                        <label class="form-check-label" for="@option.Id">@option.OptionName</label>
+                                                    </div>
+                                                    @if (option.MemoType != MemoTypeEnum.None)
+                                                    {
+                                                        string showText = option.MemoType == MemoTypeEnum.Normal ? optionalItemText : option.MemoType == MemoTypeEnum.Required ? requiredItemText : "";
+                                                        <div class="d-flex">
+                                                            <label style="display: none;" for="@(option.Id + "_memo"+option.OptionName)">@option.OptionName</label>
+                                                            <input type="text" class="form-control" id="@(option.Id + "_memo"+option.OptionName)" name="@(option.Id + "_memo" + option.OptionName)" value="@(item.Value == option.Id.ToString() ? item.MemoValue : "")" placeholder="@showText" onchange="MemoChange('@option.Id')">
+                                                        </div>
+                                                    }
+                                                </div>
+                                                if (Model.ValidResults.ContainsKey(option.Id + "_memo" + option.OptionName))
+                                                {
+                                                    <div class="invalid-feedback" style="display: block;" asp-validation-for="@item.Id">@Model.ValidResults[option.Id + "_memo" + option.OptionName]</div>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                    <small class="text-danger">@item.Note</small>
+                                    @if (Model.ValidResults.ContainsKey(item.Id.ToString()))
+                                    {
+                                        <div class="invalid-feedback" style="display: block;" asp-validation-for="@item.Id">@Model.ValidResults[item.Id.ToString()]</div>
+                                    }
+                                </div>
+                            </fieldset>
+                            break;
+                        case AnswerTypeEnum.MultipleChoice:
+                            <fieldset class="row">
+                                <legend class="col-form-label">
+                                    @item.FieldName
+                                    <abbr class="text-nowrap">@(item.IsRequired?requiredItemText:optionalItemText)</abbr>
+                                </legend>
+                                <div class="form-group">
+                                    <div class="row g-2">
+                                        <div class="col-xl-11">
+                                            @foreach (var option in item.Options.OrderBy(x => x.Sort))
+                                            {
+                                                <div class="d-inline-flex">
+                                                    <div class="col-auto form-check form-check-inline">
+                                                        <input type="checkbox" id="@option.Id" name="@item.Id" class="form-check-input" value="@option.Id" @(!string.IsNullOrWhiteSpace(item.Value) && item.Value.Contains(option.Id.ToString()) ? "checked='checked'" : "")>
+                                                        <label class="form-check-label" for="@option.Id">@option.OptionName</label>
+                                                    </div>
+                                                    @if (option.MemoType != MemoTypeEnum.None)
+                                                    {
+                                                        string showText = option.MemoType == MemoTypeEnum.Normal ? optionalItemText : option.MemoType == MemoTypeEnum.Required ? requiredItemText : "";
+                                                        <div class="d-flex">
+                                                            <label style="display: none;" for="@(option.Id + "_memo"+option.OptionName)">@option.OptionName</label>
+                                                            <input type="text" class="form-control" id="@(option.Id + "_memo"+option.OptionName)" name="@(option.Id + "_memo"+option.OptionName)" value="@(item.Value == option.Id.ToString() ? item.MemoValue : "")" placeholder="@showText" onchange="MemoChange('@option.Id')">
+                                                        </div>
+                                                    }
+                                                </div>
+                                                if (Model.ValidResults.ContainsKey(option.Id + "_memo" + option.OptionName))
+                                                {
+                                                    <div class="invalid-feedback" style="display: block;" asp-validation-for="@item.Id">@Model.ValidResults[option.Id + "_memo" + option.OptionName]</div>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                    <small class="text-danger">@item.Note</small>
+                                    @if (Model.ValidResults.ContainsKey(item.Id.ToString()))
+                                    {
+                                        <div class="invalid-feedback" style="display: block;" asp-validation-for="@item.Id">@Model.ValidResults[item.Id.ToString()]</div>
+                                    }
+                                </div>
+                            </fieldset>
+                            break;
+                        case AnswerTypeEnum.DropDownList:
+                            <div class="row">
+                                <label for="@item.Id" class="col-form-label">
+                                    @item.FieldName
+                                    <abbr class="text-nowrap ms-1">@(item.IsRequired?requiredItemText:optionalItemText)</abbr>
+                                </label>
+                                <div class="form-group">
+                                    <div class="row g-2">
+                                        <div class="col-md-8">
+                                            <select class="form-select" id="@item.Id" name="@item.Id">
+                                                <option value="">請選擇</option>
+                                                @foreach (var option in item.Options.OrderBy(x => x.Sort))
+                                                {
+                                                    <!option value="@option.Id" @(item.Value == option.Id.ToString() ? "selected='selected'" : "")>@option.OptionName</!option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <small class="text-danger">@item.Note</small>
+                                    @if (Model.ValidResults.ContainsKey(item.Id.ToString()))
+                                    {
+                                        <div class="invalid-feedback" style="display: block;" asp-validation-for="@item.Id">@Model.ValidResults[item.Id.ToString()]</div>
+                                    }
+                                </div>
+                            </div>
+                            break;
+                        case AnswerTypeEnum.File:
+                            <div class="row">
+                                <div class="col-form-label">
+                                    @item.FieldName
+                                    <abbr class="text-nowrap ms-1">@(item.IsRequired?requiredItemText:optionalItemText)</abbr>
+                                </div>
+                                <div class="form-group">
+                                    <div class="row g-2">
+                                        <div class="col-md-8">
+                                            @if (!string.IsNullOrWhiteSpace(item.Value))
+                                            {
+                                                string[] fileNames = item.Value.Split(';');
+                                                string fileName = fileNames[0];
+                                                string newFileName = fileNames[1];
+                                                <a href="@(fileFolder + newFileName)" class="btn btn-info rounded-0 mx-1" target="_blank">@fileName</a>
+                                                <br />
+                                                <br />
+                                            }
+                                            <label for="@item.Id" >@item.FieldName</label>
+                                            <input id="@item.Id" name="@item.Id" class="form-control-file mb-2" type="file" aria-labelledby="@item.Id">
+                                        </div>
+                                    </div>
+                                    <small class="d-block text-danger mt-2">@(item.FileSizeLimit == 0 ? "" : "檔案大小限制" + item.FileSizeLimit + "MB以內") @(string.IsNullOrEmpty(item.FileExtension)?"":" 支援"+item.FileExtension)</small>
+                                    <small class="text-danger">@item.Note</small>
+                                    @if (Model.ValidResults.ContainsKey(item.Id.ToString()))
+                                    {
+                                        <div class="invalid-feedback" style="display: block;" asp-validation-for="@item.Id">@Model.ValidResults[item.Id.ToString()]</div>
+                                    }
+                                </div>
+                            </div>
+                            break;
+                    }
+                </td>
+                <td>
+                    @if (item.FieldType != AnswerTypeEnum.Panel)
+                    {
+                        <textarea class="form-control" name="@(item.Id + "_remark")" cols="40" rows="8">@item.Remark</textarea>
+                    }
+                </td>
+            </tr>
+            index++;
+        }
+    </tbody>
+</table>

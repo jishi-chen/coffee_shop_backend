@@ -364,52 +364,6 @@
                 </thead>
                 <tbody>
                     @Html.Partial("_FormPartial",  Model.QuestionPage)
-                    @*                    @foreach (var item in mainFieldList)
-                        {
-                        int count = mainFieldList.Count();
-                        <tr>
-                        <td>@item.FieldName</td>
-                        <td>@(EnumHelper.GetDescription((AnswerTypeEnum)item.FieldType))</td>
-                        <td>@item.Sort</td>
-                        <td>
-                        <a class="btn btn-primary" href="@Url.Action("EditField","Document", new { fieldId = item.Id })">編輯</a>
-                        @if (item.FieldType != (int)AnswerTypeEnum.Panel || !questionPage.FieldList.Where(x => x.ParentId == item.Id).Any())
-                        {
-                        <a class="btn btn-primary" href="@Url.Action("DeleteField","Document", new { fieldId = item.Id })">刪除</a>
-                        }
-                        @if (item.Sort != 0 && count > 1)
-                        {
-                        <a class="btn btn-primary" href="@Url.Action("SetFieldSort","Document", new { fieldId = item.Id, direction = true })"><i class="bi bi-arrow-up-circle-fill"></i></a>
-                        }
-                        @if (item.Sort != count - 1 && count > 1)
-                        {
-                        <a class="btn btn-primary" href="@Url.Action("SetFieldSort","Document", new { fieldId = item.Id, direction = false })"><i class="bi bi-arrow-down-circle-fill"></i></a>
-                        }
-                        </td>
-                        </tr>
-                        var subList = subFieldList.Where(x => x.ParentId == item.Id).OrderBy(x => x.Sort);
-                        @foreach (var subItem in subList)
-                        {
-                        int subCount = subList.Count();
-                        <tr>
-                        <td>--- @subItem.FieldName</td>
-                        <td>--- @(EnumHelper.GetDescription((AnswerTypeEnum)subItem.FieldType))</td>
-                        <td>--- @subItem.Sort</td>
-                        <td>
-                        <a class="btn btn-primary" href="@Url.Action("EditField","Document", new { fieldId = subItem.Id })">編輯</a>
-                        <a class="btn btn-primary" href="@Url.Action("DeleteField","Document", new { fieldId = subItem.Id })">刪除</a>
-                        @if (subItem.Sort != 0 && subCount > 1)
-                        {
-                        <a class="btn btn-primary" href="@Url.Action("SetFieldSort","Document", new { fieldId = subItem.Id, direction = true })"><i class="bi bi-arrow-up-circle-fill"></i></a>
-                        }
-                        @if (subItem.Sort != subCount - 1 && subCount > 1)
-                        {
-                        <a class="btn btn-primary" href="@Url.Action("SetFieldSort","Document", new { fieldId = subItem.Id, direction = false })"><i class="bi bi-arrow-down-circle-fill"></i></a>
-                        }
-                        </td>
-                        </tr>
-                        }
-                        }*@
                 </tbody>
             </table>
         </div>

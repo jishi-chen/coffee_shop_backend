@@ -26,19 +26,19 @@ namespace coffee_shop_backend.Controllers
         [Route("Index")]
         public IActionResult Index()
         {
-            var model = _unitOfWork.DocumentRepository.GetAdminList();
+            var model = _unitOfWork.DocumentRepository.GetAdminList(null);
             _unitOfWork.Dispose();
             return View(model);
         }
 
         [Route("Form")]
-        public IActionResult Form(string id, string parentId, string tab)
+        public IActionResult Form(string id, string tab)
         {
             DocumentViewModel model = new DocumentViewModel();
             if (!string.IsNullOrEmpty(id))
             {
-                model.InfoPage = _unitOfWork.DocumentRepository.GetInfoPage(id);
-                model.QuestionPage.FieldList = _unitOfWork.DocumentRepository.GetQuestionFieldList(id).ToList();
+                model.InfoPage = _unitOfWork.DocumentRepository.GetDocument(id);
+                model.QuestionPage.FieldList = _unitOfWork.DocumentRepository.GetFieldList(id).ToList();
                 var parentList = model.QuestionPage.FieldList.Where(x => x.FieldType == (int)AnswerTypeEnum.Panel).Select(x => new SelectListItem
                 {
                     Text = x.FieldName,
@@ -101,7 +101,7 @@ namespace coffee_shop_backend.Controllers
                     _unitOfWork.DocumentRepository.UpdateDocument(document);
                     _unitOfWork.Complete();
                 }
-                return RedirectToAction("Form", new { id = model.InfoPage.Id, tab = "0" } );
+                return RedirectToAction("Index");
             }
         }
 
@@ -375,7 +375,7 @@ namespace coffee_shop_backend.Controllers
 
         public void ResetFieldSort(string documentId, string parentId)
         {
-            IEnumerable<DocumentField> fields = _unitOfWork.DocumentRepository.GetQuestionFieldList(documentId, parentId);
+            IEnumerable<DocumentField> fields = _unitOfWork.DocumentRepository.GetFieldList(documentId, parentId);
             int q = 0;
             foreach (var item in fields)
             {

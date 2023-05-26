@@ -1,0 +1,22 @@
+﻿@model DocumentFormViewModel
+@{
+    string fileFolder = $"/wwwroot/";
+    string optionalItemText = "(選填)";
+}
+
+<h4>@Model.Caption</h4>
+
+<div>@Html.Raw(Model.HeadText)</div>
+
+<div class="container">
+    @using (Html.BeginForm("Form", "DocumentFront", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        @if (Model != null && Model.Fields != null && Model.Fields.Any())
+        {
+            @Html.Partial("_FormPartial",  Model)
+        }
+        <button class="btn btn-secondary" type="submit">送出</button>
+    }
+</div>
+<div>@Html.Raw(Model.FooterText)</div>

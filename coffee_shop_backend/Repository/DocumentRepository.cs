@@ -13,22 +13,24 @@ namespace coffee_shop_backend.Repository
         {
         }
 
-        public IEnumerable<Document> GetAdminList()
+        public IEnumerable<Document> GetAdminList(bool? isEnabled)
         {
             string sql = $@" select * from Documents ";
-            return Connection.Query<Document>(sql, new { }, Transaction);
+            if (isEnabled.HasValue)
+                sql += " where IsEnabled=@IsEnabled ";
+            return Connection.Query<Document>(sql, new { IsEnabled = isEnabled }, Transaction);
         }
-        public DocumentInfoPage GetInfoPage(string documentId)
+        public Document GetDocument(string documentId)
         {
             string sql = $@" select * from Documents where Id=@Id ";
-            return Connection.QuerySingle<DocumentInfoPage>(sql, new { Id = documentId }, Transaction);
+            return Connection.QuerySingle<Document>(sql, new { Id = documentId }, Transaction);
         }
-        public IEnumerable<DocumentField> GetQuestionFieldList(string documentId)
+        public IEnumerable<DocumentField> GetFieldList(string documentId)
         {
             string sql = $@" select * from DocumentFields where DocumentId=@DocumentId order by Sort ";
             return Connection.Query<DocumentField>(sql, new { DocumentId = documentId }, Transaction);
         }
-        public IEnumerable<DocumentField> GetQuestionFieldList(string documentId, string parentId)
+        public IEnumerable<DocumentField> GetFieldList(string documentId, string parentId)
         {
             string sql = $@" select * from DocumentFields where DocumentId=@DocumentId ";
             if (!string.IsNullOrEmpty(parentId))

@@ -5,10 +5,10 @@ namespace coffee_shop_backend.Interface
 {
     public interface IDocumentRepository : IGenericRepository
     {
-        IEnumerable<Document> GetAdminList();
-        DocumentInfoPage GetInfoPage(string documentId);
-        IEnumerable<DocumentField> GetQuestionFieldList(string documentId);
-        IEnumerable<DocumentField> GetQuestionFieldList(string documentId, string parentId);
+        IEnumerable<Document> GetAdminList(bool? isEnabled);
+        Document GetDocument(string documentId);
+        IEnumerable<DocumentField> GetFieldList(string documentId);
+        IEnumerable<DocumentField> GetFieldList(string documentId, string parentId);
         void InsertDocument(Document document);
         void UpdateDocument(Document document);
         int InsertDocumentField(DocumentField field);

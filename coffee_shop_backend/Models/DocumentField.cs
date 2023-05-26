@@ -7,7 +7,7 @@ namespace coffee_shop_backend.Models
     {
         public string Id { get; set; } = string.Empty;
         public string? ParentId { get; set; }
-        public string DocumentId { get; set; }
+        public string DocumentId { get; set; } = null!;
         public string FieldName { get; set; } = null!;
         public string? Note { get; set; }
         public byte FieldType { get; set; }

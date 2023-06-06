@@ -1,5 +1,6 @@
 ﻿using coffee_shop_backend.Enums;
 using coffee_shop_backend.Interface;
+using coffee_shop_backend.Models;
 using coffee_shop_backend.Utility;
 using coffee_shop_backend.ViewModels;
 
@@ -13,7 +14,7 @@ namespace coffee_shop_backend.Services
             this._unitOfWork = unitOfWork;
         }
 
-        public void FieldDataCheck(IFormCollection collection, IEnumerable<DocumentFieldViewModel> fieldList, Dictionary<string, string> validResultList)
+        public void FieldDataCheck(IFormCollection collection, IEnumerable<DocumentFieldViewModel> fieldList, Dictionary<string, string> validResultList, string recordId)
         {
 
             foreach (var field in fieldList)
@@ -88,17 +89,19 @@ namespace coffee_shop_backend.Services
                         break;
                     case AnswerTypeEnum.File:
                         IFormFile file = collection.Files[field.Id.ToString()]!;
-                        if (field.IsRequired)
+                        if ((file == null || file.Length <= 0) && field.IsRequired)
                         {
-                            if (file == null || file.Length <= 0)
+                            if (!FileExistCheck(ref data, field.Id, recordId))
                             {
-                                //if (!FileCheckExists(ref data, field.ID, recordID))
-                                //{
-                                //    errMsg = $"請上傳{field.FieldName}";
-                                //}
+                                errMsg = $"請上傳{field.FieldName}";
                             }
-                            //else if (file != null && file.Length > 0)
-                                //FileFormatCheck(fileFormat, field, ref data, ref errMsg, postedFile);
+                        }
+                        else if (file != null && file.Length > 0)
+                        {
+                            if (FileFormatCheck(field, ref errMsg, file))
+                            {
+                                data = GetFileName(file);
+                            }
                         }
                         break;
                 }
@@ -111,44 +114,160 @@ namespace coffee_shop_backend.Services
         }
 
 
-        public void Create(QuestionDetailViewModel viewModel)
+        public void Create(DocumentFormViewModel model, string recordId, IFormFileCollection fileCollection)
         {
-            try
-            {
-                
-            }
-            catch (Exception ex)
-            {
-
-            }
-        }
-
-        public void CreateFieldData(QuestionDetailViewModel viewModel, Guid applicationRecordID)
-        {
-            string fileFolder = "";
-
-            foreach (var item in viewModel.Questions)
+            foreach (var item in model.Fields)
             {
                 if (string.IsNullOrWhiteSpace(item.Value))
                     continue;
 
+                DocumentRecord record = new DocumentRecord
+                {
+                    RegId = recordId,
+                    DocumentId = model.Id,
+                    DocumentFieldId = item.Id,
+                    FilledText = item.Value,
+                    MemoText = item.MemoValue,
+                    Remark = item.Remark,
+                };
+                _unitOfWork.DocumentRepository.InsertDocumentRecord(record, recordId);
+
                 if (item.FieldType == AnswerTypeEnum.File && !string.IsNullOrWhiteSpace(item.Value))
                 {
                     string[] fileNames = item.Value.Split(';');
-                    string newFileName = fileNames[1];
-
-                    string tempFilePath = Path.Combine($"{fileFolder}/Temp", newFileName);
-                    if (File.Exists(tempFilePath))
-                        File.Move(tempFilePath, Path.Combine(fileFolder, newFileName));
+                    if (fileNames!= null && fileNames.Length > 0)
+                    {
+                        IFormFile file = fileCollection[item.Id.ToString()]!;
+                        FileUpload(file, fileNames[1]);
+                    }
                 }
             }
         }
 
+        #region 檔案上傳
 
-        //public List<RecordViewModel> GetData(string regId, string applicationId)
-        //{
+        /// <summary>
+        /// 檢查檔案已存在
+        /// </summary>
+        private bool FileExistCheck(ref string data, string fieldID, string recordId)
+        {
+            if (!string.IsNullOrEmpty(recordId))
+            {
+                var fileField = _unitOfWork.DocumentRepository.GetDocumentRecord(fieldID, recordId);
+                if (fileField != null)
+                {
+                    data = fileField.FilledText!;
+                    return true;
+                }
+            }
+            return false;
+        }
 
-           
-        //}
+        /// <summary>
+        /// 檢查副檔名
+        /// </summary>
+        private bool FileFormatCheck(DocumentFieldViewModel field, ref string errMsg, IFormFile postedFile)
+        {
+            double kb = Math.Round((double)(postedFile.Length / 1024), 2);
+            double mb = Math.Round(kb / 1024, 2);  //length/1024 => k k/1024 => m
+
+            var fileExtension = Path.GetExtension(postedFile.FileName);
+            if (!string.IsNullOrEmpty(field.FileExtension) && !field.FileExtension.Contains(fileExtension))
+            {
+                errMsg = $"檔案不允許上傳{fileExtension}格式";
+                return false;
+            }
+            else if (field.FileSizeLimit != 0 && field.FileSizeLimit < mb)
+            {
+                errMsg = $"{field.FieldName}檔案太大，請上傳{ field.FileSizeLimit}MB以內的檔案";
+                return false;
+            }
+            else
+                return true;
+        }
+        /// <summary>
+        /// 取得新檔案名稱
+        /// </summary>
+        public string GetFileName(IFormFile file)
+        {
+            if (file != null && (file.Length > 0))
+            {
+                string fileName = Path.GetFileName(file.FileName);
+                string fileExt = Path.GetExtension(fileName);
+                string newfileName = Guid.NewGuid().ToString() + fileExt;
+                return fileName + ";" + newfileName;
+            }
+            return "";
+        }
+
+        /// <summary>
+        /// 上傳檔案
+        /// </summary>
+        public void FileUpload(IFormFile file, string fileName)
+        {
+            string fileFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "documents");
+            if (!Directory.Exists(fileFolder))
+                Directory.CreateDirectory(fileFolder);
+
+            if (file != null && (file.Length > 0))
+            {
+                var filePath = Path.Combine(fileFolder, fileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    file.CopyTo(stream);
+                }
+            }
+        }
+
+        #endregion
+
+        public List<DocumentRecordViewModel> GetRecordData(string regId, string documentId)
+        {
+            IEnumerable<DocumentRecordViewModel> data = _unitOfWork.DocumentRepository.GetDocumentRecordData(regId, documentId);
+
+            foreach (var item in data)
+            {
+                switch (item.FieldType)
+                {
+                    case (byte)AnswerTypeEnum.Panel:
+                        break;
+                    case (byte)AnswerTypeEnum.SingleLine:
+                    case (byte)AnswerTypeEnum.MultiLine:
+                    case (byte)AnswerTypeEnum.Email:
+                    case (byte)AnswerTypeEnum.Identity:
+                    case (byte)AnswerTypeEnum.DateObjcet:
+                    case (byte)AnswerTypeEnum.File:
+                        item.Value = item.FilledText;
+                        break;
+                    case (byte)AnswerTypeEnum.Address:
+                        item.Value = item.FilledText.Replace(";", "");
+                        break;
+                    case (byte)AnswerTypeEnum.DropDownList:
+                    case (byte)AnswerTypeEnum.SingleChoice:
+                        var option = _unitOfWork.DocumentRepository.GetFieldOption(item.FilledText, "");
+                        item.Value = option == null ? "" : option.OptionName;
+                        break;
+                    case (byte)AnswerTypeEnum.MultipleChoice:
+                        string[] optionIDList = item.FilledText.Split(',');
+                        string[] memoList = item.MemoValue.Split(',');
+                        List<string> optionNames = new List<string>();
+                        int index = 0;
+                        foreach (string optionID in optionIDList)
+                        {
+                            var optionForMultiple = _unitOfWork.DocumentRepository.GetFieldOption(optionID, "");
+                            if (memoList.Length > 1 && !string.IsNullOrWhiteSpace(memoList[index]))
+                            {
+                                optionForMultiple.OptionName += " (" + memoList[index] + ")";
+                            }
+                            optionNames.Add(optionForMultiple == null ? "" : optionForMultiple.OptionName);
+                            index++;
+                        }
+                        item.MemoValue = "";
+                        item.Value = string.Join("、", optionNames.ToArray());
+                        break;
+                }
+            }
+            return data.ToList();
+        }
     }
 }

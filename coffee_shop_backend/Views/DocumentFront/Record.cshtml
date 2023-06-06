@@ -1,9 +1,10 @@
-﻿@model List<RecordViewModel>
+﻿@model List<DocumentRecordViewModel>
+@using System.IO
 @{
-    ViewData["Title"] = "Record";
+    string fileFolder = "/documents/";
 }
 
-<h1>Record</h1>
+<h1>問卷結果</h1>
 
 @if (Model != null && Model.Any()){
      foreach (var item in Model)
@@ -26,8 +27,7 @@
                                         string[] fileNames = item.Value.Split(';');
                                         string fileName = fileNames[0];
                                         string newFileName = fileNames[1];
-
-                                        //<a href="@(Path.Combine(fileFolder,newFileName))" target="_blank">@fileName</a>
+                                        <a href="@(fileFolder + newFileName)" target="_blank">@fileName</a>
                                     }
                                 }
                                 else

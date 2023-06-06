@@ -18,7 +18,12 @@ namespace coffee_shop_backend.Interface
         DocumentField GetDocumentField(string fieldId);
         DocumentField GetDocumentField(string documentId,string parentId, int sort);
         IEnumerable<DocumentFieldOption> GetFieldOption(string fieldId);
+        DocumentFieldOption GetFieldOption(string optionId, string fieldId);
         void DeleteField(string fieldId);
         void UpdateFieldSort(IEnumerable<DocumentField> fields);
+        DocumentRecord? GetDocumentRecord(string fieldId, string recordId);
+        IEnumerable<DocumentRecord> GetDocumentRecord(string recordId);
+        IEnumerable<DocumentRecordViewModel> GetDocumentRecordData(string recordId, string documentId);
+        void InsertDocumentRecord(DocumentRecord record, string recordId);
     }
 }

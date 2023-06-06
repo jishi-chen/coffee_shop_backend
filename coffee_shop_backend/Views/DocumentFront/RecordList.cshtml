@@ -1,0 +1,26 @@
+﻿@model IEnumerable<DocumentRecordListViewModel>
+@{
+    
+}
+
+<h1>問卷結果</h1>
+
+<table class="table table-striped table-bordered table-hover table-responsive" id="dataTable" width="100%" cellspacing="0">
+    <thead class="thead-light">
+        <tr>
+            <th scope="col">註冊ID</th>
+            <th scope="col">問卷單名稱</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any()){
+            foreach(var item in Model)
+            {
+                <tr>
+                    <td><a href="@Url.Action("Record","DocumentFront", new {id = item.RegId, documentId = item.DocumentId })">@item.RegId</a></td>
+                    <td>@item.DocumentName</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

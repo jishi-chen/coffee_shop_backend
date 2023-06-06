@@ -35,6 +35,7 @@ namespace coffee_shop_backend.Controllers
         {
             Document document = _unitOfWork.DocumentRepository.GetDocument(id);
             IEnumerable<DocumentField> fields = _unitOfWork.DocumentRepository.GetFieldList(id).ToList();
+            IEnumerable<DocumentRecord> record = _unitOfWork.DocumentRepository.GetDocumentRecord(recordId);
             DocumentFormViewModel model = new DocumentFormViewModel()
             {
                 Id = document.Id!,
@@ -75,6 +76,17 @@ namespace coffee_shop_backend.Controllers
                         dfvm.Options.Add(dfovm);
                     }
                 }
+                //修改
+                if (record.Count() > 0)
+                {
+                    var doc = record.FirstOrDefault(x => x.DocumentFieldId == field.Id);
+                    if (doc != null)
+                    {
+                        dfvm.Value = doc.FilledText;
+                        dfvm.MemoValue = doc.MemoText;
+                        dfvm.Remark = doc.Remark;
+                    }
+                }
                 model.Fields.Add(dfvm);
             }
             _unitOfWork.Dispose();
@@ -88,22 +100,58 @@ namespace coffee_shop_backend.Controllers
         [HttpPost]
         [Route("Form")]
         [ValidateAntiForgeryToken]
-        public IActionResult Form(DocumentFormViewModel model, IFormCollection collection)
+        public IActionResult Form(IFormCollection collection)
         {
             if (TempData.Peek(sessionName) is string jsonText)
             {
-                model = JsonConvert.DeserializeObject<DocumentFormViewModel>(jsonText)!;
-                new DocumentAPI(_unitOfWork).FieldDataCheck(collection, model.Fields, model.ValidResults);
+                DocumentFormViewModel model = JsonConvert.DeserializeObject<DocumentFormViewModel>(jsonText)!;
+                new DocumentAPI(_unitOfWork).FieldDataCheck(collection, model.Fields, model.ValidResults, string.Empty);
                 if (model.ValidResults.Count == 0)
                 {
-                    //new DocumentAPI(_unitOfWork).Create(model);
+                    //取得暫時的recordId
+                    string recordId = "0";
+                    var record = _unitOfWork.DocumentRepository.GetDocumentRecord("").OrderByDescending(x => x.RegId).FirstOrDefault();
+                    if (record != null)
+                        recordId = (int.Parse(record.RegId) + 1).ToString();
+                    //
+                    new DocumentAPI(_unitOfWork).Create(model, recordId, collection.Files);
                 }
-                return View(model);
+                _unitOfWork.Complete();
+                return RedirectToAction("Index");
             }
             else
             {
                 return RedirectToAction("Index");
             }
+        }
+
+        [HttpGet]
+        [Route("RecordList")]
+        public IActionResult RecordList()
+        {
+            List<DocumentRecordListViewModel> model = new List<DocumentRecordListViewModel>();
+            var record = _unitOfWork.DocumentRepository.GetDocumentRecord("");
+            if (record.Count() > 0)
+            {
+                model = record.Select(x => new DocumentRecordListViewModel()
+                {
+                    RegId = x.RegId,
+                    DocumentId = x.DocumentId,
+                    DocumentName = _unitOfWork.DocumentRepository.GetDocument(x.DocumentId).Caption, 
+                }).ToList();
+            }
+            _unitOfWork.Dispose();
+            return View(model);
+        }
+
+        [HttpGet]
+        [Route("Record")]
+        public IActionResult Record(string id, string documentId)
+        {
+            List<DocumentRecordViewModel> model = new List<DocumentRecordViewModel>();
+            model = new DocumentAPI(_unitOfWork).GetRecordData(id, documentId);
+            _unitOfWork.Dispose();
+            return View(model);
         }
     }
 }

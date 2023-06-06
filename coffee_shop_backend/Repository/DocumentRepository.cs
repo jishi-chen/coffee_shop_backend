@@ -106,6 +106,11 @@ values (@DocumentFieldId, @OptionName, @MemoType, @Sort) ";
             string sql = $@" select * from DocumentFieldOptions where DocumentFieldId=@DocumentFieldId ";
             return Connection.Query<DocumentFieldOption>(sql, new { DocumentFieldId = fieldId }, Transaction);
         }
+        public DocumentFieldOption GetFieldOption(string optionId, string fieldId)
+        {
+            string sql = $@" select * from DocumentFieldOptions where Id=@Id ";
+            return Connection.QuerySingle<DocumentFieldOption>(sql, new { Id = optionId }, Transaction);
+        }
         public void DeleteField(string fieldId)
         {
             string sql = $@" delete from DocumentFields where Id=@Id ";
@@ -115,6 +120,37 @@ values (@DocumentFieldId, @OptionName, @MemoType, @Sort) ";
         {
             string sql = $@" update DocumentFields set Sort=@Sort where Id=@Id ";
             Connection.Execute(sql, fields, Transaction);
+        }
+
+        public DocumentRecord? GetDocumentRecord(string fieldId, string recordId)
+        {
+            string sql = $@" select * from DocumentRecords where DocumentFieldId=@DocumentFieldId and RegId=@RegId ";
+            return Connection.QuerySingle<DocumentRecord>(sql, new { DocumentFieldId = fieldId, RegId = recordId }, Transaction);
+        }
+        public IEnumerable<DocumentRecord> GetDocumentRecord(string recordId)
+        {
+            string sql = $@" select * from DocumentRecords where 1=1 ";
+            if (!string.IsNullOrEmpty(recordId))
+                sql += " and RegId=@RegId ";
+            return Connection.Query<DocumentRecord>(sql, new { RegId = recordId }, Transaction);
+        }
+        public IEnumerable<DocumentRecordViewModel> GetDocumentRecordData(string recordId, string documentId)
+        {
+            string sql = $@"
+select df.Id as FieldId, df.FieldName, df.FieldType, df.Sort, df.IsRequired, df.IsEditable, dr.FilledText, dr.MemoText as MemoValue, dr.Remark
+from DocumentRecords dr
+left join DocumentFields df on dr.DocumentFieldId = df.Id
+where dr.RegId=@RegId and dr.DocumentId=@DocumentId
+order by df.Sort asc ";
+
+            return Connection.Query<DocumentRecordViewModel>(sql, new { RegId = recordId, DocumentId = documentId }, Transaction);
+        }
+        public void InsertDocumentRecord(DocumentRecord record, string recordId)
+        {
+            string sql = $@"
+insert into DocumentRecords (RegId, DocumentId, DocumentFieldId, FilledText, MemoText, Remark) 
+values (@RegId, @DocumentId, @DocumentFieldId, @FilledText, @MemoText, @Remark) ";
+            Connection.Execute(sql, record, Transaction);
         }
     }
 }

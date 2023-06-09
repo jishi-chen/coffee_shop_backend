@@ -162,8 +162,8 @@
 
 <nav>
     <div class="nav nav-tabs" id="nav-tab" role="tablist">
-        <button class="nav-link @(isContent?"":"active")" id="nav-base-tab" data-bs-toggle="tab" data-bs-target="#nav-base" type="button" role="tab" aria-controls="nav-base" aria-selected="@(!isContent)">基本資料</button>
-        <button class="nav-link @(isContent?"active":"") @(string.IsNullOrEmpty(infoPage.Id)?"disabled":"")" id="nav-column-tab" data-bs-toggle="tab" data-bs-target="#nav-column" type="button" role="tab" aria-controls="nav-column" aria-selected="@(isContent)">欄位內容</button>
+        <button class="nav-link @(isContent?"":"active")" id="nav-base-tab" data-toggle="tab" data-target="#nav-base" type="button" role="tab" aria-controls="nav-base" aria-selected="@(!isContent)">基本資料</button>
+        <button class="nav-link @(isContent?"active":"") @(string.IsNullOrEmpty(infoPage.Id)?"disabled":"")" id="nav-column-tab" data-toggle="tab" data-target="#nav-column" type="button" role="tab" aria-controls="nav-column" aria-selected="@(isContent)">欄位內容</button>
     </div>
 </nav>
 
@@ -297,7 +297,7 @@
                         @Html.TextBoxFor(model => Model.QuestionPage.FileSizeLimit, new { placeholder = "請輸入檔案大小限制", @class = "form-control", type = "number", min = 0 })
                     </div>
                     <div class="col-sm-9">
-                        <label for="QuestionPage_FileExtension" class="col-sm-auto col-form-label">副檔名限制 (ex: pdf,jpg)</label>
+                        <label for="QuestionPage_FileExtension" class="col-sm-auto col-form-label">副檔名限制 (ex: .pdf,.jpg)</label>
                         @Html.TextBoxFor(model => Model.QuestionPage.FileExtension, new { placeholder = "請輸入副檔名限制", @class = "form-control" })
                     </div>
                 </div>

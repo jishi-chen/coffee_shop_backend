@@ -48,14 +48,32 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Index" asp-action="Logout">登出</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Document" asp-action="Index">文件後台</a>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDocument01" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                文件後台
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDocument01">
+                                <a class="dropdown-item" asp-area="" asp-controller="Document" asp-action="Index">
+                                    文件列表
+                                </a>
+                                <a class="dropdown-item" asp-area="" asp-controller="Document" asp-action="RecordList">
+                                    文件填寫結果
+                                </a>
+                            </div>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="DocumentFront" asp-action="Index">文件前台</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="DocumentFront" asp-action="RecordList">文件結果</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDocument02" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                文件前台
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDocument02">
+                                <a class="dropdown-item" asp-area="" asp-controller="DocumentFront" asp-action="Index">
+                                   文件列表
+                                </a>
+                                <a class="dropdown-item" asp-area="" asp-controller="DocumentFront" asp-action="RecordList">
+                                   文件填寫結果
+                                </a>
+                            </div>
                         </li>
                     </ul>
                 </div>

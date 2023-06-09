@@ -23,6 +23,8 @@ namespace coffee_shop_backend.Interface
         void UpdateFieldSort(IEnumerable<DocumentField> fields);
         DocumentRecord? GetDocumentRecord(string fieldId, string recordId);
         IEnumerable<DocumentRecord> GetDocumentRecord(string recordId);
+        IEnumerable<DocumentRecord> GetDocumentRecord();
+        IEnumerable<DocumentRecord> GetDocumentRecordList();
         IEnumerable<DocumentRecordViewModel> GetDocumentRecordData(string recordId, string documentId);
         void InsertDocumentRecord(DocumentRecord record, string recordId);
     }

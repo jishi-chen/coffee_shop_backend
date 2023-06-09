@@ -1,6 +1,7 @@
 ﻿using coffee_shop_backend.Enums;
 using coffee_shop_backend.Interface;
 using coffee_shop_backend.Models;
+using coffee_shop_backend.Services;
 using coffee_shop_backend.Utility;
 using coffee_shop_backend.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -104,6 +105,36 @@ namespace coffee_shop_backend.Controllers
                 return RedirectToAction("Index");
             }
         }
+
+        [HttpGet]
+        [Route("RecordList")]
+        public IActionResult RecordList()
+        {
+            List<DocumentRecordListViewModel> model = new List<DocumentRecordListViewModel>();
+            var record = _unitOfWork.DocumentRepository.GetDocumentRecordList();
+            if (record.Count() > 0)
+            {
+                model = record.Select(x => new DocumentRecordListViewModel()
+                {
+                    RegId = x.RegId,
+                    DocumentId = x.DocumentId,
+                    DocumentName = _unitOfWork.DocumentRepository.GetDocument(x.DocumentId).Caption,
+                }).ToList();
+            }
+            _unitOfWork.Dispose();
+            return View(model);
+        }
+
+        [HttpGet]
+        [Route("Record")]
+        public IActionResult Record(string id, string documentId)
+        {
+            List<DocumentRecordViewModel> model = new List<DocumentRecordViewModel>();
+            model = new DocumentAPI(_unitOfWork).GetRecordData(id, documentId);
+            _unitOfWork.Dispose();
+            return View(model);
+        }
+
 
         #region 新增/編輯題目
 

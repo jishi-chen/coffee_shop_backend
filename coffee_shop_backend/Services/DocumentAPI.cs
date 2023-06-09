@@ -223,7 +223,7 @@ namespace coffee_shop_backend.Services
 
         public List<DocumentRecordViewModel> GetRecordData(string regId, string documentId)
         {
-            IEnumerable<DocumentRecordViewModel> data = _unitOfWork.DocumentRepository.GetDocumentRecordData(regId, documentId);
+            List<DocumentRecordViewModel> data = _unitOfWork.DocumentRepository.GetDocumentRecordData(regId, documentId).ToList();
 
             foreach (var item in data)
             {
@@ -267,7 +267,7 @@ namespace coffee_shop_backend.Services
                         break;
                 }
             }
-            return data.ToList();
+            return data;
         }
     }
 }

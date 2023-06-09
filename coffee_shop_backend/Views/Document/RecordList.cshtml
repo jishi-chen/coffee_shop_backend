@@ -17,7 +17,7 @@
             foreach(var item in Model)
             {
                 <tr>
-                    <td><a href="@Url.Action("Form","DocumentFront", new {id = item.DocumentId, recordId = item.RegId })">@item.RegId</a></td>
+                    <td><a href="@Url.Action("Record","Document", new {id = item.RegId, documentId = item.DocumentId })">@item.RegId</a></td>
                     <td>@item.DocumentName</td>
                 </tr>
             }

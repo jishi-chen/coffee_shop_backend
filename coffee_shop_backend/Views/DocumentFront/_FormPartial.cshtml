@@ -48,8 +48,8 @@
                                 </label>
                                 <div class="form-group">
                                     <div class="row g-2">
-                                        <div class="col-md-10">
-                                            <input id="@item.Id" name="@item.Id" class="form-control" type="text" placeholder="@("請輸入" + item.FieldName + (item.IsRequired ? "(必填)" : ""))" @(item.WordLimit == 0 ? "" : "maxlength=" + item.WordLimit + "") value="@item.Value">
+                                        <div class="col-lg-11">
+                                            <input id="@item.Id" name="@item.Id" class="form-control" type="text" placeholder="@(item.IsRequired ? "(必填)" : "")" @(item.WordLimit == 0 ? "" : "maxlength=" + item.WordLimit + "") value="@item.Value">
                                         </div>
                                     </div>
                                     <small class="text-danger">@item.Note</small>
@@ -101,7 +101,7 @@
                                                         string showText = option.MemoType == MemoTypeEnum.Normal ? optionalItemText : option.MemoType == MemoTypeEnum.Required ? requiredItemText : "";
                                                         <div class="d-flex">
                                                             <label style="display: none;" for="@(option.Id + "_memo"+option.OptionName)">@option.OptionName</label>
-                                                            <input type="text" class="form-control" id="@(option.Id + "_memo"+option.OptionName)" name="@(option.Id + "_memo" + option.OptionName)" value="@(item.Value == option.Id.ToString() ? item.MemoValue : "")" placeholder="@showText" onchange="MemoChange('@option.Id')">
+                                                            <input type="text" class="form-control" id="@(option.Id + "_memo"+option.OptionName)" name="@(option.Id + "_memo" + option.OptionName)" value="@(option.MemoValue)" placeholder="@showText">
                                                         </div>
                                                     }
                                                 </div>
@@ -141,7 +141,7 @@
                                                         string showText = option.MemoType == MemoTypeEnum.Normal ? optionalItemText : option.MemoType == MemoTypeEnum.Required ? requiredItemText : "";
                                                         <div class="d-flex">
                                                             <label style="display: none;" for="@(option.Id + "_memo"+option.OptionName)">@option.OptionName</label>
-                                                            <input type="text" class="form-control" id="@(option.Id + "_memo"+option.OptionName)" name="@(option.Id + "_memo"+option.OptionName)" value="@(item.Value == option.Id.ToString() ? item.MemoValue : "")" placeholder="@showText" onchange="MemoChange('@option.Id')">
+                                                            <input type="text" class="form-control" id="@(option.Id + "_memo"+option.OptionName)" name="@(option.Id + "_memo"+option.OptionName)" value="@(option.MemoValue)" placeholder="@showText">
                                                         </div>
                                                     }
                                                 </div>

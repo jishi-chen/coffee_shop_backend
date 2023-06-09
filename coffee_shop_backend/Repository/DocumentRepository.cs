@@ -129,19 +129,30 @@ values (@DocumentFieldId, @OptionName, @MemoType, @Sort) ";
         }
         public IEnumerable<DocumentRecord> GetDocumentRecord(string recordId)
         {
-            string sql = $@" select * from DocumentRecords where 1=1 ";
-            if (!string.IsNullOrEmpty(recordId))
-                sql += " and RegId=@RegId ";
+            string sql = $@" select * from DocumentRecords where RegId=@RegId ";
             return Connection.Query<DocumentRecord>(sql, new { RegId = recordId }, Transaction);
+        }
+        public IEnumerable<DocumentRecord> GetDocumentRecord()
+        {
+            string sql = $@" select * from DocumentRecords where 1=1 ";
+            return Connection.Query<DocumentRecord>(sql, new { }, Transaction);
+        }
+        public IEnumerable<DocumentRecord> GetDocumentRecordList()
+        {
+            string sql = $@" select distinct RegId, DocumentId from DocumentRecords where 1=1 ";
+            return Connection.Query<DocumentRecord>(sql, new { }, Transaction);
         }
         public IEnumerable<DocumentRecordViewModel> GetDocumentRecordData(string recordId, string documentId)
         {
             string sql = $@"
-select df.Id as FieldId, df.FieldName, df.FieldType, df.Sort, df.IsRequired, df.IsEditable, dr.FilledText, dr.MemoText as MemoValue, dr.Remark
-from DocumentRecords dr
-left join DocumentFields df on dr.DocumentFieldId = df.Id
-where dr.RegId=@RegId and dr.DocumentId=@DocumentId
-order by df.Sort asc ";
+select df.ParentId, df.Id as FieldId, df.FieldName, df.FieldType, df.Sort, df.IsRequired, df.IsEditable, dr.FilledText, dr.MemoText as MemoValue, dr.Remark
+from
+(select *
+from DocumentRecords
+where RegId=@RegId) dr
+right join DocumentFields df on dr.DocumentFieldId = df.Id
+where df.DocumentId=@DocumentId
+order by df.Sort asc, df.ParentId asc ";
 
             return Connection.Query<DocumentRecordViewModel>(sql, new { RegId = recordId, DocumentId = documentId }, Transaction);
         }

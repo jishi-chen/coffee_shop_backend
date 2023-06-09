@@ -2,6 +2,7 @@
 {
     public class DocumentRecordViewModel
     {
+        public string? ParentId { get; set; }
         public string FieldId { get; set; } = null!;
         public string FieldName { get; set; } = null!;
         public string FilledText { get; set; } = string.Empty;

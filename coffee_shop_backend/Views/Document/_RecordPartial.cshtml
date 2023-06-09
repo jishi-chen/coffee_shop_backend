@@ -1,0 +1,63 @@
+﻿@model List<DocumentRecordViewModel>
+@{
+    string fileFolder = "/documents/";
+    var baseList = new List<DocumentRecordViewModel>();
+    var nextList = new List<DocumentRecordViewModel>();
+    int index = 1;
+    if (Model.Any())
+    {
+        var parentId = Model.First().ParentId;
+        baseList = Model.Where(x => x.ParentId == parentId).OrderBy(x => x.Sort).ToList();
+        Model.RemoveAll(x => x.ParentId == parentId);
+        nextList = Model;
+    }
+}
+
+<table class="table table-striped table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+    <thead>
+        <tr>
+            <th scope="col" width="8%">序號</th>
+            <th scope="col" width="77%">內容</th>
+            <th scope="col" width="15%">補充說明</th>
+        </tr>
+        @foreach (var item in baseList)
+        {
+            <tr>
+                <td>@index</td>
+                <td>
+                    <div class="row">
+                        <div class="font-weight-bold">
+                            @item.FieldName
+                        </div>
+                        @if (item.FieldType == (byte)AnswerTypeEnum.Panel)
+                        {
+                            nextList = nextList.OrderByDescending(x => x.ParentId == item.FieldId).ToList();
+                            @Html.Partial("_RecordPartial",  nextList)
+                        }
+                        else if (item.FieldType == (byte)AnswerTypeEnum.File)
+                        {
+                            if (!string.IsNullOrWhiteSpace(item.Value))
+                            {
+                                string[] fileNames = item.Value.Split(';');
+                                string fileName = fileNames[0];
+                                string newFileName = fileNames[1];
+                                <a href="@(fileFolder + newFileName)" target="_blank">@fileName</a>
+                            }
+                        }
+                        else
+                        {
+                            <div class="row g-2">
+                                <div class="col">
+                                    ：@item.Value @(string.IsNullOrEmpty(item.MemoValue) ? "" : ":"+ item.MemoValue)
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+                </td>
+                <td>@item.Remark</td>
+            </tr>
+            index++;
+        }
+    </thead>
+</table>

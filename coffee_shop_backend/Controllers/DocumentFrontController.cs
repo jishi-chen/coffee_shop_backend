@@ -36,6 +36,7 @@ namespace coffee_shop_backend.Controllers
             Document document = _unitOfWork.DocumentRepository.GetDocument(id);
             IEnumerable<DocumentField> fields = _unitOfWork.DocumentRepository.GetFieldList(id).ToList();
             IEnumerable<DocumentRecord> record = _unitOfWork.DocumentRepository.GetDocumentRecord(recordId);
+            bool isEdit = record.Count() > 0;
             DocumentFormViewModel model = new DocumentFormViewModel()
             {
                 Id = document.Id!,
@@ -77,7 +78,7 @@ namespace coffee_shop_backend.Controllers
                     }
                 }
                 //修改
-                if (record.Count() > 0)
+                if (isEdit)
                 {
                     var doc = record.FirstOrDefault(x => x.DocumentFieldId == field.Id);
                     if (doc != null)
@@ -85,6 +86,15 @@ namespace coffee_shop_backend.Controllers
                         dfvm.Value = doc.FilledText;
                         dfvm.MemoValue = doc.MemoText;
                         dfvm.Remark = doc.Remark;
+                        if (dfvm.Options.Count() > 0 && !string.IsNullOrEmpty(dfvm.MemoValue) && !string.IsNullOrEmpty(dfvm.Value))
+                        {
+                            string[] optionId = dfvm.Value.Split(',');
+                            string[] memoValue = dfvm.MemoValue.Split(',');
+                            for(int i = 0;i< memoValue.Count();i++)
+                            {
+                                dfvm.Options.FirstOrDefault(x => x.Id == optionId[i])!.MemoValue = memoValue[i];
+                            }
+                        }
                     }
                 }
                 model.Fields.Add(dfvm);
@@ -110,14 +120,15 @@ namespace coffee_shop_backend.Controllers
                 {
                     //取得暫時的recordId
                     string recordId = "0";
-                    var record = _unitOfWork.DocumentRepository.GetDocumentRecord("").OrderByDescending(x => x.RegId).FirstOrDefault();
+                    var record = _unitOfWork.DocumentRepository.GetDocumentRecord().OrderByDescending(x => x.RegId).FirstOrDefault();
                     if (record != null)
                         recordId = (int.Parse(record.RegId) + 1).ToString();
                     //
                     new DocumentAPI(_unitOfWork).Create(model, recordId, collection.Files);
+                    return RedirectToAction("Index");
                 }
                 _unitOfWork.Complete();
-                return RedirectToAction("Index");
+                return View("Form", model);
             }
             else
             {
@@ -130,7 +141,7 @@ namespace coffee_shop_backend.Controllers
         public IActionResult RecordList()
         {
             List<DocumentRecordListViewModel> model = new List<DocumentRecordListViewModel>();
-            var record = _unitOfWork.DocumentRepository.GetDocumentRecord("");
+            var record = _unitOfWork.DocumentRepository.GetDocumentRecordList();
             if (record.Count() > 0)
             {
                 model = record.Select(x => new DocumentRecordListViewModel()
@@ -138,18 +149,8 @@ namespace coffee_shop_backend.Controllers
                     RegId = x.RegId,
                     DocumentId = x.DocumentId,
                     DocumentName = _unitOfWork.DocumentRepository.GetDocument(x.DocumentId).Caption, 
-                }).ToList();
+                }).Distinct().ToList();
             }
-            _unitOfWork.Dispose();
-            return View(model);
-        }
-
-        [HttpGet]
-        [Route("Record")]
-        public IActionResult Record(string id, string documentId)
-        {
-            List<DocumentRecordViewModel> model = new List<DocumentRecordViewModel>();
-            model = new DocumentAPI(_unitOfWork).GetRecordData(id, documentId);
             _unitOfWork.Dispose();
             return View(model);
         }

@@ -1,0 +1,13 @@
+﻿@model List<DocumentRecordViewModel>
+@using System.IO
+@{
+    string fileFolder = "/documents/";
+    int index = 1;
+}
+
+<h1>問卷結果</h1>
+<a href="#">匯出清單</a>
+@if (Model != null && Model.Any())
+{
+    @Html.Partial("_RecordPartial",  Model)
+}

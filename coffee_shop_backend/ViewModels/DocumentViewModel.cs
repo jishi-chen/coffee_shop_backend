@@ -28,6 +28,7 @@ namespace coffee_shop_backend.ViewModels
         public List<SelectListItem> MemoTypeList { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> ParentFieldList { get; set; } = new List<SelectListItem>();
         public int Layer { get; set; } = 0;
+        public bool HasData { get; set; } = false;
     }
 
     public class AnswerOption

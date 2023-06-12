@@ -15,6 +15,7 @@
             <th scope="col">點閱率</th>
             <th scope="col">修改人員</th>
             <th scope="col">異動日期</th>
+            <th scope="col">執行動作</th>
         </tr>
     </thead>
     <tbody>
@@ -28,6 +29,7 @@
                     <td>@item.Hits</td>
                     <td>@(item.Updator == null ? item.Creator : item.Updator)</td>
                     <td>@(item.UpdateDate.HasValue ? item.UpdateDate.Value.ToString("yyyy-MM-dd") : item.CreateDate.ToString("yyyy-MM-dd"))</td>
+                    <td><a href="@Url.Action("ExportData","Document", new {Id = item.Id})" role="button">匯出填寫清單</a></td>
                 </tr>
             }
         }

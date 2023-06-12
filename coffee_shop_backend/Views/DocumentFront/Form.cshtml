@@ -11,6 +11,7 @@
     @using (Html.BeginForm("Form", "DocumentFront", FormMethod.Post, new { enctype = "multipart/form-data" }))
     {
         @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => Model.RecordId, new { @class = "form-control", @readonly = "true" })
         @if (Model != null && Model.Fields != null && Model.Fields.Any())
         {
             @Html.Partial("_FormPartial",  Model)

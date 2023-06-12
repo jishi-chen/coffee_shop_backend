@@ -137,10 +137,12 @@ values (@DocumentFieldId, @OptionName, @MemoType, @Sort) ";
             string sql = $@" select * from DocumentRecords where 1=1 ";
             return Connection.Query<DocumentRecord>(sql, new { }, Transaction);
         }
-        public IEnumerable<DocumentRecord> GetDocumentRecordList()
+        public IEnumerable<DocumentRecord> GetDocumentRecordList(string? documentId)
         {
             string sql = $@" select distinct RegId, DocumentId from DocumentRecords where 1=1 ";
-            return Connection.Query<DocumentRecord>(sql, new { }, Transaction);
+            if (!string.IsNullOrEmpty(documentId))
+                sql += " and DocumentId=@DocumentId ";
+            return Connection.Query<DocumentRecord>(sql, new { DocumentId = documentId }, Transaction);
         }
         public IEnumerable<DocumentRecordViewModel> GetDocumentRecordData(string recordId, string documentId)
         {
@@ -156,12 +158,74 @@ order by df.Sort asc, df.ParentId asc ";
 
             return Connection.Query<DocumentRecordViewModel>(sql, new { RegId = recordId, DocumentId = documentId }, Transaction);
         }
-        public void InsertDocumentRecord(DocumentRecord record, string recordId)
+        public void InsertDocumentRecord(IEnumerable<DocumentRecord> recordList)
         {
             string sql = $@"
 insert into DocumentRecords (RegId, DocumentId, DocumentFieldId, FilledText, MemoText, Remark) 
 values (@RegId, @DocumentId, @DocumentFieldId, @FilledText, @MemoText, @Remark) ";
-            Connection.Execute(sql, record, Transaction);
+            Connection.Execute(sql, recordList, Transaction);
+        }
+        public void UpdateDocumentRecord(IEnumerable<DocumentRecord> recordList)
+        {
+            string sql = $@"
+update DocumentRecords set
+FilledText=@FilledText, MemoText=@MemoText, Remark=@Remark
+where RegId=@RegId and DocumentId=@DocumentId and DocumentFieldId=@DocumentFieldId ";
+            Connection.Execute(sql, recordList, Transaction);
+        }
+        public DataTable GetExportData(string documentId)
+        {
+            string sql = $@"
+DECLARE 
+  @cols AS NVARCHAR(MAX),
+  @query AS NVARCHAR(MAX),
+  @ParmDefinition NVARCHAR(500),
+  @SubQuery AS NVARCHAR(MAX);
+
+set @ParmDefinition = '@id int, @SingleChoiceType int, @DoubleChoiceType int';
+
+select @cols = STUFF((SELECT ',' + QUOTENAME(FieldName) 
+                    from DocumentFields
+                    where DocumentId = @DocumentId and FieldType != @PanelType and FieldType != @FileType
+            FOR XML PATH(''), TYPE
+            ).value('.', 'NVARCHAR(MAX)') 
+        ,1,1,'');
+set @SubQuery = N'
+select record.RegId, field.FieldName, record.FilledText, field.FieldType,
+STUFF((
+select '';'' +cast(o.OptionName AS NVARCHAR )
+from DocumentRecords r
+join DocumentFields f on r.DocumentFieldId = f.Id and (f.FieldType = @SingleChoiceType or f.FieldType = @DoubleChoiceType)
+join DocumentFieldOptions o on r.DocumentFieldId = o.DocumentFieldId and r.FilledText like ''%''+convert(nvarchar,o.Id)+''%''
+where record.DocumentFieldId = r.DocumentFieldId
+FOR XML PATH('''')), 1, 1, '''') as OptionText
+from DocumentRecords record 
+join DocumentFields field on record.DocumentFieldId = field.Id
+where record.DocumentId = @id
+';
+set @query = N'
+select * from (
+select RegId, FieldName, CAST(CASE WHEN FieldType = @SingleChoiceType or FieldType = @DoubleChoiceType THEN OptionText ELSE FilledText END AS nvarchar) as FilledText
+from (' + @SubQuery  + ') as y where 1=1
+) t
+pivot(
+	MAX(FilledText) 
+	FOR FieldName IN ( ' + @cols + ' )) p ';
+	
+exec sp_executesql @query, @ParmDefinition,@id = @DocumentId,@SingleChoiceType = @SingleChoiceType,@DoubleChoiceType = @DoubleChoiceType; ";
+
+            object param = new
+            {
+                DocumentId = documentId,
+                PanelType = AnswerTypeEnum.Panel,
+                SingleChoiceType = AnswerTypeEnum.SingleChoice,
+                DoubleChoiceType = AnswerTypeEnum.MultipleChoice,
+                FileType = AnswerTypeEnum.File
+            };
+            var dt = new DataTable();
+            var dr = Connection.ExecuteReader(sql, param, Transaction);
+            dt.Load(dr);
+            return dt;
         }
     }
 }

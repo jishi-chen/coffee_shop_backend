@@ -238,119 +238,122 @@
 
     <div class="tab-pane fade @(isContent?"show active":"")" id="nav-column" role="tabpanel" aria-labelledby="nav-column-tab">
         <div class="container">
-            <h4>新增題目</h4>
-            @using (Html.BeginForm("InsertField", "Document", FormMethod.Post, new { enctype = "multipart/form-data", @id = "InsertField" }))
+            @if (!Model.QuestionPage.HasData)
             {
-                @Html.AntiForgeryToken()
-                @Html.HiddenFor(model => Model.QuestionPage.DocumentFieldId, new { @class = "form-control", @readonly = "true" })
-                <div class="row mb-2 py-2">
-                    <label for="QuestionPage_Caption" class="col-sm-auto col-form-label">題目</label>
-                    <div class="col-sm-10">
-                        @Html.TextBoxFor(model => Model.QuestionPage.Caption, new { placeholder = "請輸入題目", @class = "form-control"})
+                <h4>新增題目</h4>
+                @using (Html.BeginForm("InsertField", "Document", FormMethod.Post, new { enctype = "multipart/form-data", @id = "InsertField" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(model => Model.QuestionPage.DocumentFieldId, new { @class = "form-control", @readonly = "true" })
+                    <div class="row mb-2 py-2">
+                        <label for="QuestionPage_Caption" class="col-sm-auto col-form-label">題目</label>
+                        <div class="col-sm-10">
+                            @Html.TextBoxFor(model => Model.QuestionPage.Caption, new { placeholder = "請輸入題目", @class = "form-control"})
+                        </div>
+                        <small class="text-info">註:上限50 字</small>
                     </div>
-                    <small class="text-info">註:上限50 字</small>
-                </div>
-                <div class="row mb-2 py-2">
-                    <label for="QuestionPage_Note" class="col-sm-auto col-form-label">備註</label>
-                    <div class="col-sm-10">
-                        @Html.TextBoxFor(model => Model.QuestionPage.Note, new { placeholder = "請輸入備註", @class = "form-control"})
+                    <div class="row mb-2 py-2">
+                        <label for="QuestionPage_Note" class="col-sm-auto col-form-label">備註</label>
+                        <div class="col-sm-10">
+                            @Html.TextBoxFor(model => Model.QuestionPage.Note, new { placeholder = "請輸入備註", @class = "form-control"})
+                        </div>
                     </div>
-                </div>
-                <div class="row mb-2 py-2">
-                    <label for="QuestionPage_ParentId" class="col-sm-auto col-form-label">選擇父題目</label>
+                    <div class="row mb-2 py-2">
+                        <label for="QuestionPage_ParentId" class="col-sm-auto col-form-label">選擇父題目</label>
+                        <div class="col-sm-auto">
+                            @Html.DropDownListFor(model => Model.QuestionPage.ParentId, questionPage.ParentFieldList, new { @class = "form-control"})
+                        </div>
+                    </div>
+                    <div class="row mb-2 py-2">
+                        <div class="col-sm-auto align-items-center">
+                            @Html.CheckBoxFor(model => Model.QuestionPage.IsRequired)
+                            <label for="QuestionPage_IsRequired" class="col-sm-auto col-form-label">是否必填</label>
+                        </div>
+                        <div class="col-sm-auto align-items-center">
+                            @Html.CheckBoxFor(model => Model.QuestionPage.IsIncludedExport)
+                            <label for="QuestionPage_IsIncludedExport" class="col-sm-auto col-form-label">是否列入匯出表單</label>
+                        </div>
+                        <div class="col-sm-auto align-items-center">
+                            @Html.CheckBoxFor(model => Model.QuestionPage.IsEditable)
+                            <label for="QuestionPage_IsEditable" class="col-sm-auto col-form-label">是否可編輯</label>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <label for="QuestionPage_AnswerType" class="col-sm-auto col-form-label">答案類型</label>
+                        <div class="col-sm-10">
+                            @for (int q = 0; q < Model.QuestionPage.AnswerTypeList.Count(); q++)
+                            {
+                                var item = Model.QuestionPage.AnswerTypeList[q];
+                                <div class="col-sm-auto">
+                                    @{
+                                        @Html.RadioButtonFor(model => Model.QuestionPage.AnswerType, item.Value, new { @class = "form-check-input", @id = "QuestionPage_AnswerType" + q })
+                                    }
+                                    <label class="form-check-label" for="QuestionPage_AnswerType@(q)">@item.Text</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="row mb-2 py-2" id="isFile">
+                        <div class="col-sm-3">
+                            <label for="QuestionPage_FileSizeLimit" class="col-sm-auto col-form-label">檔案大小限制(mb)</label>
+                            @Html.TextBoxFor(model => Model.QuestionPage.FileSizeLimit, new { placeholder = "請輸入檔案大小限制", @class = "form-control", type = "number", min = 0 })
+                        </div>
+                        <div class="col-sm-9">
+                            <label for="QuestionPage_FileExtension" class="col-sm-auto col-form-label">副檔名限制 (ex: .pdf,.jpg)</label>
+                            @Html.TextBoxFor(model => Model.QuestionPage.FileExtension, new { placeholder = "請輸入副檔名限制", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="row mb-2 py-2" id="isText">
+                        <label for="QuestionPage_WordLimit" class="col-sm-auto col-form-label">文字長度限制</label>
+                        <div class="col-sm-auto">
+                            @Html.TextBoxFor(model => Model.QuestionPage.WordLimit, new { placeholder = "請輸入文字長度限制", @class = "form-control", type = "number", min = 0 })
+                        </div>
+                    </div>
+                }
+                <div class="row mb-2 py-2" id="isSelect">
+                    <label for="QuestionPage_NewOption" class="col-sm-auto col-form-label">答案選項</label>
+                    <div class="col-sm-auto p-3">
+                        @Html.TextBoxFor(model => Model.QuestionPage.NewOption.Text, "", new { @class = "form-control", required = true})
+                        @Html.DropDownListFor(model => Model.QuestionPage.NewOption.MemoType, questionPage.MemoTypeList , new {@class = "form-control"})
+                        @Html.HiddenFor(model => Model.QuestionPage.NewOption.Sort, new { @class = "form-control", @readonly = "true" })
+                        <button class="btn btn-primary" type="button" id="InsertOption">加入清單</button>
+                    </div>
                     <div class="col-sm-auto">
-                        @Html.DropDownListFor(model => Model.QuestionPage.ParentId, questionPage.ParentFieldList, new { @class = "form-control"})
-                    </div>
-                </div>
-                <div class="row mb-2 py-2">
-                    <div class="col-sm-auto align-items-center">
-                        @Html.CheckBoxFor(model => Model.QuestionPage.IsRequired)
-                        <label for="QuestionPage_IsRequired" class="col-sm-auto col-form-label">是否必填</label>
-                    </div>
-                    <div class="col-sm-auto align-items-center">
-                        @Html.CheckBoxFor(model => Model.QuestionPage.IsIncludedExport)
-                        <label for="QuestionPage_IsIncludedExport" class="col-sm-auto col-form-label">是否列入匯出表單</label>
-                    </div>
-                    <div class="col-sm-auto align-items-center">
-                        @Html.CheckBoxFor(model => Model.QuestionPage.IsEditable)
-                        <label for="QuestionPage_IsEditable" class="col-sm-auto col-form-label">是否可編輯</label>
-                    </div>
-                </div>
-                <div class="row mb-2">
-                    <label for="QuestionPage_AnswerType" class="col-sm-auto col-form-label">答案類型</label>
-                    <div class="col-sm-10">
-                        @for (int q = 0; q < Model.QuestionPage.AnswerTypeList.Count(); q++)
-                        {
-                            var item = Model.QuestionPage.AnswerTypeList[q];
-                            <div class="col-sm-auto">
-                                @{
-                                    @Html.RadioButtonFor(model => Model.QuestionPage.AnswerType, item.Value, new { @class = "form-check-input", @id = "QuestionPage_AnswerType" + q })
+                        <table class="table table-striped table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">選項</th>
+                                    <th scope="col">備註</th>
+                                    <th scope="col">排序</th>
+                                    <th scope="col">功能列表</th>
+                                </tr>
+                            </thead>
+                            <tbody class="option-list">
+                                @if (Model.QuestionPage.OptionList != null && Model.QuestionPage.OptionList.Any())
+                                {
+                                    foreach (var item in Model.QuestionPage.OptionList)
+                                    {
+                                        <tr>
+                                            <td>@item.Text</td>
+                                            <td>@(EnumHelper.GetDescription((MemoTypeEnum)item.MemoType))</td>
+                                            <td>@item.Sort</td>
+                                            <td>
+                                                <button class="btn btn-primary EditOption" data-sort="@(item.Sort)">編輯</button>
+                                                <button class="btn btn-primary DeleteOption" data-sort="@(item.Sort)">刪除</button>
+                                            </td>
+                                        </tr>
+                                    }
                                 }
-                                <label class="form-check-label" for="QuestionPage_AnswerType@(q)">@item.Text</label>
-                            </div>
-                        }
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                <div class="row mb-2 py-2" id="isFile">
-                    <div class="col-sm-3">
-                        <label for="QuestionPage_FileSizeLimit" class="col-sm-auto col-form-label">檔案大小限制(mb)</label>
-                        @Html.TextBoxFor(model => Model.QuestionPage.FileSizeLimit, new { placeholder = "請輸入檔案大小限制", @class = "form-control", type = "number", min = 0 })
-                    </div>
-                    <div class="col-sm-9">
-                        <label for="QuestionPage_FileExtension" class="col-sm-auto col-form-label">副檔名限制 (ex: .pdf,.jpg)</label>
-                        @Html.TextBoxFor(model => Model.QuestionPage.FileExtension, new { placeholder = "請輸入副檔名限制", @class = "form-control" })
-                    </div>
-                </div>
-                <div class="row mb-2 py-2" id="isText">
-                    <label for="QuestionPage_WordLimit" class="col-sm-auto col-form-label">文字長度限制</label>
+                <div class="row mb-2 py-2 justify-content-end">
                     <div class="col-sm-auto">
-                        @Html.TextBoxFor(model => Model.QuestionPage.WordLimit, new { placeholder = "請輸入文字長度限制", @class = "form-control", type = "number", min = 0 })
+                        <button class="btn btn-danger" form="InsertField" type="submit">@(string.IsNullOrEmpty(questionPage.DocumentFieldId)?"新增題目":"確定修改")</button>
                     </div>
                 </div>
             }
-            <div class="row mb-2 py-2" id="isSelect">
-                <label for="QuestionPage_NewOption" class="col-sm-auto col-form-label">答案選項</label>
-                <div class="col-sm-auto p-3">
-                    @Html.TextBoxFor(model => Model.QuestionPage.NewOption.Text, "", new { @class = "form-control", required = true})
-                    @Html.DropDownListFor(model => Model.QuestionPage.NewOption.MemoType, questionPage.MemoTypeList , new {@class = "form-control"})
-                    @Html.HiddenFor(model => Model.QuestionPage.NewOption.Sort, new { @class = "form-control", @readonly = "true" })
-                    <button class="btn btn-primary" type="button" id="InsertOption">加入清單</button>
-                </div>
-                <div class="col-sm-auto">
-                    <table class="table table-striped table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
-                        <thead>
-                            <tr>
-                                <th scope="col">選項</th>
-                                <th scope="col">備註</th>
-                                <th scope="col">排序</th>
-                                <th scope="col">功能列表</th>
-                            </tr>
-                        </thead>
-                        <tbody class="option-list">
-                            @if (Model.QuestionPage.OptionList != null && Model.QuestionPage.OptionList.Any())
-                            {
-                                foreach (var item in Model.QuestionPage.OptionList)
-                                {
-                                    <tr>
-                                        <td>@item.Text</td>
-                                        <td>@(EnumHelper.GetDescription((MemoTypeEnum)item.MemoType))</td>
-                                        <td>@item.Sort</td>
-                                        <td>
-                                            <button class="btn btn-primary EditOption" data-sort="@(item.Sort)">編輯</button>
-                                            <button class="btn btn-primary DeleteOption" data-sort="@(item.Sort)">刪除</button>
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="row mb-2 py-2 justify-content-end">
-                <div class="col-sm-auto">
-                    <button class="btn btn-danger" form="InsertField" type="submit">@(string.IsNullOrEmpty(questionPage.DocumentFieldId)?"新增題目":"確定修改")</button>
-                </div>
-            </div>
 
             <h4>題目列表</h4>
             <table class="table table-striped table-bordered table-hover table-responsive">

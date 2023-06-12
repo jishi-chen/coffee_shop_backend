@@ -19,10 +19,13 @@
         <td>@prefix @(EnumHelper.GetDescription((AnswerTypeEnum)item.FieldType))</td>
         <td>@prefix @item.Sort</td>
         <td>
-            <a class="btn btn-primary" href="@Url.Action("EditField","Document", new { fieldId = item.Id })">編輯</a>
-            @if (!(item.FieldType == (int)AnswerTypeEnum.Panel && Model.FieldList.Any(x => x.ParentId == item.Id)))
+            @if (!Model.HasData)
             {
-                <a class="btn btn-primary" href="@Url.Action("DeleteField","Document", new { fieldId = item.Id })">刪除</a>
+                <a class="btn btn-primary" href="@Url.Action("EditField","Document", new { fieldId = item.Id })">編輯</a>
+                @if (!(item.FieldType == (int)AnswerTypeEnum.Panel && Model.FieldList.Any(x => x.ParentId == item.Id)))
+                {
+                    <a class="btn btn-primary" href="@Url.Action("DeleteField","Document", new { fieldId = item.Id })">刪除</a>
+                }
             }
             @if (item.Sort != 0 && count > 1)
             {

@@ -1,5 +1,6 @@
 ﻿using coffee_shop_backend.Models;
 using coffee_shop_backend.ViewModels;
+using System.Data;
 
 namespace coffee_shop_backend.Interface
 {
@@ -24,8 +25,10 @@ namespace coffee_shop_backend.Interface
         DocumentRecord? GetDocumentRecord(string fieldId, string recordId);
         IEnumerable<DocumentRecord> GetDocumentRecord(string recordId);
         IEnumerable<DocumentRecord> GetDocumentRecord();
-        IEnumerable<DocumentRecord> GetDocumentRecordList();
+        IEnumerable<DocumentRecord> GetDocumentRecordList(string? documentId);
         IEnumerable<DocumentRecordViewModel> GetDocumentRecordData(string recordId, string documentId);
-        void InsertDocumentRecord(DocumentRecord record, string recordId);
+        void InsertDocumentRecord(IEnumerable<DocumentRecord> record);
+        void UpdateDocumentRecord(IEnumerable<DocumentRecord> record);
+        DataTable GetExportData(string documentId);
     }
 }

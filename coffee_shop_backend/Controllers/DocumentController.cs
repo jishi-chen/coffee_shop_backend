@@ -7,6 +7,9 @@ using coffee_shop_backend.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Newtonsoft.Json;
+using NPOI.HSSF.UserModel;
+using NPOI.SS.UserModel;
+using System.Data;
 
 namespace coffee_shop_backend.Controllers
 {
@@ -47,6 +50,8 @@ namespace coffee_shop_backend.Controllers
                 }).ToList();
                 model.QuestionPage.ParentFieldList.Add(new SelectListItem { Text = "---請選擇---", Value = string.Empty });
                 model.QuestionPage.ParentFieldList.AddRange(parentList);
+                if (_unitOfWork.DocumentRepository.GetDocumentRecordList(id).Any())
+                    model.QuestionPage.HasData = true;
                 _unitOfWork.Dispose();
             }
             GetAnswerTypeSettings(model.QuestionPage.AnswerTypeList);
@@ -111,7 +116,7 @@ namespace coffee_shop_backend.Controllers
         public IActionResult RecordList()
         {
             List<DocumentRecordListViewModel> model = new List<DocumentRecordListViewModel>();
-            var record = _unitOfWork.DocumentRepository.GetDocumentRecordList();
+            var record = _unitOfWork.DocumentRepository.GetDocumentRecordList("");
             if (record.Count() > 0)
             {
                 model = record.Select(x => new DocumentRecordListViewModel()
@@ -135,6 +140,58 @@ namespace coffee_shop_backend.Controllers
             return View(model);
         }
 
+        [HttpGet]
+        [Route("ExportData")]
+        public IActionResult ExportData(string id)
+        {
+            DataTable dt = _unitOfWork.DocumentRepository.GetExportData(id);
+            _unitOfWork.Dispose();
+
+            HSSFWorkbook workbook = new HSSFWorkbook();
+            ISheet sheet = workbook.CreateSheet("報名資料");
+
+            //設定樣式
+            ICellStyle style = workbook.CreateCellStyle();
+            IFont headerfont = workbook.CreateFont();
+            style.Alignment = HorizontalAlignment.Center; //水平置中
+            style.VerticalAlignment = VerticalAlignment.Center; //垂直置中
+            headerfont.FontName = "微軟正黑體";
+            style.SetFont(headerfont);
+
+            //標題
+            var rowIndex = 0;
+            sheet.CreateRow(rowIndex);
+            foreach (DataColumn column in dt.Columns)
+            {
+                sheet.GetRow(rowIndex).CreateCell(column.Ordinal).SetCellValue(column.ColumnName);
+                sheet.GetRow(rowIndex).GetCell(column.Ordinal).CellStyle = style;
+            }
+            rowIndex++;
+
+            // 設定欄位寬度
+            for (int i = 0; i < dt.Columns.Count; i++)
+            {
+                int width = (int)((20 + 0.72) * 256);
+                sheet.SetColumnWidth(i, width);
+            }
+
+            //內容
+            foreach (DataRow row in dt.Rows)
+            {
+                sheet.CreateRow(rowIndex);
+                foreach (DataColumn column in dt.Columns)
+                {
+                    sheet.GetRow(rowIndex).CreateCell(column.Ordinal).SetCellValue(row[column].ToString());
+                }
+                rowIndex++;
+            }
+
+            var excelDatas = new MemoryStream();
+            workbook.Write(excelDatas);
+            var filename = $"register_{Guid.NewGuid().ToString().Substring(0, 5)}.xls";
+
+            return File(excelDatas.ToArray(), "application/vnd.ms-excel", filename);
+        }
 
         #region 新增/編輯題目
 

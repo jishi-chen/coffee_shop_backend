@@ -40,6 +40,7 @@ namespace coffee_shop_backend.Controllers
             DocumentFormViewModel model = new DocumentFormViewModel()
             {
                 Id = document.Id!,
+                RecordId = recordId,
                 Caption = document.Caption,
                 HeadText = document.HeadText,
                 FooterText = document.FooterText,
@@ -115,16 +116,20 @@ namespace coffee_shop_backend.Controllers
             if (TempData.Peek(sessionName) is string jsonText)
             {
                 DocumentFormViewModel model = JsonConvert.DeserializeObject<DocumentFormViewModel>(jsonText)!;
-                new DocumentAPI(_unitOfWork).FieldDataCheck(collection, model.Fields, model.ValidResults, string.Empty);
+                string recordId = collection["RecordId"];
+                new DocumentAPI(_unitOfWork).FieldDataCheck(collection, model.Fields, model.ValidResults, recordId);
                 if (model.ValidResults.Count == 0)
                 {
-                    //取得暫時的recordId
-                    string recordId = "0";
-                    var record = _unitOfWork.DocumentRepository.GetDocumentRecord().OrderByDescending(x => x.RegId).FirstOrDefault();
-                    if (record != null)
-                        recordId = (int.Parse(record.RegId) + 1).ToString();
-                    //
-                    new DocumentAPI(_unitOfWork).Create(model, recordId, collection.Files);
+                    bool isEdit = !string.IsNullOrEmpty(recordId);
+                    //新增
+                    if (!isEdit)
+                    {
+                        var record = _unitOfWork.DocumentRepository.GetDocumentRecord().OrderByDescending(x => x.RegId).FirstOrDefault();
+                        if (record != null)
+                            recordId = (int.Parse(record.RegId) + 1).ToString();
+                    }
+                    new DocumentAPI(_unitOfWork).Create(model, recordId, collection.Files, isEdit);
+                    _unitOfWork.Complete();
                     return RedirectToAction("Index");
                 }
                 _unitOfWork.Complete();
@@ -141,7 +146,7 @@ namespace coffee_shop_backend.Controllers
         public IActionResult RecordList()
         {
             List<DocumentRecordListViewModel> model = new List<DocumentRecordListViewModel>();
-            var record = _unitOfWork.DocumentRepository.GetDocumentRecordList();
+            var record = _unitOfWork.DocumentRepository.GetDocumentRecordList("");
             if (record.Count() > 0)
             {
                 model = record.Select(x => new DocumentRecordListViewModel()

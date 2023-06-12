@@ -5,6 +5,7 @@ namespace coffee_shop_backend.ViewModels
     public class DocumentFormViewModel
     {
         public string Id { get; set; } = null!;
+        public string? RecordId { get; set; }
         public string Caption { get; set; } = string.Empty;
         public string? HeadText { get; set; } = string.Empty;
         public string? FooterText { get; set; } = string.Empty;

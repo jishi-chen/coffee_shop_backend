@@ -114,8 +114,9 @@ namespace coffee_shop_backend.Services
         }
 
 
-        public void Create(DocumentFormViewModel model, string recordId, IFormFileCollection fileCollection)
+        public void Create(DocumentFormViewModel model, string recordId, IFormFileCollection fileCollection, bool isEdit)
         {
+            List<DocumentRecord> recordList = new List<DocumentRecord>();
             foreach (var item in model.Fields)
             {
                 if (string.IsNullOrWhiteSpace(item.Value))
@@ -130,18 +131,34 @@ namespace coffee_shop_backend.Services
                     MemoText = item.MemoValue,
                     Remark = item.Remark,
                 };
-                _unitOfWork.DocumentRepository.InsertDocumentRecord(record, recordId);
+                recordList.Add(record);
 
                 if (item.FieldType == AnswerTypeEnum.File && !string.IsNullOrWhiteSpace(item.Value))
                 {
                     string[] fileNames = item.Value.Split(';');
                     if (fileNames!= null && fileNames.Length > 0)
                     {
+                        //刪除舊檔
+                        string oldFileName = "";
+                        if (FileExistCheck(ref oldFileName, item.Id, recordId))
+                        {
+                            string[] oldFileNames = oldFileName.Split(';');
+                            string fileFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "documents", oldFileNames[1]);
+                            if (File.Exists(fileFolder))
+                            {
+                                File.Delete(fileFolder);
+                            }
+                        }
+                        //新增檔案
                         IFormFile file = fileCollection[item.Id.ToString()]!;
                         FileUpload(file, fileNames[1]);
                     }
                 }
             }
+            if (!isEdit)
+                _unitOfWork.DocumentRepository.InsertDocumentRecord(recordList);
+            else
+                _unitOfWork.DocumentRepository.UpdateDocumentRecord(recordList);
         }
 
         #region 檔案上傳

@@ -197,7 +197,7 @@ select '';'' +cast(o.OptionName AS NVARCHAR )
 from DocumentRecords r
 join DocumentFields f on r.DocumentFieldId = f.Id and (f.FieldType = @SingleChoiceType or f.FieldType = @DoubleChoiceType)
 join DocumentFieldOptions o on r.DocumentFieldId = o.DocumentFieldId and r.FilledText like ''%''+convert(nvarchar,o.Id)+''%''
-where record.DocumentFieldId = r.DocumentFieldId
+where r.DocumentId = @id and record.DocumentFieldId = o.DocumentFieldId and r.RegId = record.RegId
 FOR XML PATH('''')), 1, 1, '''') as OptionText
 from DocumentRecords record 
 join DocumentFields field on record.DocumentFieldId = field.Id

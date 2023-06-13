@@ -140,17 +140,20 @@ namespace coffee_shop_backend.Services
                     {
                         //刪除舊檔
                         string oldFileName = "";
-                        if (FileExistCheck(ref oldFileName, item.Id, recordId))
+                        IFormFile file = fileCollection[item.Id.ToString()]!;
+                        if (file != null && isEdit)
                         {
-                            string[] oldFileNames = oldFileName.Split(';');
-                            string fileFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "documents", oldFileNames[1]);
-                            if (File.Exists(fileFolder))
+                            if (FileExistCheck(ref oldFileName, item.Id, recordId))
                             {
-                                File.Delete(fileFolder);
+                                string[] oldFileNames = oldFileName.Split(';');
+                                string fileFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "documents", oldFileNames[1]);
+                                if (File.Exists(fileFolder))
+                                {
+                                    File.Delete(fileFolder);
+                                }
                             }
                         }
                         //新增檔案
-                        IFormFile file = fileCollection[item.Id.ToString()]!;
                         FileUpload(file, fileNames[1]);
                     }
                 }

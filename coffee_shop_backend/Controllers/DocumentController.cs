@@ -171,7 +171,8 @@ namespace coffee_shop_backend.Controllers
             // 設定欄位寬度
             for (int i = 0; i < dt.Columns.Count; i++)
             {
-                int width = (int)((20 + 0.72) * 256);
+                int length = dt.Columns[i].ColumnName.Length;
+                int width = (int)((length + 15 + 0.72) * 256);
                 sheet.SetColumnWidth(i, width);
             }
 

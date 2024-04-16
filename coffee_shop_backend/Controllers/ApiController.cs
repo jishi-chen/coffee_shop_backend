@@ -1,5 +1,5 @@
-﻿using coffee_shop_backend.Models;
-using Microsoft.AspNetCore.Authorization;
+﻿using Asp.Versioning;
+using CoffeeShop.Model.Entities;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 

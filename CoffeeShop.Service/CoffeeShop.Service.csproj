@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CoffeeShop.Model\CoffeeShop.Model.csproj" />
+    <ProjectReference Include="..\CoffeeShop.Repository\CoffeeShop.Repository.csproj" />
+    <ProjectReference Include="..\CoffeeShop.Utility\CoffeeShop.Utility.csproj" />
+  </ItemGroup>
+
+</Project>

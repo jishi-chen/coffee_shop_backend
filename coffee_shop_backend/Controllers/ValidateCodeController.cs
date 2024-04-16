@@ -1,9 +1,9 @@
-﻿using coffee_shop_backend.Utility;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Text;
 using Microsoft.AspNetCore.DataProtection;
+using CoffeeShop.Utility.Helpers;
 
 namespace coffee_shop_backend.Controllers
 {

@@ -1,8 +1,8 @@
-﻿using coffee_shop_backend.Models;
-using coffee_shop_backend.ViewModels;
+﻿using CoffeeShop.Model.Entities;
+using CoffeeShop.Model.ViewModels;
+using CoffeeShop.Utility.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using coffee_shop_backend.Utility;
 
 namespace coffee_shop_backend.Controllers
 {

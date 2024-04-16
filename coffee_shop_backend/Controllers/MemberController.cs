@@ -1,11 +1,12 @@
-﻿using coffee_shop_backend.Models;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using Asp.Versioning;
+using CoffeeShop.Model.Entities;
 
 namespace coffee_shop_backend.Controllers
 {

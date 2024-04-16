@@ -1,10 +1,12 @@
-﻿using coffee_shop_backend.Enums;
-using coffee_shop_backend.Interface;
-using coffee_shop_backend.Models;
-using coffee_shop_backend.Services;
-using coffee_shop_backend.ViewModels;
+﻿using CoffeeShop.Model.Entities;
+using CoffeeShop.Model.Enum;
+using CoffeeShop.Model.ViewModels;
+using CoffeeShop.Repository.Interface;
+using CoffeeShop.Service.Implement;
+using CoffeeShop.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+
 
 namespace coffee_shop_backend.Controllers
 {
@@ -15,11 +17,12 @@ namespace coffee_shop_backend.Controllers
         private IUnitOfWork _unitOfWork;
         private HttpContext? _context;
         private string sessionName = "DocumentFrontViewModel";
-
-        public DocumentFrontController(IUnitOfWork unitOfWork, IHttpContextAccessor accessor) : base(accessor)
+        private IDocumentService _documentService;
+        public DocumentFrontController(IUnitOfWork unitOfWork, IHttpContextAccessor accessor, IDocumentService documentService) : base(accessor)
         {
             _context = accessor.HttpContext;
             _unitOfWork = unitOfWork;
+            _documentService = documentService;
         }
 
         [Route("Index")]
@@ -91,7 +94,7 @@ namespace coffee_shop_backend.Controllers
                         {
                             string[] optionId = dfvm.Value.Split(',');
                             string[] memoValue = dfvm.MemoValue.Split(',');
-                            for(int i = 0;i< memoValue.Count();i++)
+                            for (int i = 0; i < memoValue.Count(); i++)
                             {
                                 dfvm.Options.FirstOrDefault(x => x.Id == optionId[i])!.MemoValue = memoValue[i];
                             }
@@ -117,7 +120,7 @@ namespace coffee_shop_backend.Controllers
             {
                 DocumentFormViewModel model = JsonConvert.DeserializeObject<DocumentFormViewModel>(jsonText)!;
                 string recordId = collection["RecordId"];
-                new DocumentAPI(_unitOfWork).FieldDataCheck(collection, model.Fields, model.ValidResults, recordId);
+                _documentService.FieldDataCheck(collection, model.Fields, model.ValidResults, recordId);
                 if (model.ValidResults.Count == 0)
                 {
                     bool isEdit = !string.IsNullOrEmpty(recordId);
@@ -126,9 +129,9 @@ namespace coffee_shop_backend.Controllers
                     {
                         var record = _unitOfWork.DocumentRepository.GetDocumentRecord().OrderByDescending(x => x.RegId).FirstOrDefault();
                         if (record != null)
-                            recordId = (int.Parse(record.RegId) + 1).ToString();
+                            recordId = (record.RegId + 1).ToString();
                     }
-                    new DocumentAPI(_unitOfWork).Create(model, recordId, collection.Files, isEdit);
+                    _documentService.Create(model, recordId, collection.Files, isEdit);
                     _unitOfWork.Complete();
                     return RedirectToAction("Index");
                 }
@@ -145,18 +148,7 @@ namespace coffee_shop_backend.Controllers
         [Route("RecordList")]
         public IActionResult RecordList()
         {
-            List<DocumentRecordListViewModel> model = new List<DocumentRecordListViewModel>();
-            var record = _unitOfWork.DocumentRepository.GetDocumentRecordList("");
-            if (record.Count() > 0)
-            {
-                model = record.Select(x => new DocumentRecordListViewModel()
-                {
-                    RegId = x.RegId,
-                    DocumentId = x.DocumentId,
-                    DocumentName = _unitOfWork.DocumentRepository.GetDocument(x.DocumentId).Caption, 
-                }).Distinct().ToList();
-            }
-            _unitOfWork.Dispose();
+            List<DocumentRecordListViewModel> model = _documentService.GetRecodList();
             return View(model);
         }
     }

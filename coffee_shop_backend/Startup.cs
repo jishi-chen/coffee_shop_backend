@@ -1,15 +1,17 @@
-﻿using coffee_shop_backend.Models;
-using Microsoft.AspNetCore.Mvc.Versioning;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
+﻿using Asp.Versioning;
+using CoffeeShop.Model;
+using CoffeeShop.Repository.Implement;
+using CoffeeShop.Repository.Interface;
+using CoffeeShop.Service.Implement;
+using CoffeeShop.Service.Interface;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using coffee_shop_backend.Interface;
-using coffee_shop_backend.Repository;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.ComponentModel.Design;
+using System.Text;
 
 namespace coffee_shop_backend
 {
@@ -55,15 +57,16 @@ namespace coffee_shop_backend
             services.AddLocalization(options => options.ResourcesPath = "Resources");
             services.AddMemoryCache();
             services.AddSession();
+            services.AddScoped<ServiceContainer>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IDocumentService, DocumentService>();
 
             // Entity Framework
-            services.AddDbContext<ModelContext>(options =>
+            services.AddDbContext<CoffeeShopContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
                 options.EnableSensitiveDataLogging(); //啟用「敏感資料」紀錄的結果
             });
-
             //資料保護 cryptographic API
             services.AddDataProtection();
 
@@ -184,7 +187,7 @@ namespace coffee_shop_backend
             app.UseAuthentication();  //先執行驗證再授權
             app.UseAuthorization(); //Controller、Action才能加上 [Authorize] 屬性
             app.UseSession();
-            app.UseApiVersioning(); //使用 Api Version Middleware
+            //app.UseApiVersioning(); //使用 Api Version Middleware
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             //app.UseSwagger();

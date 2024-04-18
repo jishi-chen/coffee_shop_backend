@@ -1,0 +1,11 @@
+﻿
+@{
+    Dictionary<string, string> data = ViewBag.MemoryCache;
+}
+
+<div>
+    現在時間：@data["現在時間"]
+</div>
+<div>
+    快取內容：@data["快取內容"]
+</div>

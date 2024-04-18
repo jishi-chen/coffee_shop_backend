@@ -42,7 +42,7 @@ namespace CoffeeShop.Utility.Helpers
         /// <returns></returns>
         public bool IsAlphaNumeric(String InputString)
         {
-            return (InputString != string.Empty && !Regex.IsMatch(InputString, "[^a-zA-Z0-9]"));
+            return (InputString != string.Empty && InputString != null && !Regex.IsMatch(InputString, "[^a-zA-Z0-9]"));
         }
         /// <summary>
         /// 檢查是否為數字

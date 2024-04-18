@@ -180,25 +180,34 @@ namespace CoffeeShop.Service.Implement
 
         public void Create(DocumentFormViewModel model, string recordId, IFormFileCollection fileCollection, bool isEdit)
         {
-            List<DocumentRecord> recordList = new List<DocumentRecord>();
+            List<DocumentRecordDetail> recordList = new List<DocumentRecordDetail>();
             var config = new MapperConfiguration(cfg =>
-                cfg.CreateMap<DocumentRecordDTO, DocumentRecord>());
+                cfg.CreateMap<DocumentRecordDetailDTO, DocumentRecordDetail>());
             var mapper = config.CreateMapper();
+
+            if (!isEdit)
+            {
+                DocumentRecord documentRecord = new DocumentRecord()
+                {
+                    DocumentId = int.Parse(model.Id),
+                    Name = "Admin"
+                };
+                recordId = _unitOfWork.DocumentRepository.InsertDocumentRecord(documentRecord).ToString();
+            }
             foreach (var item in model.Fields)
             {
                 if (string.IsNullOrWhiteSpace(item.Value))
                     continue;
 
-                DocumentRecordDTO documentRecordDTO = new DocumentRecordDTO()
+                DocumentRecordDetailDTO documentRecordDetailDTO = new DocumentRecordDetailDTO()
                 {
-                    RegId = recordId,
-                    DocumentId = model.Id,
+                    DocumentRecordId = recordId,
                     DocumentFieldId = item.Id,
                     FilledText = item.Value,
                     MemoText = item.MemoValue,
                     Remark = item.Remark,
                 };
-                DocumentRecord record = mapper.Map<DocumentRecord>(documentRecordDTO);
+                DocumentRecordDetail record = mapper.Map<DocumentRecordDetail>(documentRecordDetailDTO);
                 recordList.Add(record);
 
                 if (item.FieldType == AnswerTypeEnum.File && !string.IsNullOrWhiteSpace(item.Value))
@@ -227,9 +236,9 @@ namespace CoffeeShop.Service.Implement
                 }
             }
             if (!isEdit)
-                _unitOfWork.DocumentRepository.InsertDocumentRecord(recordList);
+                _unitOfWork.DocumentRepository.InsertDocumentRecordDetail(recordList);
             else
-                _unitOfWork.DocumentRepository.UpdateDocumentRecord(recordList);
+                _unitOfWork.DocumentRepository.UpdateDocumentRecordDetail(recordList);
         }
 
         #region 檔案上傳
@@ -355,20 +364,13 @@ namespace CoffeeShop.Service.Implement
                         break;
                 }
             }
+            _unitOfWork.Dispose();
             return data;
         }
 
         public List<DocumentRecordListViewModel> GetRecodList()
         {
-            List<DocumentRecordListViewModel> model = new List<DocumentRecordListViewModel>();
-            var record = _unitOfWork.DocumentRepository.GetDocumentRecordList("");
-            if (record.Count() > 0)
-            {
-                var config = new MapperConfiguration(cfg =>
-                cfg.CreateMap<IEnumerable<DocumentRecord>, List<DocumentRecordListViewModel>>());
-                var mapper = config.CreateMapper();
-                model = mapper.Map<List<DocumentRecordListViewModel>>(record);
-            }
+            List<DocumentRecordListViewModel> model = _unitOfWork.DocumentRepository.GetDocumentRecordList("").ToList();
             _unitOfWork.Dispose();
             return model;
         }
@@ -489,6 +491,78 @@ namespace CoffeeShop.Service.Implement
                     }
                 }
             }
+        }
+        public DocumentFormViewModel GetFrontFormData(string id, string recordId)
+        {
+            Document document = _unitOfWork.DocumentRepository.GetDocument(id);
+            IEnumerable<DocumentField> fields = _unitOfWork.DocumentRepository.GetFieldList(id).ToList();
+            IEnumerable<DocumentRecordDetail> record = _unitOfWork.DocumentRepository.GetDocumentRecord(recordId);
+            bool isEdit = record.Count() > 0;
+            DocumentFormViewModel model = new DocumentFormViewModel()
+            {
+                Id = document.Id.ToString(),
+                RecordId = recordId,
+                Caption = document.Caption,
+                HeadText = document.HeadText,
+                FooterText = document.FooterText,
+            };
+            foreach (DocumentField field in fields)
+            {
+                DocumentFieldViewModel dfvm = new DocumentFieldViewModel()
+                {
+                    Id = field.Id.ToString(),
+                    ParentId = field.ParentId.HasValue ? field.ParentId.Value.ToString() : null,
+                    FieldName = field.FieldName,
+                    Note = field.Note,
+                    FieldType = (AnswerTypeEnum)field.FieldType,
+                    WordLimit = field.WordLimit,
+                    RowLimit = field.RowLimit,
+                    FileSizeLimit = field.FileSizeLimit,
+                    FileExtension = field.FileExtension,
+                    Sort = field.Sort,
+                    IsRequired = field.IsRequired,
+                    IsIncludedExport = field.IsIncludedExport,
+                    IsEditable = field.IsEditable,
+                };
+                if (field.FieldType == (int)AnswerTypeEnum.SingleChoice || field.FieldType == (int)AnswerTypeEnum.MultipleChoice || field.FieldType == (int)AnswerTypeEnum.DropDownList)
+                {
+                    IEnumerable<DocumentFieldOption> options = _unitOfWork.DocumentRepository.GetFieldOption(field.Id.ToString()).ToList();
+                    foreach (DocumentFieldOption option in options)
+                    {
+                        DocumentFieldOptionViewModel dfovm = new DocumentFieldOptionViewModel()
+                        {
+                            Id = option.Id.ToString(),
+                            OptionName = option.OptionName,
+                            Sort = option.Sort,
+                            MemoType = (MemoTypeEnum)option.MemoType,
+                        };
+                        dfvm.Options.Add(dfovm);
+                    }
+                }
+                //修改
+                if (isEdit)
+                {
+                    var doc = record.FirstOrDefault(x => x.DocumentFieldId == field.Id);
+                    if (doc != null)
+                    {
+                        dfvm.Value = doc.FilledText;
+                        dfvm.MemoValue = doc.MemoText;
+                        dfvm.Remark = doc.Remark;
+                        if (dfvm.Options.Count() > 0 && !string.IsNullOrEmpty(dfvm.MemoValue) && !string.IsNullOrEmpty(dfvm.Value))
+                        {
+                            string[] optionId = dfvm.Value.Split(',');
+                            string[] memoValue = dfvm.MemoValue.Split(',');
+                            for (int i = 0; i < memoValue.Count(); i++)
+                            {
+                                dfvm.Options.FirstOrDefault(x => x.Id == optionId[i])!.MemoValue = memoValue[i];
+                            }
+                        }
+                    }
+                }
+                model.Fields.Add(dfvm);
+            }
+            _unitOfWork.Dispose();
+            return model;
         }
 
         public int DeleteField(string fieldId)

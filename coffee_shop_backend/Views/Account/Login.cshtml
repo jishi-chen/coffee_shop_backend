@@ -1,0 +1,18 @@
+﻿@model LoginViewModel
+
+<a href="@Url.Action("Register","Account")">申請</a>
+<a href="@Url.Action("Settings","Account")">設定</a>
+
+<form method="post" asp-controller="Account" asp-action="Login" novalidate>
+    <div class="form-group">
+        <label asp-for="IdentityString">身分證字號</label>
+        <input asp-for="IdentityString" class="form-control" />
+        <span asp-validation-for="IdentityString" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Password">密碼</label>
+        <input asp-for="Password" class="form-control" type="password" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">提交</button>
+</form>

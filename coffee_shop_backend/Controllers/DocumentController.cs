@@ -1,11 +1,10 @@
-﻿using CoffeeShop.Model.Entities;
-using CoffeeShop.Model.Enum;
+﻿using CoffeeShop.Model.Enum;
 using CoffeeShop.Model.ViewModels;
 using CoffeeShop.Repository.Interface;
 using CoffeeShop.Service.Interface;
 using CoffeeShop.Utility.Helpers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Newtonsoft.Json;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
@@ -16,6 +15,7 @@ namespace coffee_shop_backend.Controllers
 {
     [ApiExplorerSettings(IgnoreApi = true)]
     [Route("[controller]")]
+    [Authorize(Policy = "AdminPolicy")]
     public class DocumentController : BaseController
     {
         private IDocumentService _documentService;
@@ -96,9 +96,7 @@ namespace coffee_shop_backend.Controllers
         [Route("Record")]
         public IActionResult Record(string id, string documentId)
         {
-            List<DocumentRecordViewModel> model = new List<DocumentRecordViewModel>();
-            model = _documentService.GetRecordData(id, documentId);
-            _unitOfWork.Dispose();
+            List<DocumentRecordViewModel> model = _documentService.GetRecordData(id, documentId);
             return View(model);
         }
 

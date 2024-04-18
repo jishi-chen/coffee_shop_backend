@@ -17,66 +17,56 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Koffee</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Index" asp-action="Index">Koffee</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Index" asp-action="Index">Javascript</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="practice01" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                練習程式測試
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="practice01">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Test" asp-action="Index">Javascript</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Test" asp-action="Index2">驗證碼</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Test" asp-action="Index3">Datatable</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Test" asp-action="Index4">??</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Test" asp-action="Index5">Test</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Test" asp-action="Index6">Redis</a>
+                            </div>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Index" asp-action="Index2">驗證碼</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Index" asp-action="Index3">Datatable</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Application" asp-action="Login">基本資料驗證</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Test" asp-action="Index">Test</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="account01" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                會員功能
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="account01">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">登入</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">登出</a>
+                            </div>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" href="../swagger">Api UI</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Index" asp-action="Index4">個人資料</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Index" asp-action="Logout">登出</a>
-                        </li>
-
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDocument01" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                文件後台
+                                申請問卷功能
                             </a>
                             <div class="dropdown-menu" aria-labelledby="navbarDocument01">
                                 <a class="dropdown-item" asp-area="" asp-controller="Document" asp-action="Index">
-                                    文件列表
+                                    後台列表
                                 </a>
                                 <a class="dropdown-item" asp-area="" asp-controller="Document" asp-action="RecordList">
-                                    文件填寫結果
+                                    後台填寫結果
                                 </a>
-                            </div>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDocument02" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                文件前台
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="navbarDocument02">
                                 <a class="dropdown-item" asp-area="" asp-controller="DocumentFront" asp-action="Index">
-                                   文件列表
+                                    前台列表
                                 </a>
                                 <a class="dropdown-item" asp-area="" asp-controller="DocumentFront" asp-action="RecordList">
-                                   文件填寫結果
+                                    前台填寫結果
                                 </a>
                             </div>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Project" asp-action="Index">專案建置工具</a>
                         </li>
                     </ul>
                 </div>

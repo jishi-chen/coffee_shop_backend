@@ -6,7 +6,6 @@ using CoffeeShop.Service.Implement;
 using CoffeeShop.Service.Interface;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -17,7 +16,7 @@ namespace coffee_shop_backend
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration) 
+        public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
@@ -53,7 +52,7 @@ namespace coffee_shop_backend
             {
                 ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; },
                 UseCookies = false,
-            }); 
+            });
             services.AddLocalization(options => options.ResourcesPath = "Resources");
             services.AddMemoryCache();
             services.AddSession();
@@ -101,14 +100,18 @@ namespace coffee_shop_backend
                         builder.AllowAnyHeader();
                     });
             });
-            
-            //CSRF token 驗證相關
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(
+
+            //JWT 身份驗證 CSRF token 主要用於api應用程式
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(
                 options =>
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
-                         // 透過這項宣告，就可以從 "sub" 取值並設定給 User.Identity.Name
+                        // 透過這項宣告，就可以從 "sub" 取值並設定給 User.Identity.Name
                         //NameClaimType = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier",
                         // 透過這項宣告，就可以從 "roles" 取值，並可讓 [Authorize] 判斷角色
                         //RoleClaimType = "Member",
@@ -141,8 +144,39 @@ namespace coffee_shop_backend
                         }
                     };
                 });
-            //OpenID Connect 整合 Google 登入
+
+            //Cookie 身份驗證 主要用於web應用程式
             services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            }).AddCookie(options =>
+            {
+                options.Cookie.Name = "AuthenticationCookie";
+                options.Cookie.HttpOnly = true;
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+                options.SlidingExpiration = true;
+                options.AccessDeniedPath = "/Account/Login";
+            });
+
+            //使用Policy策略驗證
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminPolicy", policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireRole("Admin");
+                    //policy.RequireClaim("Admin");
+                });
+                options.AddPolicy("MemberPolicy", policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireRole("Member");
+                    //policy.RequireClaim("Member");
+                });
+            });
+            //OpenID Connect 整合 Google 登入
+            /*services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
@@ -168,7 +202,16 @@ namespace coffee_shop_backend
                 };
 
                 options.SaveTokens = true;
-            });
+            });*/
+
+            //實踐本機快取
+            services.AddMemoryCache();
+            // Redis 分散式快取
+            //services.AddDistributedRedisCache(options =>
+            //{
+            //    // Redis Server 的 IP 跟 Port
+            //    options.Configuration = "127.0.0.1:8080";
+            //});
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -190,18 +233,17 @@ namespace coffee_shop_backend
             //app.UseApiVersioning(); //使用 Api Version Middleware
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
-            //app.UseSwagger();
+            app.UseSwagger();
             // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
             // specifying the Swagger JSON endpoint.
             // 在應用程式的根目錄上提供 Swagger UI，請將 RoutePrefix 屬性設為空字串
-            //app.UseSwaggerUI(c =>
-            //{
-            //    c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Document V1");  // https://localhost:7219/swagger/v1/swagger.json
-            //    //c.RoutePrefix = string.Empty;
-            //    c.RoutePrefix = "swagger";
-            //});
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Document V1");  // https://localhost:7219/swagger/v1/swagger.json
+                c.RoutePrefix = "swagger";
+            });
 
-            // Middleware使用
+            // 自訂Middleware使用
             //app.UseMiddleware<CustomMiddleware>();
             //app.UseCustom();
             //app.UseCustom2();
@@ -211,11 +253,11 @@ namespace coffee_shop_backend
             {
                 endpoints.MapControllerRoute(
                   name: "Admin",
-                  pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+                  pattern: "{area:exists}/{controller=Index}/{action=Index}/{id?}");
                 endpoints.MapControllerRoute(
                   name: "default",
-                  pattern: "{controller=Index}/{action=Index}/{id?}")
-                  .RequireAuthorization(); // <-- 加入這行，這會讓整個網站都需要登入才能用！
+                  pattern: "{controller=Index}/{action=Index}/{id?}");
+                //.RequireAuthorization(); // <-- 加入這行，這會讓整個網站都需要登入才能用！
                 endpoints.MapRazorPages();
             });
         }

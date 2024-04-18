@@ -1,25 +1,134 @@
 ﻿
-@{
-    ViewData["Title"] = "Index";
-}
+<t2>Test Javascript</t2>
+<div>練習內容：<br>
+    <ol>
+        <li>console其他用法</li>
+        <li>Spread Operator</li>
+        <li>Rest Parameter </li>
+        <li>Arguments 變成 Array</li>
+    </ol>
+</div>
+<p id="name">test</p>
+<p id="address">test2</p>
 
-<h1>Index</h1>
-
-<form asp-controller="test" asp-action="Upload" enctype="multipart/form-data" method="post">
-    <label for="file">上傳檔案</label>
-    <input id="file" name="file" type="file" />
-    <button type="submit">送出</button>
-</form>
-<a class="btn btn-primary" id="link" role="button" href="@Url.Action("GetFile","Test")">下載檔案</a>
+<p>var something = "20230414.pdf"</p>
+<p>var IndexView = "HomeView.vue"</p>
+<select>
+    <option>檔案名稱</option>
+    <option>變數名稱</option>
+</select>
+<input type="text"/><button>搜尋</button>
+<p>搜尋結果:</p>
+<table border=1>
+  <tr>
+    <td>IndexView</td>
+    <td>HomeView.vue</td>
+  </tr>
+</table>
 
 @section Scripts {
-    <script>
-        $("[id^=link]").hover(function () {
-            $(this).removeClass("btn-primary");
-            $(this).addClass("btn-secondary");
-        }, function () {
-            $(this).removeClass("btn-secondary");
-            $(this).addClass("btn-primary");
-        });
-    </script>
+<script>
+    $(document).ready(function() {
+
+        const Ming = {
+          name: '小明',
+          age: 15,
+          favorite: '鍋燒意麵'
+        }
+        const Jay = {
+          name: '杰倫',
+          age: 16,
+          favorite: '炒麵'
+        }
+        const Auntie = {
+          name: '漂亮阿姨',
+          age: 21,
+          favorite: '蘿蔔糕'
+        }
+        const people = [Ming, Jay, Auntie];
+
+        console.clear();
+        //紀錄並印出調用 console.count() 的次數
+        console.count();
+        console.count("apple")
+        //套用css
+        console.log(`%c ${Ming.name} 改顏色大小`, 'color: orange; font-size: 24px');
+        console.warn(Jay.name);
+        console.error(Auntie.name);
+        console.info(Ming.name);
+        console.log(people);
+        console.table(people);
+
+        let testBool = true;
+        console.assert(testBool, "false~~");
+        console.assert(!testBool, "false~~");
+
+        //執行時間
+        let count = 1;
+        console.time("for loop");
+        for(let i = 0;i<1000;i++){
+            count++;
+        }
+        console.timeEnd("for loop");
+
+        //啟動並建立一個 group，讓訊息包在 group 裡面
+        console.group("fruit");
+        console.log("lemon");
+        console.log("orange");
+        console.groupEnd("fruit");
+
+        //Spread Operator可以用來將一個可迭代物件（如數組或字串）展開為個別元素，或者將多個物件合併為一個物件。其語法為三個點(...)。
+        const text = "spread";
+        const text2 = [...text];
+        $("#address").html(text2);
+
+        let array = [12, 82, 2, -4, 0]
+        let array2 = [4, 5, 6];
+        const arr = [...array, ...array2];
+        console.log(Math.max(...arr));
+        console.log(Math.max(arr)); //error
+
+        function myFunction(x, y, z) {
+          console.log(x + y + z);
+        }
+        myFunction.apply(null, array2)  // 
+        myFunction(...array2)  // 同上
+
+        //以物件的形式呈現資料
+        const p = document.querySelector('p');
+        console.log(p);
+        console.dir(p);
+
+        // Rest Parameter 傳入不定數量的參數，並把它們收集到一個陣列中
+        function sum(...numbers) {
+          let result = 0;
+          for (let i = 0; i < numbers.length; i++) {
+            result += numbers[i];
+          }
+          return result;
+        }
+        console.log(sum(1, 2, 3, 4, 5)); // 15
+
+        function plus (a, ...theArgs) {
+          return theArgs.map((element) => a + element)
+        }
+
+        const array1 = plus(2, 30, 45, 63)
+        console.log(array1)  // [32, 47, 65]
+
+        //把 Arguments 變成 Array
+        function myFunction3() {
+            const normalArray1 = Array.prototype.slice.call(arguments)  
+            const normalArray2 = [].slice.call(arguments)  
+            const normalArray3 = Array.from(arguments)  
+            const normalArray4 = [...arguments]
+
+            console.log(normalArray1)  // ['one', 'two', 'three']
+            normalArray1.shift()       // test 能否用標準數組的方法
+            console.log(normalArray1)  // ['two', 'three']，成功
+        }
+        myFunction3("one", "two", "three", "four")
+    });
+
+</script>
 }

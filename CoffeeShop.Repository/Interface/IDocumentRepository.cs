@@ -22,13 +22,14 @@ namespace CoffeeShop.Repository.Interface
         DocumentFieldOption GetFieldOption(string optionId, string fieldId);
         void DeleteField(string fieldId);
         void UpdateFieldSort(IEnumerable<DocumentField> fields);
-        DocumentRecord? GetDocumentRecord(string fieldId, string recordId);
-        IEnumerable<DocumentRecord> GetDocumentRecord(string recordId);
-        IEnumerable<DocumentRecord> GetDocumentRecord();
-        IEnumerable<DocumentRecord> GetDocumentRecordList(string? documentId);
+        DocumentRecordDetail? GetDocumentRecord(string fieldId, string recordId);
+        IEnumerable<DocumentRecordDetail> GetDocumentRecord(string recordId);
+        IEnumerable<DocumentRecordDetail> GetDocumentRecord();
+        IEnumerable<DocumentRecordListViewModel> GetDocumentRecordList(string? documentId);
         IEnumerable<DocumentRecordViewModel> GetDocumentRecordData(string recordId, string documentId);
-        void InsertDocumentRecord(IEnumerable<DocumentRecord> record);
-        void UpdateDocumentRecord(IEnumerable<DocumentRecord> record);
+        int InsertDocumentRecord(DocumentRecord record);
+        void InsertDocumentRecordDetail(IEnumerable<DocumentRecordDetail> record);
+        void UpdateDocumentRecordDetail(IEnumerable<DocumentRecordDetail> record);
         DataTable GetExportData(string documentId);
     }
 }

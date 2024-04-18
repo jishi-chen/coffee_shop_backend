@@ -12,6 +12,8 @@ public partial class CoffeeShopContext : DbContext
     {
     }
 
+    public virtual DbSet<Account> Accounts { get; set; }
+
     public virtual DbSet<AddressArea> AddressAreas { get; set; }
 
     public virtual DbSet<AddressCity> AddressCities { get; set; }
@@ -24,12 +26,32 @@ public partial class CoffeeShopContext : DbContext
 
     public virtual DbSet<DocumentRecord> DocumentRecords { get; set; }
 
-    public virtual DbSet<MemberInfo> MemberInfos { get; set; }
+    public virtual DbSet<DocumentRecordDetail> DocumentRecordDetails { get; set; }
 
-    public virtual DbSet<Reg> Regs { get; set; }
+    public virtual DbSet<MemberInfo> MemberInfos { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Account>(entity =>
+        {
+            entity.Property(e => e.IdentityString)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("IdentityString");
+            entity.Property(e => e.CreateDate).HasColumnType("datetime");
+            entity.Property(e => e.Email)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.Name).HasMaxLength(50);
+            entity.Property(e => e.Password)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.Phone)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+        });
+
         modelBuilder.Entity<AddressArea>(entity =>
         {
             entity.ToTable("AddressArea");
@@ -89,6 +111,13 @@ public partial class CoffeeShopContext : DbContext
 
         modelBuilder.Entity<DocumentRecord>(entity =>
         {
+            entity.HasKey(e => e.Id).HasName("PK_Regs");
+
+            entity.Property(e => e.Name).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<DocumentRecordDetail>(entity =>
+        {
             entity.HasKey(e => e.SeqNo).HasName("PK_DocumentRecord");
 
             entity.Property(e => e.FilledText).HasMaxLength(50);
@@ -109,11 +138,6 @@ public partial class CoffeeShopContext : DbContext
                 .IsUnicode(false);
             entity.Property(e => e.UpdateDate).HasColumnType("datetime");
             entity.Property(e => e.UserName).HasMaxLength(50);
-        });
-
-        modelBuilder.Entity<Reg>(entity =>
-        {
-            entity.Property(e => e.Name).HasMaxLength(50);
         });
 
         OnModelCreatingPartial(modelBuilder);

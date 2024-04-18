@@ -15,12 +15,10 @@ namespace coffee_shop_backend.Controllers
     public class DocumentFrontController : BaseController
     {
         private IUnitOfWork _unitOfWork;
-        private HttpContext? _context;
         private string sessionName = "DocumentFrontViewModel";
         private IDocumentService _documentService;
         public DocumentFrontController(IUnitOfWork unitOfWork, IHttpContextAccessor accessor, IDocumentService documentService) : base(accessor)
         {
-            _context = accessor.HttpContext;
             _unitOfWork = unitOfWork;
             _documentService = documentService;
         }
@@ -36,75 +34,7 @@ namespace coffee_shop_backend.Controllers
         [Route("Form")]
         public IActionResult Form(string id, string recordId)
         {
-            Document document = _unitOfWork.DocumentRepository.GetDocument(id);
-            IEnumerable<DocumentField> fields = _unitOfWork.DocumentRepository.GetFieldList(id).ToList();
-            IEnumerable<DocumentRecord> record = _unitOfWork.DocumentRepository.GetDocumentRecord(recordId);
-            bool isEdit = record.Count() > 0;
-            DocumentFormViewModel model = new DocumentFormViewModel()
-            {
-                Id = document.Id!,
-                RecordId = recordId,
-                Caption = document.Caption,
-                HeadText = document.HeadText,
-                FooterText = document.FooterText,
-            };
-            foreach (DocumentField field in fields)
-            {
-                DocumentFieldViewModel dfvm = new DocumentFieldViewModel()
-                {
-                    Id = field.Id,
-                    ParentId = field.ParentId,
-                    FieldName = field.FieldName,
-                    Note = field.Note,
-                    FieldType = (AnswerTypeEnum)field.FieldType,
-                    WordLimit = field.WordLimit,
-                    RowLimit = field.RowLimit,
-                    FileSizeLimit = field.FileSizeLimit,
-                    FileExtension = field.FileExtension,
-                    Sort = field.Sort,
-                    IsRequired = field.IsRequired,
-                    IsIncludedExport = field.IsIncludedExport,
-                    IsEditable = field.IsEditable,
-                };
-                if (field.FieldType == (int)AnswerTypeEnum.SingleChoice || field.FieldType == (int)AnswerTypeEnum.MultipleChoice || field.FieldType == (int)AnswerTypeEnum.DropDownList)
-                {
-                    IEnumerable<DocumentFieldOption> options = _unitOfWork.DocumentRepository.GetFieldOption(field.Id).ToList();
-                    foreach (DocumentFieldOption option in options)
-                    {
-                        DocumentFieldOptionViewModel dfovm = new DocumentFieldOptionViewModel()
-                        {
-                            Id = option.Id,
-                            OptionName = option.OptionName,
-                            Sort = option.Sort,
-                            MemoType = (MemoTypeEnum)option.MemoType,
-                        };
-                        dfvm.Options.Add(dfovm);
-                    }
-                }
-                //修改
-                if (isEdit)
-                {
-                    var doc = record.FirstOrDefault(x => x.DocumentFieldId == field.Id);
-                    if (doc != null)
-                    {
-                        dfvm.Value = doc.FilledText;
-                        dfvm.MemoValue = doc.MemoText;
-                        dfvm.Remark = doc.Remark;
-                        if (dfvm.Options.Count() > 0 && !string.IsNullOrEmpty(dfvm.MemoValue) && !string.IsNullOrEmpty(dfvm.Value))
-                        {
-                            string[] optionId = dfvm.Value.Split(',');
-                            string[] memoValue = dfvm.MemoValue.Split(',');
-                            for (int i = 0; i < memoValue.Count(); i++)
-                            {
-                                dfvm.Options.FirstOrDefault(x => x.Id == optionId[i])!.MemoValue = memoValue[i];
-                            }
-                        }
-                    }
-                }
-                model.Fields.Add(dfvm);
-            }
-            _unitOfWork.Dispose();
-
+            DocumentFormViewModel model = _documentService.GetFrontFormData(id, recordId);
             model.Fields = model.Fields.OrderBy(x => x.Sort).ThenBy(x => x.ParentId).ToList();
             string modelString = JsonConvert.SerializeObject(model);
             TempData[sessionName] = modelString;
@@ -127,9 +57,8 @@ namespace coffee_shop_backend.Controllers
                     //新增
                     if (!isEdit)
                     {
-                        var record = _unitOfWork.DocumentRepository.GetDocumentRecord().OrderByDescending(x => x.RegId).FirstOrDefault();
-                        if (record != null)
-                            recordId = (record.RegId + 1).ToString();
+                        var record = _unitOfWork.DocumentRepository.GetDocumentRecord().OrderByDescending(x => x.DocumentRecordId).FirstOrDefault();
+                        recordId = record == null ? "1" : (record.DocumentRecordId + 1).ToString();
                     }
                     _documentService.Create(model, recordId, collection.Files, isEdit);
                     _unitOfWork.Complete();

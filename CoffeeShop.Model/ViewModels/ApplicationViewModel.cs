@@ -1,12 +1,8 @@
 ﻿namespace CoffeeShop.Model.ViewModels
 {
-    public class ApplicationViewModel
-    {
-    }
-
     public class LoginViewModel
     {
-        public string Account { get; set; }
-        public string Password { get; set; }
+        public string IdentityString { get; set; } = null!;
+        public string Password { get; set; } = null!;
     }
 }

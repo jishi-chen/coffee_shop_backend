@@ -13,7 +13,7 @@ public partial class DocumentField
 
     public string FieldName { get; set; } = null!;
 
-    public string Note { get; set; } = null!;
+    public string? Note { get; set; }
 
     public byte FieldType { get; set; }
 

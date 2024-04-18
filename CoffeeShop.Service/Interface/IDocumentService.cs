@@ -20,6 +20,6 @@ namespace CoffeeShop.Service.Interface
         void EditField(DocumentViewModel model, string fieldId);
         int DeleteField (string id);
         void SetFieldSort(DocumentViewModel model, string fieldId, bool direction);
-
+        DocumentFormViewModel GetFrontFormData(string id, string recordId);
     }
 }

@@ -1,0 +1,25 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<form asp-controller="test" asp-action="Upload" enctype="multipart/form-data" method="post">
+    <label for="file">上傳檔案</label>
+    <input id="file" name="file" type="file" />
+    <button type="submit">送出</button>
+</form>
+<a class="btn btn-primary" id="link" role="button" href="@Url.Action("GetFile","Test")">下載檔案</a>
+
+@section Scripts {
+    <script>
+        $("[id^=link]").hover(function () {
+            $(this).removeClass("btn-primary");
+            $(this).addClass("btn-secondary");
+        }, function () {
+            $(this).removeClass("btn-secondary");
+            $(this).addClass("btn-primary");
+        });
+    </script>
+}

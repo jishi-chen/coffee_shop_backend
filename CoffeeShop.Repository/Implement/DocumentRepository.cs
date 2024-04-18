@@ -122,27 +122,31 @@ values (@DocumentFieldId, @OptionName, @MemoType, @Sort) ";
             Connection.Execute(sql, fields, Transaction);
         }
 
-        public DocumentRecord? GetDocumentRecord(string fieldId, string recordId)
+        public DocumentRecordDetail? GetDocumentRecord(string fieldId, string recordId)
         {
-            string sql = $@" select * from DocumentRecords where DocumentFieldId=@DocumentFieldId and RegId=@RegId ";
-            return Connection.QuerySingle<DocumentRecord>(sql, new { DocumentFieldId = fieldId, RegId = recordId }, Transaction);
+            string sql = $@" select * from DocumentRecordDetails where DocumentFieldId=@DocumentFieldId and DocumentRecordId=@DocumentRecordId ";
+            return Connection.QuerySingle<DocumentRecordDetail>(sql, new { DocumentFieldId = fieldId, DocumentRecordId = recordId }, Transaction);
         }
-        public IEnumerable<DocumentRecord> GetDocumentRecord(string recordId)
+        public IEnumerable<DocumentRecordDetail> GetDocumentRecord(string recordId)
         {
-            string sql = $@" select * from DocumentRecords where RegId=@RegId ";
-            return Connection.Query<DocumentRecord>(sql, new { RegId = recordId }, Transaction);
+            string sql = $@" select * from DocumentRecordDetails where DocumentRecordId=@DocumentRecordId ";
+            return Connection.Query<DocumentRecordDetail>(sql, new { DocumentRecordId = recordId }, Transaction);
         }
-        public IEnumerable<DocumentRecord> GetDocumentRecord()
+        public IEnumerable<DocumentRecordDetail> GetDocumentRecord()
         {
-            string sql = $@" select * from DocumentRecords where 1=1 ";
-            return Connection.Query<DocumentRecord>(sql, new { }, Transaction);
+            string sql = $@" select * from DocumentRecordDetails where 1=1 ";
+            return Connection.Query<DocumentRecordDetail>(sql, new { }, Transaction);
         }
-        public IEnumerable<DocumentRecord> GetDocumentRecordList(string? documentId)
+        public IEnumerable<DocumentRecordListViewModel> GetDocumentRecordList(string? documentId)
         {
-            string sql = $@" select distinct RegId, DocumentId from DocumentRecords where 1=1 ";
+            string sql = $@"  select distinct record.Id as RegId, record.DocumentId, d.Caption as DocumentName, record.Name as RegName
+                             from DocumentRecords record
+                             left join Documents d on record.DocumentId = d.Id
+                             left join DocumentRecordDetails r on record.Id = r.DocumentRecordId
+                             where 1=1 ";
             if (!string.IsNullOrEmpty(documentId))
                 sql += " and DocumentId=@DocumentId ";
-            return Connection.Query<DocumentRecord>(sql, new { DocumentId = documentId }, Transaction);
+            return Connection.Query<DocumentRecordListViewModel>(sql, new { DocumentId = documentId }, Transaction);
         }
         public IEnumerable<DocumentRecordViewModel> GetDocumentRecordData(string recordId, string documentId)
         {
@@ -150,27 +154,35 @@ values (@DocumentFieldId, @OptionName, @MemoType, @Sort) ";
 select df.ParentId, df.Id as FieldId, df.FieldName, df.FieldType, df.Sort, df.IsRequired, df.IsEditable, dr.FilledText, dr.MemoText as MemoValue, dr.Remark
 from
 (select *
-from DocumentRecords
-where RegId=@RegId) dr
+from DocumentRecordDetails
+where DocumentRecordId=@DocumentRecordId) dr
 right join DocumentFields df on dr.DocumentFieldId = df.Id
 where df.DocumentId=@DocumentId
 order by df.Sort asc, df.ParentId asc ";
 
-            return Connection.Query<DocumentRecordViewModel>(sql, new { RegId = recordId, DocumentId = documentId }, Transaction);
+            return Connection.Query<DocumentRecordViewModel>(sql, new { DocumentRecordId = recordId, DocumentId = documentId }, Transaction);
         }
-        public void InsertDocumentRecord(IEnumerable<DocumentRecord> recordList)
+        public int InsertDocumentRecord(DocumentRecord record)
         {
             string sql = $@"
-insert into DocumentRecords (RegId, DocumentId, DocumentFieldId, FilledText, MemoText, Remark) 
-values (@RegId, @DocumentId, @DocumentFieldId, @FilledText, @MemoText, @Remark) ";
+insert into DocumentRecords (DocumentId, Name) 
+values (@DocumentId, @Name)
+SELECT SCOPE_IDENTITY(); ";
+            return Connection.Query<int>(sql, record, Transaction).Single();
+        }
+        public void InsertDocumentRecordDetail(IEnumerable<DocumentRecordDetail> recordList)
+        {
+            string sql = $@"
+insert into DocumentRecordDetails (DocumentRecordId, DocumentFieldId, FilledText, MemoText, Remark) 
+values (@DocumentRecordId, @DocumentFieldId, @FilledText, @MemoText, @Remark) ";
             Connection.Execute(sql, recordList, Transaction);
         }
-        public void UpdateDocumentRecord(IEnumerable<DocumentRecord> recordList)
+        public void UpdateDocumentRecordDetail(IEnumerable<DocumentRecordDetail> recordList)
         {
             string sql = $@"
-update DocumentRecords set
+update DocumentRecordDetails set
 FilledText=@FilledText, MemoText=@MemoText, Remark=@Remark
-where RegId=@RegId and DocumentId=@DocumentId and DocumentFieldId=@DocumentFieldId ";
+where DocumentRecordId=@DocumentRecordId and DocumentFieldId=@DocumentFieldId ";
             Connection.Execute(sql, recordList, Transaction);
         }
         public DataTable GetExportData(string documentId)
@@ -191,21 +203,23 @@ select @cols = STUFF((SELECT ',' + QUOTENAME(FieldName)
             ).value('.', 'NVARCHAR(MAX)') 
         ,1,1,'');
 set @SubQuery = N'
-select record.RegId, field.FieldName, record.FilledText, field.FieldType,
+select record.DocumentRecordId, field.FieldName, record.FilledText, field.FieldType,
 STUFF((
 select '';'' +cast(o.OptionName AS NVARCHAR )
-from DocumentRecords r
+from DocumentRecordDetails r
 join DocumentFields f on r.DocumentFieldId = f.Id and (f.FieldType = @SingleChoiceType or f.FieldType = @DoubleChoiceType)
 join DocumentFieldOptions o on r.DocumentFieldId = o.DocumentFieldId and r.FilledText like ''%''+convert(nvarchar,o.Id)+''%''
-where r.DocumentId = @id and record.DocumentFieldId = o.DocumentFieldId and r.RegId = record.RegId
+join DocumentRecords drecord on r.DocumentRecordId = drecord.Id
+where drecord.DocumentId = @id and record.DocumentFieldId = o.DocumentFieldId and r.DocumentRecordId = record.DocumentRecordId
 FOR XML PATH('''')), 1, 1, '''') as OptionText
-from DocumentRecords record 
+from DocumentRecordDetails record 
+join DocumentRecords ddrecord on record.DocumentRecordId = ddrecord.Id
 join DocumentFields field on record.DocumentFieldId = field.Id
-where record.DocumentId = @id
+where ddrecord.DocumentId = @id
 ';
 set @query = N'
 select * from (
-select RegId, FieldName, CAST(CASE WHEN FieldType = @SingleChoiceType or FieldType = @DoubleChoiceType THEN OptionText ELSE FilledText END AS nvarchar) as FilledText
+select DocumentRecordId, FieldName, CAST(CASE WHEN FieldType = @SingleChoiceType or FieldType = @DoubleChoiceType THEN OptionText ELSE FilledText END AS nvarchar) as FilledText
 from (' + @SubQuery  + ') as y where 1=1
 ) t
 pivot(

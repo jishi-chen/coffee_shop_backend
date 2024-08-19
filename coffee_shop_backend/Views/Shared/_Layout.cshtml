@@ -6,12 +6,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - coffee_shop_backend</title>
-    <link rel="stylesheet" href="~/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="~/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/coffee_shop_backend.styles.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/bootstrap-icons.css"/>
-    <link rel="stylesheet" href="~/css/sweetalert2.min.css"/>
-    <link rel="stylesheet" href="~/css/common.css"/>
+    <link rel="stylesheet" href="~/css/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css" />
+    <link rel="stylesheet" href="~/css/common.css" />
 </head>
 <body>
     <header>
@@ -35,6 +35,7 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Test" asp-action="Index4">??</a>
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Test" asp-action="Index5">Test</a>
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Test" asp-action="Index6">Redis</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Test" asp-action="Index7">CSS</a>
                             </div>
                         </li>
                         <li class="nav-item dropdown">
@@ -89,7 +90,7 @@
     <!--頁腳Scripts-->
     <partial name="_FooterScripts" />
     <script src="~/js/site.js" asp-append-version="true"></script>
-    @await Component.InvokeAsync(nameof(Footer), new { name = "Willy"})
+    @await Component.InvokeAsync(nameof(Footer), new { name = "Willy" })
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

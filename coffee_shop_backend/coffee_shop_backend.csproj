@@ -15,6 +15,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Models\**" />
+    <Content Remove="Models\**" />
+    <EmbeddedResource Remove="Models\**" />
+    <None Remove="Models\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Asp.Versioning.Mvc" Version="8.1.0" />
     <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.0" />
     <PackageReference Include="Bootstrap.v3.Datetimepicker" Version="4.17.49" />
@@ -35,10 +42,6 @@
 	<ProjectReference Include="..\CoffeeShop.Repository\CoffeeShop.Repository.csproj" />
 	<ProjectReference Include="..\CoffeeShop.Service\CoffeeShop.Service.csproj" />
 	<ProjectReference Include="..\CoffeeShop.Utility\CoffeeShop.Utility.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Models\" />
   </ItemGroup>
 
 </Project>

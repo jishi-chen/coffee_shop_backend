@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using CoffeeShop.Utility.Helpers;
 
 namespace coffee_shop_backend.Controllers
 {
@@ -44,6 +45,12 @@ namespace coffee_shop_backend.Controllers
 
         public IActionResult Index2()
         {
+            List<string> list = new List<string>();
+            int a = 5;
+            int b = 0;
+            var add = (int value) => a++;
+            add += (int value) => value++;
+            b = add(a);
             return View();
         }
         public IActionResult Index3()
@@ -85,28 +92,28 @@ namespace coffee_shop_backend.Controllers
             builder.MultipleActiveResultSets = true;
             builder.TrustServerCertificate = true;
             var sql = "SELECT * FROM AddressCity FOR JSON PATH";
-            using (SqlConnection conn = new SqlConnection(builder.ConnectionString))
-            {
-                using (var cmd = new SqlCommand(sql, conn))
-                {
-                    var jsonResult = new StringBuilder();
-                    conn.Open();
+            //using (SqlConnection conn = new SqlConnection(builder.ConnectionString))
+            //{
+            //    using (var cmd = new SqlCommand(sql, conn))
+            //    {
+            //        var jsonResult = new StringBuilder();
+            //        conn.Open();
 
-                    var reader = cmd.ExecuteReader();
-                    if (!reader.HasRows)
-                    {
-                        jsonResult.Append("[]");
-                    }
-                    else
-                    {
-                        while (reader.Read())
-                        {
-                            jsonResult.Append(reader.GetValue(0).ToString());
-                        }
-                    }
-                    Console.WriteLine(jsonResult.ToString());
-                };
-            };
+            //        var reader = cmd.ExecuteReader();
+            //        if (!reader.HasRows)
+            //        {
+            //            jsonResult.Append("[]");
+            //        }
+            //        else
+            //        {
+            //            while (reader.Read())
+            //            {
+            //                jsonResult.Append(reader.GetValue(0).ToString());
+            //            }
+            //        }
+            //        Console.WriteLine(jsonResult.ToString());
+            //    };
+            //};
 
             // 漂亮的建立 Query String 查詢字串
 
@@ -212,6 +219,11 @@ namespace coffee_shop_backend.Controllers
             return View();
         }
 
+        public IActionResult Index7()
+        {
+            return View();
+        }
+
         [Route("[controller]/GetFile")]
         public IActionResult GetFile()
         {
@@ -234,10 +246,23 @@ namespace coffee_shop_backend.Controllers
         {
             if (file != null && file.Length > 0)
             {
+                FileUtility fileUtility = new FileUtility()
+                {
+                    allowedExtensions = ".jpg,.zip"
+                };
                 var fileName = Path.GetFileName(file.FileName);
                 var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", fileName);
+                using (Stream stream = file.OpenReadStream())
+                {
+                    string errMsg = fileUtility.CheckIsUploadFilesValid(stream, Path.GetExtension(fileName));
+                    if (!string.IsNullOrEmpty(errMsg))
+                    {
+                        return BadRequest("檔案格式錯誤");
+                    }
+                }
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
+                    
                     await file.CopyToAsync(stream);
                 }
                 return Ok();

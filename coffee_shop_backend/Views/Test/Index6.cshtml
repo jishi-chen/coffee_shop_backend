@@ -1,4 +1,5 @@
-﻿@{
+﻿
+@{
     Dictionary<string, string> data = ViewBag.MemoryCache;
 }
 
@@ -8,57 +9,3 @@
 <div>
     快取內容：@data["快取內容"]
 </div>
-
-
-<div class="counter-container">
-    <div class="counter" id="counter1">0</div>
-    <div class="counter" id="counter2">0</div>
-    <div class="counter" id="counter3">0</div>
-    <div class="counter" id="counter4">0</div>
-</div>
-
-<style>
-    .counter-container {
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        width: 80%;
-    }
-
-    .counter {
-        font-size: 4rem;
-        color: #2E8B57;
-        margin: 0 10px;
-    }
-</style>
-
-@section Scripts {
-    <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function () {
-            const counters = [
-                { element: document.getElementById('counter1'), targetNumber: 10000 },
-                { element: document.getElementById('counter2'), targetNumber: 20000 },
-                { element: document.getElementById('counter3'), targetNumber: 30000 },
-                { element: document.getElementById('counter4'), targetNumber: 40000 }
-            ];
-            const duration = 2000; // 動畫持續時間 (毫秒)
-            const startTime = performance.now();
-
-            function updateCounter(currentTime) {
-                const elapsedTime = currentTime - startTime;
-                const progress = Math.min(elapsedTime / duration, 1); // 進度值範圍在 0 到 1 之間
-
-                counters.forEach(counter => {
-                    const currentNumber = Math.floor(progress * counter.targetNumber);
-                    counter.element.textContent = currentNumber.toLocaleString();
-                });
-
-                if (progress < 1) {
-                    requestAnimationFrame(updateCounter);
-                }
-            }
-
-            requestAnimationFrame(updateCounter);
-        });
-    </script>
-}

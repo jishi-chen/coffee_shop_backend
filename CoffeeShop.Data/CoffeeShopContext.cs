@@ -12,7 +12,7 @@ public partial class CoffeeShopContext : DbContext
     {
     }
 
-    public virtual DbSet<Account> Accounts { get; set; }
+    public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<AddressArea> AddressAreas { get; set; }
 
@@ -32,22 +32,15 @@ public partial class CoffeeShopContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Account>(entity =>
+        modelBuilder.Entity<User>(entity =>
         {
-            entity.Property(e => e.IdentityString)
+            entity.Property(e => e.UserName)
                 .HasMaxLength(50)
                 .IsUnicode(false)
-                .HasColumnName("IdentityString");
+                .HasColumnName("UserName");
             entity.Property(e => e.CreateDate).HasColumnType("datetime");
             entity.Property(e => e.Email)
                 .HasMaxLength(100)
-                .IsUnicode(false);
-            entity.Property(e => e.Name).HasMaxLength(50);
-            entity.Property(e => e.Password)
-                .HasMaxLength(100)
-                .IsUnicode(false);
-            entity.Property(e => e.Phone)
-                .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.UpdateDate).HasColumnType("datetime");
         });

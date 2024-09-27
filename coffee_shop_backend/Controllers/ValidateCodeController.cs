@@ -33,22 +33,14 @@ namespace coffee_shop_backend.Controllers
                 byte[] bytes;
                 string mimeType;
                 MemoryStream ms;
-                switch (type)
+                if (type == "GenerateImage")
                 {
-                    case "GenerateImage":
-                        string code = ValidateCodeHelper.GenerateValidateCodeAndKeepInSession(ConstString.FrontEndSessionName + model);
-                        bytes = ValidateCodeHelper.GenerateValidateCodeImage(code);
-                        mimeType = ValidateCodeHelper.ImageMimeType;
-                        Response.Clear();
-                        ms = new MemoryStream(bytes);
-                        return new FileStreamResult(ms, mimeType);
-
-                    //case "GenerateAudio":
-                    //    bytes = ValidateCodeHelper.GenerateValidateCodeAudio(ConstString.FrontEndSessionName + model);
-                    //    mimeType = ValidateCodeHelper.AudioMimeType;
-                    //    Response.Clear();
-                    //    ms = new MemoryStream(bytes);
-                    //    return new FileStreamResult(ms, mimeType);
+                    string code = ValidateCodeHelper.GenerateValidateCodeAndKeepInSession(ConstString.FrontEndSessionName + model);
+                    bytes = ValidateCodeHelper.GenerateValidateCodeImage(code);
+                    mimeType = ValidateCodeHelper.ImageMimeType;
+                    Response.Clear();
+                    ms = new MemoryStream(bytes);
+                    return new FileStreamResult(ms, mimeType);
                 }
 
                 //----- 驗證輸入值 -----
@@ -137,22 +129,16 @@ namespace coffee_shop_backend.Controllers
         // 可用文字，略過數字0,1， 英文 i, L, O
         private static readonly char[] _charArray = { '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
 
-        // 聲音檔路徑
-        private const string _folderPath = "~/Sysadm/Files/mp3/";
-
         public const string ValidateCodePostName = "ValidateCode";
         #endregion
 
         /// <summary> 驗證碼圖片的輸出 MimeType </summary>
         public static string ImageMimeType { get; set; } = "image/Gif";
 
-        /// <summary> 驗證碼語音的輸出 MimeType </summary>
-        public static string AudioMimeType { get; set; } = "audio/mpeg";
-
         private static IHttpContextAccessor _httpContext;
         private static IDataProtector _protector;
 
-        public ValidateCodeHelper(IHttpContextAccessor httpContextAccessor,IDataProtectionProvider provider)
+        public ValidateCodeHelper(IHttpContextAccessor httpContextAccessor, IDataProtectionProvider provider)
         {
             _protector = provider.CreateProtector("AspNetCoreDataProtectionDemo.v1");
             _httpContext = httpContextAccessor;

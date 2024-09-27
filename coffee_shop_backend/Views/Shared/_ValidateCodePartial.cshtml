@@ -1,0 +1,42 @@
+﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor
+@using coffee_shop_backend.Controllers
+@using Microsoft.AspNetCore.Routing
+
+@{
+    var controllerName = httpContextAccessor.HttpContext.GetRouteData().Values["controller"].ToString();
+}
+
+
+<div class="formsItem clearfix">
+    <label for="@ValidateCodeHelper.ValidateCodePostName" class="col-form-label formsLabel">
+        驗證碼
+    </label>
+    <div class="formsGroup">
+        <div class="row g-2">
+            <div class="col-12 col-lg-auto d-flex flex-column">
+                <button type="button" class="align-self-start" name="imgBtnValidateCode" onclick="refreshValidationCode(); return false;">
+                    <img src="@(Url.Action("Index", "ValidateCode", new { type = "GenerateImage", model = controllerName }))" alt="重新獲取驗證碼">
+                </button>
+            </div>
+            <div class="col-sm-8">
+                <input id="@ValidateCodeHelper.ValidateCodePostName" name="@ValidateCodeHelper.ValidateCodePostName" class="form-control" type="text" placeholder="" autocomplete="off">
+            </div>
+        </div>
+        @if (this.ViewBag.IsValidated != null && !this.ViewBag.IsValidated)
+        {
+            <div class="invalid-feedback">
+                <span>驗證失敗</span>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    function refreshValidationCode() {
+        var url = '@Html.Raw(Url.Action("Index", "ValidateCode", new { type = "GenerateImage", model = "controllerName" }))';
+        url = url.replace("controllerName", '@controllerName');
+        var r = Math.random();
+        var imageSrc = url + "&rn=" + r;
+        $("button[name=imgBtnValidateCode] img").attr("src", imageSrc);
+    }
+</script>

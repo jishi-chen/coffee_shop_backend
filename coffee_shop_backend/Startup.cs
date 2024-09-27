@@ -156,7 +156,7 @@ namespace coffee_shop_backend
                 options.Cookie.HttpOnly = true;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
                 options.SlidingExpiration = true;
-                options.AccessDeniedPath = "/Account/Login";
+                options.AccessDeniedPath = "/User/Login";
             });
 
             //使用Policy策略驗證

@@ -9,7 +9,6 @@ using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace coffee_shop_backend.Controllers
 {

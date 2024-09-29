@@ -13,10 +13,6 @@ public partial class MemberInfo
 
     public string Password { get; set; } = null!;
 
-    public string Address { get; set; } = null!;
-
-    public bool IsDelete { get; set; }
-
     public bool IsEnabled { get; set; }
 
     public DateTime CreateDate { get; set; }

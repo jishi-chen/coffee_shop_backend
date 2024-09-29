@@ -128,7 +128,6 @@ public partial class CoffeeShopContext : DbContext
         modelBuilder.Entity<MemberInfo>(entity =>
         {
             entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.Address).HasMaxLength(50);
             entity.Property(e => e.CreateDate).HasColumnType("datetime");
             entity.Property(e => e.Email)
                 .HasMaxLength(100)

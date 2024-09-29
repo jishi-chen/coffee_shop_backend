@@ -51,15 +51,18 @@
                 this.$appSelectArea.append($('<option></option>').val('').text('--請選擇地區--'));
             } else {
                 var selectedValue = this.$appSelectCity.find('option:selected').val();
+                var token = $('input[name="__RequestVerificationToken"]').val();
                 $.ajax({
-                    url: '/Application/Address',
+                    url: '/Api/Address',
+                    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
                     data: {
+                        __RequestVerificationToken: token,
                         cityName: selectedValue,
                         areaName: ""
                     },
                     type: 'post',
                     cache: false,
-                    async: false,
+                    async: true,
                     dataType: 'json',
                     success: function (data) {
                         if (data.length > 0) {
@@ -72,27 +75,36 @@
                                 area.append(newOption);
                             });
                         }
+                    },
+                    error: function (error) {
+                        console.error('Error:', error);
                     }
                 });
             };
         },
         _selectArea: function () {
             var selectedValue = this.$appSelectArea.find('option:selected').val();
+            var token = $('input[name="__RequestVerificationToken"]').val();
             $.ajax({
-                url: '/Application/Address',
+                url: '/Api/Address',
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
                 data: {
+                    __RequestVerificationToken: token,
                     cityName: this.$appSelectCity.find('option:selected').val(),
                     areaName: selectedValue
                 },
                 type: 'post',
                 cache: false,
-                async: false,
+                async: true,
                 dataType: 'json',
                 success: function (data) {
                     $('#Address_PostalCode').val("");
                     if (data.length > 0 && typeof data === 'string') {
                         $('#Address_PostalCode').val(data);
                     }
+                },
+                error: function (error) {
+                    console.error('Error:', error);
                 }
             });
         },
@@ -105,7 +117,7 @@
         },
         //驗證輸入項目
         _checkValidInput: function () {
-            let name = $('[id^=Name]');
+            let name = $('[id^=UserName]');
             let startDate = $('[id^=StartDate]');
             let endDate = $('[id^=EndDate]');
             let phone = $('[id^=Phone]');
@@ -116,7 +128,7 @@
             //必填
             if (!this._isEmptyInput(name)) {
                 this._valid.valid = false;
-                this._valid.errorMsg += '姓名為必填<br>';
+                this._valid.errorMsg += '使用者名稱為必填<br>';
             }
             if (!this._isEmptyInput(account)) {
                 this._valid.valid = false;

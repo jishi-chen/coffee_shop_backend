@@ -5,6 +5,8 @@ namespace CoffeeShop.Model.ViewModels
 {
     public class UserRegisterViewModel
     {
+        public int? UserId { get; set; }
+        public int TenantId { get; set; }
         [Required]
         public string UserName { get; set; } = string.Empty;
 
@@ -12,11 +14,9 @@ namespace CoffeeShop.Model.ViewModels
         public string Email { get; set; } = string.Empty;
         public Address Address { get; set; } = new Address();
 
-        [Required]
         [DataType(DataType.Password)]
         public string Password { get; set; } = string.Empty;
 
-        [Required]
         [DataType(DataType.Password)]
         [Compare("Password")]
         public string ConfirmPassword { get; set; } = string.Empty;
@@ -27,6 +27,7 @@ namespace CoffeeShop.Model.ViewModels
             new SelectListItem("女", "1"),
             new SelectListItem("其他", "2"),
         };
+        public bool IsEnabled { get; set; }
         public string? Description { get; set; }
     }
 

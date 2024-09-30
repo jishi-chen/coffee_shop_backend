@@ -1,0 +1,49 @@
+﻿@model TenantFormViewModel
+
+@{
+    string title = Model.TenantId.HasValue ? "編輯租戶" : "新增租戶";
+    ViewData["Title"] = title;
+}
+
+@section Scripts {
+    <script type="text/javascript" src="~/js/tenant_edit.js"></script>
+}
+
+<h1>@title</h1>
+
+<form method="post" asp-controller="Tenant" asp-action="Edit">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="TenantId" />
+
+    <div class="form-group">
+        <label asp-for="TenantName" class="control-label">租戶名稱</label>
+        <input asp-for="TenantName" class="form-control" required />
+        <span asp-validation-for="TenantName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="ContactName" class="control-label">聯絡人姓名</label>
+        <input asp-for="ContactName" class="form-control" required />
+        <span asp-validation-for="ContactName" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="ContactEmail" class="control-label">聯絡人信箱</label>
+        <input asp-for="ContactEmail" class="form-control" type="email" required />
+        <span asp-validation-for="ContactEmail" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="ContactPhone" class="control-label">聯絡人電話</label>
+        <input asp-for="ContactPhone" class="form-control" required />
+        <span asp-validation-for="ContactPhone" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="IsEnabled" class="control-label">是否啟用</label><br />
+        <input type="radio" asp-for="IsEnabled" value="true" /> 是
+        <input type="radio" asp-for="IsEnabled" value="false" /> 否
+        <span asp-validation-for="IsEnabled" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">儲存</button>
+    <a href="@Url.Action("Index", "Tenant")" class="btn btn-secondary">返回</a>
+</form>

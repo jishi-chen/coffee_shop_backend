@@ -30,7 +30,7 @@ namespace coffee_shop_backend.Controllers
         {
             try
             {
-                MemberInfo? info = _db?.MemberInfos.FirstOrDefault(x => x.UserName == data.username && x.Password == data.password);
+                Member? info = _db?.Members.FirstOrDefault(x => x.UserName == data.username && x.Password == data.password);
                 if (info != null)
                 {
                     var secret = _config["AccessSecret"]; // 密鑰
@@ -86,7 +86,7 @@ namespace coffee_shop_backend.Controllers
         {
             try
             {
-                MemberInfo model = new MemberInfo()
+                Member model = new Member()
                 {
                     Id = Guid.NewGuid(),
                     UserName = data.username,
@@ -95,7 +95,7 @@ namespace coffee_shop_backend.Controllers
                     IsEnabled = true,
                     CreateDate = DateTime.Now,
                 };
-                _db?.MemberInfos.Add(model);
+                _db?.Members.Add(model);
                 _db?.SaveChanges();
 
                 return Ok(new { message = "成功接收到資料！" });

@@ -42,7 +42,7 @@ namespace coffee_shop_backend.Controllers
 
             // 獲取帳號資訊
             var user = decodedToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Aud)?.Value;
-            MemberInfo? info = _db?.MemberInfos.FirstOrDefault(x => x.UserName == user);
+            Member? info = _db?.Members.FirstOrDefault(x => x.UserName == user);
 
             return this.Ok(new
             {
@@ -54,26 +54,23 @@ namespace coffee_shop_backend.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Route("Address")]
-        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
-        public JsonResult Address(string cityName, string areaName)
+        public IActionResult Address([FromBody] AddressModel model)
         {
-            if (!string.IsNullOrEmpty(areaName) && !string.IsNullOrEmpty(cityName))
+            if (!string.IsNullOrEmpty(model.areaId) && !string.IsNullOrEmpty(model.cityId))
             {
-                var cityId = _db?.AddressCities.FirstOrDefault(x => x.CityName == cityName)?.Id;
-                var area = _db?.AddressAreas.FirstOrDefault(x => x.AreaName == areaName && x.CityId == cityId);
+                var area = _db?.AddressAreas.FirstOrDefault(x => x.Id.ToString() == model.areaId && x.CityId.ToString() == model.cityId);
                 Response.StatusCode = 200;
                 return this.Json(area?.ZipCode);
             }
-            else if (!string.IsNullOrEmpty(cityName))
+            else if (!string.IsNullOrEmpty(model.cityId))
             {
                 List<KeyValuePair<string, string>> items = new List<KeyValuePair<string, string>>();
-                var cityId = _db?.AddressCities.FirstOrDefault(x => x.CityName == cityName)?.Id;
-                var areas = _db?.AddressAreas.Where(x => x.CityId == cityId);
+                var areas = _db?.AddressAreas.Where(x => x.CityId.ToString() == model.cityId);
                 if (areas.Any())
                 {
                     foreach (var area in areas)
                     {
-                        items.Add(new KeyValuePair<string, string>(area.AreaName, area.AreaName));
+                        items.Add(new KeyValuePair<string, string>(area.Id.ToString(), area.AreaName));
                     }
                 }
                 Response.StatusCode = 200;
@@ -84,6 +81,12 @@ namespace coffee_shop_backend.Controllers
                 Response.StatusCode = 500;
                 return this.Json(string.Empty);
             }
+        }
+
+        public class AddressModel
+        {
+            public string cityId { get; set; } = null!;
+            public string areaId { get; set; } = null!;
         }
     }
 }

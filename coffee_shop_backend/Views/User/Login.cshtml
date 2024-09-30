@@ -1,8 +1,5 @@
 ﻿@model UserLoginViewModel
 
-<a href="@Url.Action("Register","User")">申請</a>
-<a href="@Url.Action("Settings","User")">設定</a>
-
 <form method="post" asp-controller="User" asp-action="Login" novalidate>
     @Html.AntiForgeryToken()
     <div class="form-group">

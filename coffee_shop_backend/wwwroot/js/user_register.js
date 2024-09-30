@@ -43,6 +43,7 @@
             this.$appSelectCity.on("change", $.proxy(this._selectCity, this));
             this.$appSelectArea.on("change", $.proxy(this._selectArea, this));
             this.$app.on("click", "#togglePassword", this._togglePassword);
+            this.$app.on("click", "#toggleConfirmPassword", this._toggleConfirmPassword);
             this.$appBtnSubmit.on("click", $.proxy(this._btnSubmit, this));
         },
         _selectCity: function () {
@@ -51,16 +52,17 @@
                 this.$appSelectArea.append($('<option></option>').val('').text('--請選擇地區--'));
             } else {
                 var selectedValue = this.$appSelectCity.find('option:selected').val();
-                var token = $('input[name="__RequestVerificationToken"]').val();
                 $.ajax({
-                    url: '/Api/Address',
-                    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
-                    data: {
-                        __RequestVerificationToken: token,
-                        cityName: selectedValue,
-                        areaName: ""
+                    url: '/api/Address',
+                    headers: {
+                        RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
                     },
-                    type: 'post',
+                    data: JSON.stringify({
+                        cityId: selectedValue,
+                        areaId: ""
+                    }),
+                    contentType: 'application/json; charset=utf-8',
+                    type: 'POST',
                     cache: false,
                     async: true,
                     dataType: 'json',
@@ -71,7 +73,7 @@
                             area.empty();
                             area.append($('<option></option>').val('').text('--請選擇地區--'));
                             $.each(data, function (i, item) {
-                                var newOption = `<option value=${item.value}>${item.value}</option>`;
+                                var newOption = `<option value=${item.key}>${item.value}</option>`;
                                 area.append(newOption);
                             });
                         }
@@ -84,16 +86,17 @@
         },
         _selectArea: function () {
             var selectedValue = this.$appSelectArea.find('option:selected').val();
-            var token = $('input[name="__RequestVerificationToken"]').val();
             $.ajax({
-                url: '/Api/Address',
-                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
-                data: {
-                    __RequestVerificationToken: token,
-                    cityName: this.$appSelectCity.find('option:selected').val(),
-                    areaName: selectedValue
+                url: '/api/Address',
+                headers: {
+                    RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
                 },
-                type: 'post',
+                data: JSON.stringify({
+                    cityId: this.$appSelectCity.find('option:selected').val(),
+                    areaId: selectedValue
+                }),
+                contentType: 'application/json; charset=utf-8',
+                type: 'POST',
                 cache: false,
                 async: true,
                 dataType: 'json',
@@ -111,6 +114,12 @@
         //顯示密碼
         _togglePassword: function () {
             let password = $('#Password');
+            let type = password.attr('type') == 'password' ? 'text' : 'password';
+            password.attr('type', type);
+            this.classList.toggle('bi-eye');
+        },
+        _toggleConfirmPassword: function () {
+            let password = $('#ConfirmPassword');
             let type = password.attr('type') == 'password' ? 'text' : 'password';
             password.attr('type', type);
             this.classList.toggle('bi-eye');

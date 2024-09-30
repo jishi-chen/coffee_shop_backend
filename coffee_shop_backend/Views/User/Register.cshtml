@@ -1,102 +1,122 @@
 ﻿@using coffee_shop_backend.Controllers
 @model UserRegisterViewModel
 
+@{
+    string title = Model.UserId.HasValue ? "編輯使用者" : "新增使用者";
+    ViewData["Title"] = title;
+}
+
 @section Scripts {
     <script type="text/javascript" src="~/js/user_register.js"></script>
     <script type="text/javascript" src="~/js/tinymce/tinymce.min.js"></script>
     <script>
         tinymce.init({
-        selector: '#Description',
-        language:'zh_TW',
-        height: 300,
-        skin: 'lightgray',
-        menubar: false,
+            selector: '#Description',
+            language: 'zh_TW',
+            height: 300,
+            skin: 'lightgray',
+            menubar: false,
 
-        content_style: 'body { line-height: 1.5 !important; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji" !important; } p { margin-top: 0 !important; margin-bottom: 0 !important; }',
-        fontsize_formats: "8pt 10pt 12pt 14pt 16pt 18pt 20pt 22pt 24pt 28pt 32pt 36pt 48pt 60pt 72pt",
-        font_formats: "微軟正黑體=微軟正黑體; 微軟正黑體 Light=微軟正黑體 Light; 新細明體=新細明體; 細明體=細明體; 標楷體=標楷體; Andale Mono=andale mono,times; Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats;",
-        default_link_target: '_blank',
-        target_list: false,
-        link_title: false,
-        paste_enable_default_filters: false,
-        
-        plugins: 'advlist lists link code autosave emoticons paste table textcolor',
-        toolbar: 'restoredraft | undo redo | fontsizeselect fontselect | bold italic underline forecolor backcolor | ' +
-        'alignleft aligncenter alignright | emoticons link table |' +
-        '| bullist numlist | code | '
+            content_style: 'body { line-height: 1.5 !important; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji" !important; } p { margin-top: 0 !important; margin-bottom: 0 !important; }',
+            fontsize_formats: "8pt 10pt 12pt 14pt 16pt 18pt 20pt 22pt 24pt 28pt 32pt 36pt 48pt 60pt 72pt",
+            font_formats: "微軟正黑體=微軟正黑體; 微軟正黑體 Light=微軟正黑體 Light; 新細明體=新細明體; 細明體=細明體; 標楷體=標楷體; Andale Mono=andale mono,times; Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats;",
+            default_link_target: '_blank',
+            target_list: false,
+            link_title: false,
+            paste_enable_default_filters: false,
+
+            plugins: 'advlist lists link code autosave emoticons paste table textcolor',
+            toolbar: 'restoredraft | undo redo | fontsizeselect fontselect | bold italic underline forecolor backcolor | ' +
+                'alignleft aligncenter alignright | emoticons link table |' +
+                '| bullist numlist | code | '
         });
     </script>
 }
 
-<form method="post" asp-controller="Account" asp-action="Register" novalidate>
-    @Html.AntiForgeryToken()
-    <div class="container">
-        <div class="row">
-            <div class="form-group">
-                <label asp-for="UserName">姓名</label>
-                <input asp-for="UserName" class="form-control" />
-                <span asp-validation-for="UserName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label>性別</label>
-                @foreach (var gender in Model.GenderOption)
-                {
-                    <div class="form-check">
-                            <input type="radio" asp-for="Gender" value="@gender.Value" class="form-check-input" id="@gender.Value" />
-                            <label class="form-check-label" for="@gender.Value">@gender.Text</label>
-                    </div>
-                }
-            </div>
-            <div class="form-group">
-                <label asp-for="Email">信箱</label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <div class="row pt-3">
-                    <label asp-for="Address">地址</label>
-                    <div class="col-2">
-                        <select asp-for="Address.City" class="form-control">
-                            <option value="">--請選擇城市--</option>
-                                @foreach(var option in ViewBag.CityList)
-                            {
-                                <option value="@option.Value" selected="@option.Selected">@option.Text</option>
-                            }
-                        </select>
-                        <span asp-validation-for="Address.City" class="text-danger"></span>
-                    </div>
-                    <div class="col-2">
-                        <select asp-for="Address.Region" class="form-control">
-                            <option value="">--請選擇地區--</option>
-                        </select>
-                        <span asp-validation-for="Address.Region" class="text-danger"></span>
-                    </div>
-                    <div class="col-2">
-                        <input asp-for="Address.PostalCode" class="form-control" />
-                    </div>
-                    <div class="col-6">
-                        <input asp-for="Address.AddressField" class="form-control" />
-                        <span asp-validation-for="Address.AddressField" class="text-danger"></span>
-                    </div>
+<div class="container mt-4">
+    <h2>@title</h2>
+    <form method="post" asp-controller="User" asp-action="Register" novalidate>
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="UserId" />
+
+        <div class="form-group">
+            <label asp-for="UserName">使用者名稱</label>
+            <input asp-for="UserName" class="form-control" placeholder="請輸入使用者名稱" />
+            <span asp-validation-for="UserName" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="TenantId">租戶名稱</label>
+            <select asp-for="TenantId" asp-items="ViewBag.TenantList" class="form-control">
+                <option value="">--請選擇--</option>
+            </select>
+            <span asp-validation-for="TenantId" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label>性別</label><br />
+            @foreach (var gender in Model.GenderOption)
+            {
+                <div class="form-check form-check-inline">
+                    <input type="radio" asp-for="Gender" value="@gender.Value" class="form-check-input" id="@gender.Value" />
+                    <label class="form-check-label" for="@gender.Value">@gender.Text</label>
+                </div>
+
+            }
+            <span asp-validation-for="Gender" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Email">信箱</label>
+            <input asp-for="Email" type="email" class="form-control" placeholder="請輸入信箱" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <div class="row">
+                <label asp-for="Address">地址</label>
+                <div class="col-2">
+                    <select asp-for="Address.City" asp-items="ViewBag.CityList" class="form-control">
+                        <option value="">--請選擇城市--</option>
+                    </select>
+                    <span asp-validation-for="Address.City" class="text-danger"></span>
+                </div>
+                <div class="col-2">
+                    <select asp-for="Address.Region" asp-items="ViewBag.AreaList" class="form-control">
+                        <option value="">--請選擇地區--</option>
+                    </select>
+                    <span asp-validation-for="Address.Region" class="text-danger"></span>
+                </div>
+                <div class="col-1">
+                    <input asp-for="Address.PostalCode" class="form-control" />
+                </div>
+                <div class="col-5">
+                    <input asp-for="Address.AddressField" class="form-control" />
+                    <span asp-validation-for="Address.AddressField" class="text-danger"></span>
                 </div>
             </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="IsEnabled" class="control-label">是否啟用</label><br />
+            <input type="radio" asp-for="IsEnabled" value="true" /> 是
+            <input type="radio" asp-for="IsEnabled" value="false" /> 否
+            <span asp-validation-for="IsEnabled" class="text-danger"></span>
+        </div>
+        @if (!Model.UserId.HasValue)
+        {
             <div class="form-group">
-                <label asp-for="Password">密碼</label>
-                <input asp-for="Password" class="form-control" type="password" />
-                <i class="bi bi-eye-slash" id="togglePassword"></i>
+                <label asp-for="Password">密碼</label><i class="bi bi-eye-slash" id="togglePassword"></i>
+                <input asp-for="Password" class="form-control" type="password" placeholder="請輸入密碼" />
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="ConfirmPassword">確認密碼</label>
-                <input asp-for="ConfirmPassword" class="form-control" type="password" />
+                <label asp-for="ConfirmPassword">確認密碼</label><i class="bi bi-eye-slash" id="toggleConfirmPassword"></i>
+                <input asp-for="ConfirmPassword" class="form-control" type="password" placeholder="請再次輸入密碼" />
                 <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Description">介紹</label>
-                <textarea asp-for="Description" class="form-control"></textarea>
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <button type="button" class="btn btn-primary btn-submit">提交</button>
+        }
+        <div class="form-group">
+            <label asp-for="Description">介紹</label>
+            <textarea asp-for="Description" class="form-control"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
         </div>
-    </div>
-</form>
+        <button type="button" class="btn btn-primary btn-submit">提交</button>
+    </form>
+</div>
+

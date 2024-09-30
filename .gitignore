@@ -13,8 +13,9 @@ CoffeeShop.Utility/bin/
 CoffeeShop.Utility/obj/
 CoffeeShop.Data/bin/
 CoffeeShop.Data/obj/
+CoffeeShop.Console/InsertAddressData/bin/
+CoffeeShop.Console/InsertAddressData/obj/
 
 coffee_shop_backend/wwwroot/documents
 
-Console/
 packages/

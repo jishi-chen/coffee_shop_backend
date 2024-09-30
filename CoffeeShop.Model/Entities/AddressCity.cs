@@ -5,7 +5,7 @@ namespace CoffeeShop.Model.Entities;
 
 public partial class AddressCity
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
 
     public string CityName { get; set; } = null!;
 

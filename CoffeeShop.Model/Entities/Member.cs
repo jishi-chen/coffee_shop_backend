@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace CoffeeShop.Model.Entities;
 
-public partial class MemberInfo
+public partial class Member
 {
     public Guid Id { get; set; }
 

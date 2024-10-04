@@ -4,6 +4,7 @@ using CoffeeShop.Repository.Implement;
 using CoffeeShop.Repository.Interface;
 using CoffeeShop.Service.Implement;
 using CoffeeShop.Service.Interface;
+using CoffeeShop.Utility.Helpers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -61,6 +62,7 @@ namespace coffee_shop_backend
             services.AddScoped<IDocumentService, DocumentService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ITenantService, TenantService>();
+            services.AddScoped<IAddressService, AddressService>();
 
             // Entity Framework
             services.AddDbContext<CoffeeShopContext>(options =>

@@ -9,13 +9,13 @@ namespace CoffeeShop.Repository.Implement
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         protected IDbTransaction Transaction { get; }
-        protected IDbConnection Connection => Transaction.Connection;
+        protected IDbConnection? Connection => Transaction.Connection;
 
         protected readonly CoffeeShopContext _context;
 
         public GenericRepository(IDbTransaction transaction, CoffeeShopContext context)
         {
-            Transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
+            Transaction = transaction;
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
@@ -33,7 +33,7 @@ namespace CoffeeShop.Repository.Implement
 
         public void Delete(int id)
         {
-            T entity = GetById(id);
+            T? entity = GetById(id);
             if (entity != null)
             {
                 _context.Set<T>().Remove(entity);
@@ -41,7 +41,7 @@ namespace CoffeeShop.Repository.Implement
             }
         }
 
-        public T GetById(int id)
+        public T? GetById(int id)
         {
             return _context.Set<T>().Find(id);
         }

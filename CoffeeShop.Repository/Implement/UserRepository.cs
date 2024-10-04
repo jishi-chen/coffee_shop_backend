@@ -13,7 +13,7 @@ namespace CoffeeShop.Repository.Implement
         {
             return _context.Users.Where(x => x.UserName.Contains(searchString));
         }
-        public User GetByUserName(string userName)
+        public User? GetByUserName(string userName)
         {
             return _context.Users.FirstOrDefault(x => x.UserName == userName);
         }

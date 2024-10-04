@@ -20,15 +20,17 @@ namespace coffee_shop_backend.Controllers
     [Authorize(Policy = "AdminPolicy")]
     public class UserController : BaseController
     {
-        private HttpContext? _context;
-        private AddressHelper _addressHelper = new AddressHelper(_db);
+        private readonly HttpContext? _context;
         private readonly IUserService _userService;
+        private readonly IAddressService _addressService;
+        private readonly ITenantService _tenantService;
 
-
-        public UserController(IUserService userService, IHttpContextAccessor accessor) : base(accessor)
+        public UserController(IUserService userService, IHttpContextAccessor accessor, IAddressService addressService, ITenantService tenantService) : base(accessor)
         {
             _context = accessor.HttpContext;
             _userService = userService;
+            _addressService = addressService;
+            _tenantService = tenantService;
         }
 
         [HttpGet]
@@ -46,7 +48,7 @@ namespace coffee_shop_backend.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login(UserLoginViewModel model)
         {
-            string validCode = _context.Request.Form[ValidateCodeHelper.ValidateCodePostName];
+            string? validCode = _context?.Request.Form[ValidateCodeHelper.ValidateCodePostName];
             ValidateCodeHelper.Validate(validCode, ConstString.FrontEndSessionName + ControllerContext.RouteData.Values["controller"]);
             //檢查驗證碼
             if (!ValidateCodeHelper.IsSuccess(ConstString.FrontEndSessionName + ControllerContext.RouteData.Values["controller"]))
@@ -56,10 +58,8 @@ namespace coffee_shop_backend.Controllers
                 return View(model);
             }
 
-            var user = _db.Users.Where(x => x.UserName == model.UserName).FirstOrDefault();
-            var passwordHasher = new PasswordHasher<UserLoginViewModel>();
-            //密碼解密
-            if (user != null && passwordHasher.VerifyHashedPassword(model, user.PasswordHash, model.Password) == PasswordVerificationResult.Success)
+            var user = _userService.CheckPassword(model);
+            if (user != null)
             {
                 var claims = new List<Claim>
             {
@@ -91,30 +91,11 @@ namespace coffee_shop_backend.Controllers
         [Route("Register")]
         public IActionResult Register(int? id)
         {
-            var model = new UserRegisterViewModel();
             string cityId = string.Empty, areaId = string.Empty;
-            if (id.HasValue)
-            {
-                var user = _db.Users.Find(id.Value);
-                var config = new MapperConfiguration(cfg =>
-                    cfg.CreateMap<CoffeeShop.Model.Entities.User, UserRegisterViewModel>().ForMember(dest => dest.Address, opt => opt.Ignore()));
-                var mapper = config.CreateMapper();
-                mapper.Map(user, model);
-                model.Password = "";
-                model.ConfirmPassword = "";
-                if (user.AddressId.HasValue)
-                {
-                    var area = _db.AddressAreas.Find(user.AddressId.Value);
-                    cityId = area.CityId.ToString();
-                    areaId = area.Id.ToString();
-                    model.Address.PostalCode = area.ZipCode;
-                    model.Address.AddressField = user.Address;
-                }
-            }
-            ViewBag.CityList = _addressHelper.GetAddressCityList(cityId);
-            ViewBag.AreaList = _addressHelper.GetAddressAreaList(cityId, areaId);
-            ViewBag.TenantList = GetTenantList(model.TenantId);
-
+            var model = _userService.GetFormViewModel(id,ref cityId, ref areaId);
+            ViewBag.CityList = _addressService.GetAddressCityList(cityId);
+            ViewBag.AreaList = _addressService.GetAddressAreaList(cityId, areaId);
+            ViewBag.TenantList = _tenantService.GetTenantList(model.TenantId);
             return View(model);
         }
 
@@ -125,58 +106,13 @@ namespace coffee_shop_backend.Controllers
         {
             if (ModelState.IsValid)
             {
-                DataCheckUtility check = new DataCheckUtility();
-                string errorMsg = string.Empty;
-                if (!check.CheckNotNULLAndLength(model.UserName, 20, out errorMsg))
-                    ModelState.AddModelError("Name", "姓名" + errorMsg);
-                if (model.Password.Length > 0 && !check.IsAlphaNumeric(model.Password))
-                    ModelState.AddModelError("Password", "密碼格式錯誤");
-                if (!check.IsEmail(model.Email))
-                    ModelState.AddModelError("Email", "信箱格式錯誤");
-                if (model.Password.Length > 0 && model.ConfirmPassword.Length > 0 && model.Password != model.ConfirmPassword)
-                    ModelState.AddModelError("ConfirmPassword", "確認密碼與密碼必須相同");
-
-                //密碼加密
-                var passwordHasher = new PasswordHasher<UserRegisterViewModel>();
-
-                var config = new MapperConfiguration(cfg =>
-                    cfg.CreateMap<UserRegisterViewModel, User>());
-                var mapper = config.CreateMapper();
-
-                var user = new User();
-                if (!model.UserId.HasValue)
-                {
-                    user = mapper.Map<User>(model);
-                    user.PasswordHash = passwordHasher.HashPassword(model, model.Password);
-                    user.AddressId = int.TryParse(model.Address.Region, out int addressId) ? addressId : -1;
-                    user.Address = model.Address.AddressField;
-                    user.CreateDate = DateTime.Now;
-                    user.Creator = GetCurrentLoginId();
-                    _db.Users.Add(user);
-                    _db.SaveChanges();
-                    SetAlertMsg("建立完成");
-                    return RedirectToAction("Index");
-                }
-                else
-                {
-                    user = _db.Users.Find(model.UserId.Value);
-                    if (user != null)
-                    {
-                        mapper.Map(model, user);
-                        user.AddressId = int.TryParse(model.Address.Region, out int addressId) ? addressId : -1;
-                        user.Address = model.Address.AddressField;
-                        user.UpdateDate = DateTime.Now;
-                        user.Updator = GetCurrentLoginId();
-                        _db.SaveChanges();
-                        SetAlertMsg("操作完成");
-                        return RedirectToAction("Index");
-                    }
-                }
+                _userService.UpdateUser(model);
+                SetAlertMsg("操作完成");
+                return RedirectToAction("Index");
             }
-
-            ViewBag.CityList = _addressHelper.GetAddressCityList(model.Address?.City);
-            ViewBag.AreaList = _addressHelper.GetAddressAreaList(model.Address?.City, model.Address?.Region); ;
-            ViewBag.TenantList = GetTenantList(model.TenantId);
+            ViewBag.CityList = _addressService.GetAddressCityList(model.Address?.City);
+            ViewBag.AreaList = _addressService.GetAddressAreaList(model.Address?.City, model.Address?.Region); ;
+            ViewBag.TenantList = _tenantService.GetTenantList(model.TenantId);
             SetAlertMsg("操作失敗");
             return View(model);
         }
@@ -228,24 +164,5 @@ namespace coffee_shop_backend.Controllers
             SetAlertMsg("已成功登出");
             return RedirectToAction("Index");
         }
-
-        public List<SelectListItem> GetTenantList(int? TenantId)
-        {
-            List<SelectListItem> tenantList = new List<SelectListItem>();
-            List<Tenant> list = _db.Tenants.Where(x => x.IsEnabled == true).ToList();
-            foreach (var c in list)
-            {
-                tenantList.Add(new SelectListItem()
-                {
-                    Text = c.TenantName,
-                    Value = c.TenantId.ToString(),
-                    Selected = TenantId.HasValue? TenantId.Value == c.TenantId : false,
-                });
-            }
-            return tenantList;
-        }
     }
-
-
-
 }

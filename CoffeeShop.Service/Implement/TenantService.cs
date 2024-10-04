@@ -3,9 +3,7 @@ using CoffeeShop.Model.Entities;
 using CoffeeShop.Model.ViewModels;
 using CoffeeShop.Repository.Interface;
 using CoffeeShop.Service.Interface;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 
 namespace CoffeeShop.Service.Implement
@@ -29,11 +27,6 @@ namespace CoffeeShop.Service.Implement
         public IEnumerable<Tenant> GetAll(string searchString)
         {
             return _unitOfWork.TenantRepository.GetAll(searchString);
-        }
-
-        public Tenant GetById(int id)
-        {
-            return _unitOfWork.TenantRepository.GetById(id);
         }
 
         public TenantFormViewModel GetFormViewModel(int? id)
@@ -89,6 +82,23 @@ namespace CoffeeShop.Service.Implement
                 }
             }
             return false;
+        }
+
+        public IEnumerable<SelectListItem> GetTenantList(int? tenantId)
+        {
+            List<SelectListItem> tenantList = new List<SelectListItem>();
+            IEnumerable<Tenant> list = _unitOfWork.TenantRepository.GetAll();
+            foreach (var c in list)
+            {
+                if (c.IsEnabled == false) continue;
+                tenantList.Add(new SelectListItem()
+                {
+                    Text = c.TenantName,
+                    Value = c.TenantId.ToString(),
+                    Selected = tenantId.HasValue ? tenantId.Value == c.TenantId : false,
+                });
+            }
+            return tenantList;
         }
     }
 }

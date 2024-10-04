@@ -22,4 +22,7 @@
     </PackageReference>
   </ItemGroup>
 
+	<ItemGroup>
+		<ProjectReference Include="..\CoffeeShop.Utility\CoffeeShop.Utility.csproj" />
+	</ItemGroup>
 </Project>

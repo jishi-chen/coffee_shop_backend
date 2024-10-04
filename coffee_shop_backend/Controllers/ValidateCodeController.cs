@@ -164,7 +164,7 @@ namespace coffee_shop_backend.Controllers
         /// <param name="validateCode"> 輸入的驗證碼 </param>
         /// <param name="keepSessionKey"> Session 名稱，前後台應使用不同名稱 </param>
         /// <returns></returns>
-        public static void Validate(string validateCode, string keepSessionKey)
+        public static void Validate(string? validateCode, string keepSessionKey)
         {
             var type = GetValidateType();
             string validResultSessionKey = keepSessionKey + "_result";

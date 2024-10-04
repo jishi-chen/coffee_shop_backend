@@ -1,10 +1,6 @@
 ﻿using CoffeeShop.Model.Entities;
 using CoffeeShop.Model.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace CoffeeShop.Service.Interface
 {
@@ -12,10 +8,10 @@ namespace CoffeeShop.Service.Interface
     {
         IEnumerable<Tenant> GetAll();
         IEnumerable<Tenant> GetAll(string searchString);
-        Tenant GetById(int id);
         TenantFormViewModel GetFormViewModel(int? id);
 
         void UpdateTenant(TenantFormViewModel model);
         bool DeleteTenant(int? id);
+        IEnumerable<SelectListItem> GetTenantList(int? tenantId);
     }
 }

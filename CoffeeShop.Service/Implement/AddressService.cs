@@ -1,20 +1,21 @@
-﻿using CoffeeShop.Model;
-using CoffeeShop.Model.Entities;
+﻿using CoffeeShop.Model.Entities;
+using CoffeeShop.Repository.Interface;
+using CoffeeShop.Service.Interface;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace CoffeeShop.Utility.Helpers
+namespace CoffeeShop.Service.Implement
 {
-    public class AddressHelper
+    public class AddressService : IAddressService
     {
-        protected static CoffeeShopContext _db;
-        public AddressHelper(CoffeeShopContext coffeeShopContext) {
-            _db = coffeeShopContext;
+        private readonly IUnitOfWork _unitOfWork;
+        public AddressService(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
         }
-
         public List<SelectListItem> GetAddressCityList(string? cityId)
         {
             List<SelectListItem> cityList = new List<SelectListItem>();
-            List<AddressCity> cityModel = _db.AddressCities.Select(x => x).ToList();
+            IEnumerable<AddressCity> cityModel = _unitOfWork.AddressRepository.GetAddressCity();
             foreach (var c in cityModel)
             {
                 cityList.Add(new SelectListItem()
@@ -30,7 +31,7 @@ namespace CoffeeShop.Utility.Helpers
         public List<SelectListItem> GetAddressAreaList(string? cityId, string? areaId)
         {
             List<SelectListItem> areaList = new List<SelectListItem>();
-            List<AddressArea> areaModel = _db.AddressAreas.Where(x => x.CityId.ToString() == cityId).ToList();
+            IEnumerable<AddressArea> areaModel = _unitOfWork.AddressRepository.GetAddressAreaByCityId(int.TryParse(cityId, out int id) ? id : 0);
             foreach (var c in areaModel)
             {
                 areaList.Add(new SelectListItem()
@@ -41,6 +42,11 @@ namespace CoffeeShop.Utility.Helpers
                 });
             }
             return areaList;
+        }
+
+        public AddressArea? GetAddressAreaById(int id)
+        {
+            return _unitOfWork.AddressRepository.GetById(id);
         }
     }
 }

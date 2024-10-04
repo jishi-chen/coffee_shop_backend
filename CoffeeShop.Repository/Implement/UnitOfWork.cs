@@ -13,13 +13,14 @@ namespace CoffeeShop.Repository.Implement
         private IDocumentRepository _documentRepository;
         private ITenantRepository _tenantRepository;
         private IUserRepository _userRepository;
+        private IAddressRepository _addressRepository;
 
         public UnitOfWork(CoffeeShopContext context)
         {
             _context = context;
             _connection = _context.Database.GetDbConnection();
             _connection.Open();
-            _transaction = _connection.BeginTransaction();
+            //_transaction = _connection.BeginTransaction();
         }
 
         public IDocumentRepository DocumentRepository
@@ -33,6 +34,10 @@ namespace CoffeeShop.Repository.Implement
         public IUserRepository UserRepository
         {
             get { return _userRepository ?? (_userRepository = new UserRepository(_transaction, _context)); }
+        }
+        public IAddressRepository AddressRepository
+        {
+            get { return _addressRepository ?? (_addressRepository = new AddressRepository(_transaction, _context)); }
         }
 
 

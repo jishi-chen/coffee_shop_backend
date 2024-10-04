@@ -4,7 +4,7 @@ using System.Data;
 
 namespace CoffeeShop.Repository.Interface
 {
-    public interface IDocumentRepository
+    public interface IDocumentRepository : IGenericRepository<Document>
     {
         IEnumerable<Document> GetAdminList(bool? isEnabled);
         Document GetDocument(string documentId);

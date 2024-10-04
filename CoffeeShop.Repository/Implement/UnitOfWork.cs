@@ -11,6 +11,8 @@ namespace CoffeeShop.Repository.Implement
         private IDbConnection _connection;
         private IDbTransaction _transaction;
         private IDocumentRepository _documentRepository;
+        private ITenantRepository _tenantRepository;
+        private IUserRepository _userRepository;
 
         public UnitOfWork(CoffeeShopContext context)
         {
@@ -22,8 +24,17 @@ namespace CoffeeShop.Repository.Implement
 
         public IDocumentRepository DocumentRepository
         {
-            get { return _documentRepository ?? (_documentRepository = new DocumentRepository(_transaction)); }
+            get { return _documentRepository ?? (_documentRepository = new DocumentRepository(_transaction, _context)); }
         }
+        public ITenantRepository TenantRepository
+        {
+            get { return _tenantRepository ?? (_tenantRepository = new TenantRepository(_transaction, _context)); }
+        }
+        public IUserRepository UserRepository
+        {
+            get { return _userRepository ?? (_userRepository = new UserRepository(_transaction, _context)); }
+        }
+
 
         public void Complete()
         {

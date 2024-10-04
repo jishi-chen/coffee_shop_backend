@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using CoffeeShop.Model.Entities;
 using CoffeeShop.Model.ViewModels;
+using CoffeeShop.Service.Implement;
+using CoffeeShop.Service.Interface;
 using CoffeeShop.Utility.Helpers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -20,10 +22,13 @@ namespace coffee_shop_backend.Controllers
     {
         private HttpContext? _context;
         private AddressHelper _addressHelper = new AddressHelper(_db);
+        private readonly IUserService _userService;
 
-        public UserController(IHttpContextAccessor accessor) : base(accessor)
+
+        public UserController(IUserService userService, IHttpContextAccessor accessor) : base(accessor)
         {
             _context = accessor.HttpContext;
+            _userService = userService;
         }
 
         [HttpGet]
@@ -47,6 +52,7 @@ namespace coffee_shop_backend.Controllers
             if (!ValidateCodeHelper.IsSuccess(ConstString.FrontEndSessionName + ControllerContext.RouteData.Values["controller"]))
             {
                 ViewBag.IsValidated = false;
+                SetAlertMsg("驗證碼錯誤");
                 return View(model);
             }
 

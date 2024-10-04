@@ -4,14 +4,13 @@ using CoffeeShop.Repository.Interface;
 using System.Data;
 using Dapper;
 using CoffeeShop.Model.Enum;
+using CoffeeShop.Model;
 
 namespace CoffeeShop.Repository.Implement
 {
-    public class DocumentRepository : GenericRepository, IDocumentRepository
+    public class DocumentRepository : GenericRepository<Document>, IDocumentRepository
     {
-        public DocumentRepository(IDbTransaction transaction) : base(transaction)
-        {
-        }
+        public DocumentRepository(IDbTransaction transaction, CoffeeShopContext context) : base(transaction, context) { }
 
         public IEnumerable<Document> GetAdminList(bool? isEnabled)
         {

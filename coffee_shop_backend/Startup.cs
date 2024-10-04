@@ -59,6 +59,8 @@ namespace coffee_shop_backend
             services.AddScoped<ServiceContainer>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IDocumentService, DocumentService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ITenantService, TenantService>();
 
             // Entity Framework
             services.AddDbContext<CoffeeShopContext>(options =>

@@ -39,6 +39,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Console", "Console", "{4E64
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InsertAddressData", "CoffeeShop.Console\InsertAddressData\InsertAddressData.csproj", "{9F7B7B2B-0FAA-4EF5-A5E9-4E5B76831F58}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YoutubeControl", "CoffeeShop.Console\YoutubeControl\YoutubeControl.csproj", "{109DC96D-1917-48EC-B2D5-DF44C51668B9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +75,10 @@ Global
 		{9F7B7B2B-0FAA-4EF5-A5E9-4E5B76831F58}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9F7B7B2B-0FAA-4EF5-A5E9-4E5B76831F58}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9F7B7B2B-0FAA-4EF5-A5E9-4E5B76831F58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{109DC96D-1917-48EC-B2D5-DF44C51668B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{109DC96D-1917-48EC-B2D5-DF44C51668B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{109DC96D-1917-48EC-B2D5-DF44C51668B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{109DC96D-1917-48EC-B2D5-DF44C51668B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -85,6 +91,7 @@ Global
 		{099FE29A-3A26-43EC-822A-E657E2A66D08} = {1698AB42-B5E5-468C-87B0-F5E8D1F8E638}
 		{06E63EF4-8E1E-4863-B2A4-047E59A40837} = {1698AB42-B5E5-468C-87B0-F5E8D1F8E638}
 		{9F7B7B2B-0FAA-4EF5-A5E9-4E5B76831F58} = {4E64E925-890B-4A2B-AD19-61E76CD1B770}
+		{109DC96D-1917-48EC-B2D5-DF44C51668B9} = {4E64E925-890B-4A2B-AD19-61E76CD1B770}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0AECFBB4-D632-4416-99E0-B6C7FCF90888}

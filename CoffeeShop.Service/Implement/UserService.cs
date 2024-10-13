@@ -1,18 +1,13 @@
 ﻿using AutoMapper;
 using CoffeeShop.Model.Entities;
 using CoffeeShop.Model.ViewModels;
-using CoffeeShop.Repository.Implement;
 using CoffeeShop.Repository.Interface;
 using CoffeeShop.Service.Interface;
-using CoffeeShop.Utility.Helpers;
+using Ganss.Xss;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace CoffeeShop.Service.Implement
 {
@@ -21,6 +16,7 @@ namespace CoffeeShop.Service.Implement
         private readonly IAddressService _addressService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly HtmlSanitizer htmlSanitizer = new HtmlSanitizer();
 
         public UserService(IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor, IAddressService addressService)
         {
@@ -41,7 +37,7 @@ namespace CoffeeShop.Service.Implement
                 mapper.Map(user, model);
                 model.Password = "";
                 model.ConfirmPassword = "";
-                if (user.AddressId.HasValue)
+                if (user != null && user.AddressId.HasValue)
                 {
                     var area = _addressService.GetAddressAreaById(user.AddressId.Value);
                     cityId = area.CityId.ToString();
@@ -89,7 +85,7 @@ namespace CoffeeShop.Service.Implement
 
         public User? CheckPassword(UserLoginViewModel model)
         {
-            User? user = _unitOfWork.UserRepository.GetByUserName(model.UserName);
+            User? user = _unitOfWork.UserRepository.GetByUserName(htmlSanitizer.Sanitize(model.UserName));
             var passwordHasher = new PasswordHasher<UserLoginViewModel>();
             if (user != null && passwordHasher.VerifyHashedPassword(model, user.PasswordHash, model.Password) == PasswordVerificationResult.Success)
             {

@@ -18,8 +18,8 @@ namespace coffee_shop_backend.Controllers
     [Authorize(Policy = "AdminPolicy")]
     public class DocumentController : BaseController
     {
-        private IDocumentService _documentService;
-        private IUnitOfWork _unitOfWork;
+        private readonly IDocumentService _documentService;
+        private readonly IUnitOfWork _unitOfWork;
         private HttpContext? _context;
         private string sessionName = "DocumentViewModel";
 

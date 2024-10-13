@@ -20,7 +20,7 @@ namespace CoffeeShop.Repository.Implement
             _context = context;
             _connection = _context.Database.GetDbConnection();
             _connection.Open();
-            //_transaction = _connection.BeginTransaction();
+            _transaction = _connection.BeginTransaction();
         }
 
         public IDocumentRepository DocumentRepository

@@ -3,6 +3,7 @@ using CoffeeShop.Model.Entities;
 using CoffeeShop.Repository.Interface;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using System.Data.Common;
 
 namespace CoffeeShop.Repository.Implement
 {
@@ -15,8 +16,18 @@ namespace CoffeeShop.Repository.Implement
 
         public GenericRepository(IDbTransaction transaction, CoffeeShopContext context)
         {
-            Transaction = transaction;
+            Transaction = transaction ?? throw new ArgumentNullException(nameof(context));
             _context = context ?? throw new ArgumentNullException(nameof(context));
+
+            // 確保交易與 DbContext 關聯
+            if (Transaction is DbTransaction dbTransaction)
+            {
+                _context.Database.UseTransaction(dbTransaction);  // 將交易與 DbContext 關聯
+            }
+            else
+            {
+                throw new InvalidOperationException("無法將 IDbTransaction 轉換為 DbTransaction");
+            }
         }
 
         public void Add(T entity)

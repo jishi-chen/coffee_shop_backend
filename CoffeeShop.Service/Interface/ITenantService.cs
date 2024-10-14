@@ -6,8 +6,7 @@ namespace CoffeeShop.Service.Interface
 {
     public interface ITenantService
     {
-        IEnumerable<Tenant> GetAll();
-        IEnumerable<Tenant> GetAll(string searchString);
+        IEnumerable<Tenant> GetAll(string? searchString);
         TenantFormViewModel GetFormViewModel(int? id);
 
         void UpdateTenant(TenantFormViewModel model);

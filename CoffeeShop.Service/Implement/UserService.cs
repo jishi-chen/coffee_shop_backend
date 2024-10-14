@@ -25,7 +25,7 @@ namespace CoffeeShop.Service.Implement
             _addressService = addressService;
         }
 
-        public UserRegisterViewModel GetFormViewModel(int? id,ref string cityId, ref string areaId)
+        public UserRegisterViewModel GetFormViewModel(int? id, ref string cityId, ref string areaId)
         {
             var model = new UserRegisterViewModel();
             if (id.HasValue)
@@ -66,7 +66,7 @@ namespace CoffeeShop.Service.Implement
                 user.CreateDate = DateTime.Now;
                 user.Creator = GetCurrentLoginId();
                 _unitOfWork.UserRepository.Add(user);
-                
+
             }
             else
             {
@@ -104,6 +104,27 @@ namespace CoffeeShop.Service.Implement
                 return int.TryParse(userIdClaim?.Value, out int userId) ? userId : 0;
             }
             return 0;
+        }
+        public IEnumerable<UserIndexViewModel> GetIndexViewModel(string? searchString)
+        {
+            IEnumerable<User> users = _unitOfWork.UserRepository.GetAll();
+            IEnumerable<Tenant> tenants = _unitOfWork.TenantRepository.GetAll();
+            var result = users.Join(tenants,
+                user => user.TenantId,
+                tenant => tenant.TenantId,
+                (user, tenant) => new UserIndexViewModel
+                {
+                    UserId = user.UserId,
+                    UserName = user.UserName,
+                    TenantName = tenant.TenantName,
+                    Email = user.Email,
+                    IsEnabled = user.IsEnabled
+                });
+            if (searchString != null)
+            {
+                result = result.Where(x => x.UserName.Contains(searchString) || x.TenantName.Contains(searchString)).ToList();
+            }
+            return result;
         }
     }
 }

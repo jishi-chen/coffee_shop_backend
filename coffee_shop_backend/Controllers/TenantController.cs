@@ -20,19 +20,16 @@ namespace coffee_shop_backend.Controllers
         [Route("Index")]
         public IActionResult Index()
         {
-            var model = _tenantService.GetAll();
-            return View(model);
+            return View(_tenantService.GetAll(null));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Route("Index")]
-        public IActionResult Index(string searchString)
+        public IActionResult Index(string? searchString)
         {
-            if (!string.IsNullOrEmpty(searchString))
-                return View(_tenantService.GetAll(searchString));
-            else
-                return View(_tenantService.GetAll());
+            ViewBag.SearchString = searchString;
+            return View(_tenantService.GetAll(searchString));
         }
 
         [HttpGet]

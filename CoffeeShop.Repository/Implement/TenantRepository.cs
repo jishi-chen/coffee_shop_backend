@@ -11,9 +11,5 @@ namespace CoffeeShop.Repository.Implement
         public TenantRepository(IDbTransaction transaction, CoffeeShopContext context): base(transaction, context) { }
 
 
-        public IEnumerable<Tenant> GetAll(string searchString)
-        {
-            return _context.Tenants.Where(x => x.TenantName.Contains(searchString) || x.ContactName.Contains(searchString)).ToList();
-        }
     }
 }

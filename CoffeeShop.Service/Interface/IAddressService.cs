@@ -8,5 +8,6 @@ namespace CoffeeShop.Service.Interface
         List<SelectListItem> GetAddressCityList(string? cityId);
         List<SelectListItem> GetAddressAreaList(string? cityId, string? areaId);
         AddressArea? GetAddressAreaById(int id);
+        string? GetZipCodeByAreaId(int areaId);
     }
 }

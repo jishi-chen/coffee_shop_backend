@@ -9,7 +9,6 @@ namespace CoffeeShop.Repository.Interface
 {
     public interface ITenantRepository : IGenericRepository<Tenant>
     {
-        IEnumerable<Tenant> GetAll(string searchString);
 
     }
 }

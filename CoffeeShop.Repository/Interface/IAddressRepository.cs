@@ -6,6 +6,7 @@ namespace CoffeeShop.Repository.Interface
     {
         IEnumerable<AddressCity> GetAddressCity();
         IEnumerable<AddressArea> GetAddressAreaByCityId(int cityId);
+        string? GetZipCodeByAreaId(int areaId);
 
     }
 }

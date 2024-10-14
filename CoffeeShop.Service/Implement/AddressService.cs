@@ -48,5 +48,9 @@ namespace CoffeeShop.Service.Implement
         {
             return _unitOfWork.AddressRepository.GetById(id);
         }
+        public string? GetZipCodeByAreaId(int areaId)
+        {
+            return _unitOfWork.AddressRepository.GetZipCodeByAreaId(areaId);
+        }
     }
 }

@@ -29,10 +29,7 @@ namespace CoffeeShop.Utility.Helpers
             { ".mp4", "0000" },
             { ".zip", "504B" }
          };
-        //public string CheckIsUploadFilesValid(HttpPostedFile upload)
-        //{
-        //    return CheckIsUploadFilesValid(upload.InputStream, Path.GetExtension(upload.FileName).ToLower());
-        //}
+
         public string CheckIsUploadFilesValid(Stream file, string extension)
         {
             List<string> AllowedExtensions = allowedExtensions.ToLower().Split(',').ToList();

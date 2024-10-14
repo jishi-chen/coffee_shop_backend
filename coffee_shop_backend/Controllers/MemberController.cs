@@ -30,54 +30,55 @@ namespace coffee_shop_backend.Controllers
         {
             try
             {
-                Member? info = _db?.Members.FirstOrDefault(x => x.UserName == data.username && x.Password == data.password);
-                if (info != null)
-                {
-                    var secret = _config["AccessSecret"]; // 密鑰
-                    var issuer = _config["Issuer"]; // 發行者
-                    var audience = info.UserName; // 使用者
-                    var expires = 60; // JWT 有效期，單位為分鐘
+                //Member? info = _db?.Members.FirstOrDefault(x => x.UserName == data.username && x.Password == data.password);
+                //if (info != null)
+                //{
+                //    var secret = _config["AccessSecret"]; // 密鑰
+                //    var issuer = _config["Issuer"]; // 發行者
+                //    var audience = info.UserName; // 使用者
+                //    var expires = 60; // JWT 有效期，單位為分鐘
 
-                    // 會員登入成功
-                    List<Claim> claims = new List<Claim>
-                    {
-                        new Claim(ClaimTypes.Name, info.UserName),
-                        new Claim(ClaimTypes.UserData, JsonConvert.SerializeObject(info)),
-                        new Claim(ClaimTypes.Role, "Member"),
-                    };
-                    var token = JwtHelper.GenerateToken(secret, issuer, audience, claims, expires);
+                //    // 會員登入成功
+                //    List<Claim> claims = new List<Claim>
+                //    {
+                //        new Claim(ClaimTypes.Name, info.UserName),
+                //        new Claim(ClaimTypes.UserData, JsonConvert.SerializeObject(info)),
+                //        new Claim(ClaimTypes.Role, "Member"),
+                //    };
+                //    var token = JwtHelper.GenerateToken(secret, issuer, audience, claims, expires);
 
-                    ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, JwtBearerDefaults.AuthenticationScheme);
-                    AuthenticationProperties authProperties = new AuthenticationProperties
-                    {
-                        AllowRefresh = true,
-                        ExpiresUtc = DateTime.Now.AddHours(1),
-                        IsPersistent = true
-                    };
-                    _context?.SignInAsync(JwtBearerDefaults.AuthenticationScheme,
-                        new ClaimsPrincipal(claimsIdentity),
-                        authProperties);
-                    return Ok(new
-                    {
-                        status = "success",
-                        message = "會員登入成功",
-                        token = token
-                    });
-                }
-                else
-                {
-                    // 會員登入失敗
-                    return Unauthorized(new
-                    {
-                        status = "error",
-                        message = "帳號或密碼錯誤"
-                    });
-                }
+                //    ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, JwtBearerDefaults.AuthenticationScheme);
+                //    AuthenticationProperties authProperties = new AuthenticationProperties
+                //    {
+                //        AllowRefresh = true,
+                //        ExpiresUtc = DateTime.Now.AddHours(1),
+                //        IsPersistent = true
+                //    };
+                //    _context?.SignInAsync(JwtBearerDefaults.AuthenticationScheme,
+                //        new ClaimsPrincipal(claimsIdentity),
+                //        authProperties);
+                //    return Ok(new
+                //    {
+                //        status = "success",
+                //        message = "會員登入成功",
+                //        token = token
+                //    });
+                //}
+                //else
+                //{
+                //    // 會員登入失敗
+                //    return Unauthorized(new
+                //    {
+                //        status = "error",
+                //        message = "帳號或密碼錯誤"
+                //    });
+                //}
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new { status = "error", message = "發生錯誤：" + ex.Message });
             }
+            return StatusCode(500, new { status = "error" });
         }
 
         [HttpPost]
@@ -86,17 +87,17 @@ namespace coffee_shop_backend.Controllers
         {
             try
             {
-                Member model = new Member()
-                {
-                    Id = Guid.NewGuid(),
-                    UserName = data.username,
-                    Email = data.email,
-                    Password = data.password,
-                    IsEnabled = true,
-                    CreateDate = DateTime.Now,
-                };
-                _db?.Members.Add(model);
-                _db?.SaveChanges();
+                //Member model = new Member()
+                //{
+                //    Id = Guid.NewGuid(),
+                //    UserName = data.username,
+                //    Email = data.email,
+                //    Password = data.password,
+                //    IsEnabled = true,
+                //    CreateDate = DateTime.Now,
+                //};
+                //_db?.Members.Add(model);
+                //_db?.SaveChanges();
 
                 return Ok(new { message = "成功接收到資料！" });
             }

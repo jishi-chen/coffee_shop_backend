@@ -1,15 +1,9 @@
-﻿using AutoMapper;
-using CoffeeShop.Model.Entities;
-using CoffeeShop.Model.ViewModels;
-using CoffeeShop.Service.Implement;
+﻿using CoffeeShop.Model.ViewModels;
 using CoffeeShop.Service.Interface;
-using CoffeeShop.Utility.Helpers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Security.Claims;
 
 
@@ -121,18 +115,7 @@ namespace coffee_shop_backend.Controllers
         [Route("Index")]
         public IActionResult Index()
         {
-            var result = from user in _db.Users
-                         join tenant in _db.Tenants on user.TenantId equals tenant.TenantId
-                         select new UserIndexViewModel
-                         {
-                             UserId = user.UserId,
-                             UserName = user.UserName,
-                             TenantName = tenant.TenantName,
-                             Email = user.Email,
-                             IsEnabled = true
-                         };
-            var model = result.ToList();
-            return View(model);
+            return View(_userService.GetIndexViewModel(null));
         }
 
         [HttpPost]
@@ -140,20 +123,8 @@ namespace coffee_shop_backend.Controllers
         [Route("Index")]
         public IActionResult Index(string searchString)
         {
-            var result = from user in _db.Users
-                         join tenant in _db.Tenants on user.TenantId equals tenant.TenantId
-                         select new UserIndexViewModel
-                         {
-                             UserId = user.UserId,
-                             UserName = user.UserName,
-                             TenantName = tenant.TenantName,
-                             Email = user.Email,
-                             IsEnabled = true
-                         };
-            var model = result.ToList();
-            if (!string.IsNullOrEmpty(searchString))
-                model = model.Where(x => x.UserName.Contains(searchString) || x.TenantName.Contains(searchString)).ToList();
-            return View(model);
+            ViewBag.SearchString = searchString;
+            return View(_userService.GetIndexViewModel(searchString));
         }
 
         [HttpGet]

@@ -1,5 +1,7 @@
 ﻿using Asp.Versioning;
 using CoffeeShop.Model.Entities;
+using CoffeeShop.Service.Implement;
+using CoffeeShop.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 
@@ -10,9 +12,10 @@ namespace coffee_shop_backend.Controllers
     [Route("api")]
     public class ApiController : BaseController
     {
-        public ApiController(IHttpContextAccessor accessor) : base(accessor)
+        private readonly IAddressService _addressService;
+        public ApiController(IAddressService addressService, IHttpContextAccessor accessor) : base(accessor)
         {
-
+            _addressService = addressService;
         }
 
         [HttpGet]
@@ -42,13 +45,14 @@ namespace coffee_shop_backend.Controllers
 
             // 獲取帳號資訊
             var user = decodedToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Aud)?.Value;
-            Member? info = _db?.Members.FirstOrDefault(x => x.UserName == user);
+            //Member? info = _db?.Members.FirstOrDefault(x => x.UserName == user);
 
-            return this.Ok(new
-            {
-                name = info?.UserName,
-                price = 1000
-            });
+            //return this.Ok(new
+            //{
+            //    name = info?.UserName,
+            //    price = 1000
+            //});
+            return this.Ok();
         }
 
         [HttpPost]
@@ -56,21 +60,20 @@ namespace coffee_shop_backend.Controllers
         [Route("Address")]
         public IActionResult Address([FromBody] AddressModel model)
         {
-            if (!string.IsNullOrEmpty(model.areaId) && !string.IsNullOrEmpty(model.cityId))
+            if (int.TryParse(model.areaId, out int result))
             {
-                var area = _db?.AddressAreas.FirstOrDefault(x => x.Id.ToString() == model.areaId && x.CityId.ToString() == model.cityId);
                 Response.StatusCode = 200;
-                return this.Json(area?.ZipCode);
+                return this.Json(_addressService.GetZipCodeByAreaId(result));
             }
             else if (!string.IsNullOrEmpty(model.cityId))
             {
                 List<KeyValuePair<string, string>> items = new List<KeyValuePair<string, string>>();
-                var areas = _db?.AddressAreas.Where(x => x.CityId.ToString() == model.cityId);
+                var areas = _addressService.GetAddressCityList(model.cityId);
                 if (areas.Any())
                 {
                     foreach (var area in areas)
                     {
-                        items.Add(new KeyValuePair<string, string>(area.Id.ToString(), area.AreaName));
+                        items.Add(new KeyValuePair<string, string>(area.Value, area.Text));
                     }
                 }
                 Response.StatusCode = 200;

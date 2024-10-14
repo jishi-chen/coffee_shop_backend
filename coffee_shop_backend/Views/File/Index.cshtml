@@ -1,0 +1,26 @@
+﻿@{
+    ViewBag.Title = "File List";
+}
+
+<h2>File List</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>File Name</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var file in Model)
+        {
+            var fileName = "";
+            <tr>
+                <td>@fileName</td>
+                <td>
+                    <a asp-area="Frontend" asp-controller="File" asp-action="Download" asp-route-fileName="@fileName" class="btn btn-primary">Download</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

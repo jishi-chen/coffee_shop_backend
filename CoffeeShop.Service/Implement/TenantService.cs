@@ -20,13 +20,14 @@ namespace CoffeeShop.Service.Implement
             _userService = userService;
         }
 
-        public IEnumerable<Tenant> GetAll()
+        public IEnumerable<Tenant> GetAll(string? searchString)
         {
-            return _unitOfWork.TenantRepository.GetAll();
-        }
-        public IEnumerable<Tenant> GetAll(string searchString)
-        {
-            return _unitOfWork.TenantRepository.GetAll(searchString);
+            var result = _unitOfWork.TenantRepository.GetAll();
+            if (searchString != null)
+            {
+                result = result.Where(x => x.TenantName.Contains(searchString) || x.ContactName.Contains(searchString)).ToList();
+            }
+            return result;
         }
 
         public TenantFormViewModel GetFormViewModel(int? id)

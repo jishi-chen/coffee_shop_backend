@@ -23,5 +23,9 @@ namespace CoffeeShop.Repository.Implement
         {
             return _context.AddressAreas.Where(x => x.CityId == cityId);
         }
+        public string? GetZipCodeByAreaId(int areaId)
+        {
+            return _context.AddressAreas.FirstOrDefault(x => x.Id == areaId)?.ZipCode;
+        }
     }
 }

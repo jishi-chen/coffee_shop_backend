@@ -1,64 +1,76 @@
 ﻿using coffee_shop_backend.Controllers;
-using CoffeeShop.Repository.Interface;
 using CoffeeShop.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using CoffeeShop.Model.ViewModels;
 
 namespace coffee_shop_backend.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Route("[area]/[controller]")]
     [ApiExplorerSettings(IgnoreApi = true)]
-    [Route("[controller]")]
     [Authorize(Policy = "AdminPolicy")]
     public class FileController : BaseController
     {
         private readonly HttpContext? _context;
-        private readonly string _uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-        public FileController(IDocumentService documentService, IUnitOfWork unitOfWork, IHttpContextAccessor accessor) : base(accessor)
+        private readonly IFileService _fileService;
+
+        public FileController(IFileService fileService, IHttpContextAccessor accessor) : base(accessor)
         {
             _context = accessor.HttpContext;
+            _fileService = fileService;
         }
         [HttpGet]
-        [Route("Login")]
+        [Route("Index")]
         public IActionResult Index()
         {
-            return View();
+            return View(_fileService.GetAll(null));
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("Index")]
+        public IActionResult Index(string searchString)
+        {
+            ViewBag.SearchString = searchString;
+            return View(_fileService.GetAll(searchString));
         }
 
         [HttpGet]
         [Route("Upload")]
         public IActionResult Upload()
         {
-            return View();
+            return View(new FileUploadViewModel());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Route("Upload")]
-        public async Task<IActionResult> Upload(IFormFile file)
+        public async Task<IActionResult> Upload(FileUploadViewModel model)
         {
-            if (file != null && file.Length > 0)
+            if (await _fileService.UploadFileAsync(model))
             {
-                if (!Directory.Exists(_uploadPath))
-                {
-                    Directory.CreateDirectory(_uploadPath);
-                }
+                SetAlertMsg("上傳成功");
+                return RedirectToAction("Index");
+            }
+            ModelState.AddModelError("", "File upload failed");
+            SetAlertMsg("上傳失敗");
+            return View(model);
+        }
 
-                var filePath = Path.Combine(_uploadPath, file.FileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
-
-                ViewBag.Message = "File uploaded successfully!";
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("Delete")]
+        public IActionResult Delete(int fileStorageId)
+        {
+            if (_fileService.DeleteFile(fileStorageId))
+            {
+                SetAlertMsg("刪除完成");
             }
             else
             {
-                ViewBag.Message = "Please select a file.";
+                SetAlertMsg("刪除失敗");
             }
-
-            return View();
+            return RedirectToAction("Index");
         }
     }
 }

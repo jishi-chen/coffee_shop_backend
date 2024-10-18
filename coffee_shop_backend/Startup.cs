@@ -63,7 +63,7 @@ namespace coffee_shop_backend
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ITenantService, TenantService>();
             services.AddScoped<IAddressService, AddressService>();
-
+            services.AddScoped<IFileService, FileService>();
             // Entity Framework
             services.AddDbContext<CoffeeShopContext>(options =>
             {
@@ -257,7 +257,7 @@ namespace coffee_shop_backend
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
-                  name: "Admin",
+                  name: "areas",
                   pattern: "{area:exists}/{controller=Index}/{action=Index}/{id?}");
                 endpoints.MapControllerRoute(
                   name: "default",

@@ -1,5 +1,6 @@
 ﻿using CoffeeShop.Service.Interface;
 using Microsoft.AspNetCore.Mvc;
+using NPOI.HPSF;
 
 
 namespace coffee_shop_backend.Controllers
@@ -9,29 +10,43 @@ namespace coffee_shop_backend.Controllers
     public class FileController : BaseController
     {
         private readonly HttpContext? _context;
-        private readonly string _uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+        private readonly IFileService _fileService;
 
-        public FileController(IUserService userService, IHttpContextAccessor accessor, IAddressService addressService, ITenantService tenantService) : base(accessor)
+        public FileController(IFileService fileService, IHttpContextAccessor accessor) : base(accessor)
         {
             _context = accessor.HttpContext;
-        }
-        public IActionResult Index()
-        {
-            var files = Directory.GetFiles(_uploadPath);
-            return View(files);
+            _fileService = fileService;
         }
 
         [HttpGet]
-        public IActionResult Download(string fileName)
+        [Route("Index")]
+        public IActionResult Index()
         {
-            if (string.IsNullOrEmpty(fileName)) return BadRequest("Filename is not provided.");
+            return View(_fileService.GetAll(null));
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("Index")]
+        public IActionResult Index(string searchString)
+        {
+            ViewBag.SearchString = searchString;
+            return View(_fileService.GetAll(searchString));
+        }
 
-            var filePath = Path.Combine(_uploadPath, fileName);
-
-            if (!System.IO.File.Exists(filePath)) return NotFound("File does not exist.");
-
-            var fileBytes = System.IO.File.ReadAllBytes(filePath);
-            return File(fileBytes, "application/octet-stream", fileName);
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("Download")]
+        public IActionResult Download(int fileStorageId, string fileName)
+        {
+            try
+            {
+                var fileBytes = _fileService.DownloadFile(fileStorageId);
+                return File(fileBytes, "application/octet-stream", fileName);
+            }
+            catch (FileNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }

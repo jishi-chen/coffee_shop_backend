@@ -1,14 +1,14 @@
 ﻿@model IEnumerable<UserIndexViewModel>
-
 @{
-    ViewData["Title"] = "使用者列表";
+    PaginationModel paginationModel = ViewBag.PaginationModel;
 }
 
 <h2>使用者列表</h2>
 
-<form method="post" class="form-inline mb-3">
+<form asp-action="Index" method="post" class="form-inline mb-3">
     @Html.AntiForgeryToken()
     <input type="text" name="searchString" value="@ViewBag.SearchString" placeholder="請輸入使用者名稱或租戶名稱" class="form-control" />
+    <input type="hidden" name="pageIndex" value="@paginationModel.PageIndex" />
     <button type="submit" class="btn btn-primary">搜尋</button>
 </form>
 
@@ -34,10 +34,10 @@
                 <td>@item.Email</td>
                 <td>@(item.IsEnabled?"是":"否")</td>
                 <td>
-                    <a href="@Url.Action("Register", "User", new { id = item.UserId })" class="btn btn-warning">編輯</a>
-                    <form method="post" action="@Url.Action("Delete", "User", new { id = item.UserId })" style="display:inline;">
+                    <a href="@Url.Action("Register", "User", new { userId = item.UserId })" class="btn btn-warning">編輯</a>
+                    <form method="post" action="@Url.Action("SetEnabled", "User", new { userId = item.UserId })" style="display:inline;">
                         @Html.AntiForgeryToken()
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('確定刪除嗎？')">刪除</button>
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('確定刪除嗎？')">@(item.IsEnabled ? "停用" : "啟用")</button>
                     </form>
                 </td>
             </tr>
@@ -45,14 +45,7 @@
     </tbody>
 </table>
 
-<div>
-    @if (ViewBag.CurrentPage > 1)
-    {
-        <a href="@Url.Action("Index", new { page = ViewBag.CurrentPage - 1, searchString = ViewBag.SearchString })" class="btn btn-secondary">上一頁</a>
-    }
-
-    @if (ViewBag.CurrentPage < ViewBag.TotalPages)
-    {
-        <a href="@Url.Action("Index", new { page = ViewBag.CurrentPage + 1, searchString = ViewBag.SearchString })" class="btn btn-secondary">下一頁</a>
-    }
-</div>
+<form asp-action="Index" method="post">
+    <input type="hidden" name="searchString" value="@ViewBag.SearchString" />
+    @await Html.PartialAsync("_PaginationPartial", paginationModel)
+</form>

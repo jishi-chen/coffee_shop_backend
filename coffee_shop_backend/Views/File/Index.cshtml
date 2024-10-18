@@ -1,24 +1,30 @@
-﻿@{
-    ViewBag.Title = "File List";
+﻿@model IEnumerable<FileStorage>
+@{
+    ViewData["Title"] = "檔案下載列表";
 }
-
-<h2>File List</h2>
+<h2>檔案下載列表</h2>
 
 <table class="table">
     <thead>
         <tr>
-            <th>File Name</th>
-            <th>Action</th>
+            <th>檔案名稱</th>
+            <th>描述</th>
+            <th>上傳日期</th>
+            <th>操作</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var file in Model)
         {
-            var fileName = "";
             <tr>
-                <td>@fileName</td>
+                <td>@file.OriginalFileName</td>
+                <td>@file.Description</td>
+                <td>@file.UploadDate.ToString("yyyy-MM-dd")</td>
                 <td>
-                    <a asp-area="Frontend" asp-controller="File" asp-action="Download" asp-route-fileName="@fileName" class="btn btn-primary">Download</a>
+                    <form method="post" action="@Url.Action("Download", "File", new { fileStorageId = file.FileStorageId , fileName = file.OriginalFileName })" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-danger">下載</button>
+                    </form>
                 </td>
             </tr>
         }

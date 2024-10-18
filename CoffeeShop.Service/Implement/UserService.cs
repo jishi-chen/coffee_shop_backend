@@ -66,7 +66,6 @@ namespace CoffeeShop.Service.Implement
                 user.CreateDate = DateTime.Now;
                 user.Creator = GetCurrentLoginId();
                 _unitOfWork.UserRepository.Add(user);
-
             }
             else
             {
@@ -81,6 +80,7 @@ namespace CoffeeShop.Service.Implement
                     _unitOfWork.UserRepository.Update(user);
                 }
             }
+            _unitOfWork.Complete();
         }
 
         public User? CheckPassword(UserLoginViewModel model)
@@ -125,6 +125,17 @@ namespace CoffeeShop.Service.Implement
                 result = result.Where(x => x.UserName.Contains(searchString) || x.TenantName.Contains(searchString)).ToList();
             }
             return result;
+        }
+
+        public void SetEnabled(int userId)
+        {
+            User? user = _unitOfWork.UserRepository.GetById(userId);
+            if (user != null)
+            {
+                user.IsEnabled = !user.IsEnabled;
+                _unitOfWork.UserRepository.Update(user);
+                _unitOfWork.Complete();
+            }
         }
     }
 }

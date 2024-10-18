@@ -69,6 +69,7 @@ namespace CoffeeShop.Service.Implement
                     _unitOfWork.TenantRepository.Update(tenant);
                 }
             }
+            _unitOfWork.Complete();
         }
         public bool DeleteTenant(int? id)
         {
@@ -79,6 +80,7 @@ namespace CoffeeShop.Service.Implement
                 if (!isUsed && currentTenant != null)
                 {
                     _unitOfWork.TenantRepository.Delete(id.Value);
+                    _unitOfWork.Complete();
                     return true;
                 }
             }

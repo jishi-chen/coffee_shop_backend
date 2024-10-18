@@ -83,10 +83,10 @@ namespace coffee_shop_backend.Controllers
 
         [HttpGet]
         [Route("Register")]
-        public IActionResult Register(int? id)
+        public IActionResult Register(int? userId)
         {
             string cityId = string.Empty, areaId = string.Empty;
-            var model = _userService.GetFormViewModel(id,ref cityId, ref areaId);
+            var model = _userService.GetFormViewModel(userId, ref cityId, ref areaId);
             ViewBag.CityList = _addressService.GetAddressCityList(cityId);
             ViewBag.AreaList = _addressService.GetAddressAreaList(cityId, areaId);
             ViewBag.TenantList = _tenantService.GetTenantList(model.TenantId);
@@ -121,10 +121,20 @@ namespace coffee_shop_backend.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Route("Index")]
-        public IActionResult Index(string searchString)
+        public IActionResult Index(string searchString, PaginationModel pagination)
         {
             ViewBag.SearchString = searchString;
-            return View(_userService.GetIndexViewModel(searchString));
+            return View(GetPaginatedList(_userService.GetIndexViewModel(searchString), pagination.PageIndex));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("SetEnabled")]
+        public IActionResult SetEnabled(int userId)
+        {
+            _userService.SetEnabled(userId);
+            SetAlertMsg("操作完成");
+            return RedirectToAction("Index");
         }
 
         [HttpGet]

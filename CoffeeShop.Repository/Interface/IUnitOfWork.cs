@@ -8,7 +8,7 @@ namespace CoffeeShop.Repository.Interface
         ITenantRepository TenantRepository { get; }
         IUserRepository UserRepository { get; }
         IAddressRepository AddressRepository { get; }
-
+        IFileRepository FileRepository { get; }
         void Complete();
         void Rollback();
     }

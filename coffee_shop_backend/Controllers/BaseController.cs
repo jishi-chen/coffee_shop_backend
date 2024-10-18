@@ -1,6 +1,6 @@
-﻿using CoffeeShop.Model;
+﻿using CoffeeShop.Model.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+
 
 namespace coffee_shop_backend.Controllers
 {
@@ -16,19 +16,20 @@ namespace coffee_shop_backend.Controllers
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
-        public int GetCurrentLoginId()
-        {
-            if (User.Identity != null && User.Identity.IsAuthenticated)
-            {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-                return int.TryParse(userIdClaim?.Value, out int userId) ? userId : 0;
-            }
-            return 0;
-        }
-        [ApiExplorerSettings(IgnoreApi = true)]
-        public void SetAlertMsg(string msg)
+        protected void SetAlertMsg(string msg)
         {
             TempData["AlertMsg"] = msg;
+        }
+
+        [ApiExplorerSettings(IgnoreApi = true)]
+        protected IEnumerable<T> GetPaginatedList<T>(IEnumerable<T> allItems, int pageIndex)
+        {
+            int pageSize = 2;
+            pageIndex = pageIndex <= 0 ? 1 : pageIndex;
+            var count = allItems.Count(); // 總筆數
+            PaginatedList paginatedList = new PaginatedList(count, pageIndex, pageSize);
+            ViewBag.PaginationModel = paginatedList.PaginationModel;
+            return allItems = allItems.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList();
         }
     }
 }

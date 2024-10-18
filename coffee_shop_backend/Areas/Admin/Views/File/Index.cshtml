@@ -1,26 +1,27 @@
-﻿@model IEnumerable<UserIndexViewModel>
+﻿@model IEnumerable<FileStorage>
 
 @{
-    ViewData["Title"] = "使用者列表";
+    ViewData["Title"] = "檔案列表";
 }
 
-<h2>使用者列表</h2>
+<h2>檔案列表</h2>
+<a asp-action="Upload" class="btn btn-primary">上傳檔案</a>
 
 <form method="post" class="form-inline mb-3">
     @Html.AntiForgeryToken()
-    <input type="text" name="searchString" value="@ViewBag.SearchString" placeholder="請輸入使用者名稱或租戶名稱" class="form-control" />
+    <input type="text" name="searchString" value="@ViewBag.SearchString" placeholder="請輸入檔案名稱" class="form-control" />
     <button type="submit" class="btn btn-primary">搜尋</button>
 </form>
 
-<a href="@Url.Action("Register", "User", new { id = "" })" class="btn btn-success mb-3">新增</a>
 <table class="table table-bordered">
     <thead>
         <tr>
             <th>編號</th>
-            <th>租戶名稱</th>
-            <th>使用者名稱</th>
-            <th>使用者信箱</th>
-            <th>啟用</th>
+            <th>類別</th>
+            <th>檔案名稱</th>
+            <th>檔案大小</th>
+            <th>更新日期</th>
+            <th>是否刪除</th>
             <th>操作</th>
         </tr>
     </thead>
@@ -28,14 +29,14 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.UserId</td>
-                <td>@item.TenantName</td>
-                <td>@item.UserName</td>
-                <td>@item.Email</td>
-                <td>@(item.IsEnabled ? "是" : "否")</td>
+                <td>@item.FileStorageId</td>
+                <td>@item.CategoryType</td>
+                <td>@item.OriginalFileName</td>
+                <td>@item.FileSize</td>
+                <td>@item.UploadDate</td>
+                <td>@(item.IsDeleted ? "是" : "否")</td>
                 <td>
-                    <a href="@Url.Action("Register", "User", new { id = item.UserId })" class="btn btn-warning">編輯</a>
-                    <form method="post" action="@Url.Action("Delete", "User", new { id = item.UserId })" style="display:inline;">
+                    <form method="post" action="@Url.Action("Delete", "File", new { fileStorageId = item.FileStorageId })" style="display:inline;">
                         @Html.AntiForgeryToken()
                         <button type="submit" class="btn btn-danger" onclick="return confirm('確定刪除嗎？')">刪除</button>
                     </form>

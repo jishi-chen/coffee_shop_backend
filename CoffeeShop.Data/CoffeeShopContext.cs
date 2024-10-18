@@ -16,6 +16,8 @@ public partial class CoffeeShopContext : DbContext
 
     public virtual DbSet<AddressCity> AddressCities { get; set; }
 
+    public virtual DbSet<Category> Categories { get; set; }
+
     public virtual DbSet<Document> Documents { get; set; }
 
     public virtual DbSet<DocumentField> DocumentFields { get; set; }
@@ -26,7 +28,11 @@ public partial class CoffeeShopContext : DbContext
 
     public virtual DbSet<DocumentRecordDetail> DocumentRecordDetails { get; set; }
 
+    public virtual DbSet<FileStorage> FileStorages { get; set; }
+
     public virtual DbSet<Member> Members { get; set; }
+
+    public virtual DbSet<Module> Modules { get; set; }
 
     public virtual DbSet<Tenant> Tenants { get; set; }
 
@@ -51,6 +57,15 @@ public partial class CoffeeShopContext : DbContext
             entity.ToTable("AddressCity");
 
             entity.Property(e => e.CityName).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<Category>(entity =>
+        {
+            entity.HasKey(e => e.CategoryId).HasName("PK__Categori__19093A0B5A7E0A9C");
+
+            entity.Property(e => e.CategoryName).HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.UpdateDate).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<Document>(entity =>
@@ -107,6 +122,21 @@ public partial class CoffeeShopContext : DbContext
             entity.Property(e => e.Remark).HasMaxLength(50);
         });
 
+        modelBuilder.Entity<FileStorage>(entity =>
+        {
+            entity.Property(e => e.CategoryType).HasMaxLength(50);
+            entity.Property(e => e.ContentType).HasMaxLength(100);
+            entity.Property(e => e.FilePath).HasMaxLength(500);
+            entity.Property(e => e.ModuleType)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.NewFileName).HasMaxLength(255);
+            entity.Property(e => e.OriginalFileName).HasMaxLength(255);
+            entity.Property(e => e.UploadDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+        });
+
         modelBuilder.Entity<Member>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK_MemberInfos");
@@ -121,6 +151,15 @@ public partial class CoffeeShopContext : DbContext
                 .IsUnicode(false);
             entity.Property(e => e.UpdateDate).HasColumnType("datetime");
             entity.Property(e => e.UserName).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<Module>(entity =>
+        {
+            entity.HasKey(e => e.ModuleId).HasName("PK__Modules__2B7477A7B3A3BDD5");
+
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.ModuleName).HasMaxLength(100);
+            entity.Property(e => e.UpdateDate).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<Tenant>(entity =>

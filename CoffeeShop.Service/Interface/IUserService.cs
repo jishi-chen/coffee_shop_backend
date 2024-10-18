@@ -10,5 +10,6 @@ namespace CoffeeShop.Service.Interface
         void UpdateUser(UserRegisterViewModel model);
         User? CheckPassword(UserLoginViewModel model);
         int GetCurrentLoginId();
+        void SetEnabled(int userId);
     }
 }

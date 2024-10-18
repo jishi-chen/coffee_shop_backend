@@ -14,6 +14,7 @@ namespace CoffeeShop.Repository.Implement
         private ITenantRepository _tenantRepository;
         private IUserRepository _userRepository;
         private IAddressRepository _addressRepository;
+        private IFileRepository _fileRepository;
 
         public UnitOfWork(CoffeeShopContext context)
         {
@@ -39,8 +40,10 @@ namespace CoffeeShop.Repository.Implement
         {
             get { return _addressRepository ?? (_addressRepository = new AddressRepository(_transaction, _context)); }
         }
-
-
+        public IFileRepository FileRepository
+        {
+            get { return _fileRepository ?? (_fileRepository = new FileRepository(_transaction, _context)); }
+        }
         public void Complete()
         {
             try

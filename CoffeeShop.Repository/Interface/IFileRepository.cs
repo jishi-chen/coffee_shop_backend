@@ -2,7 +2,7 @@
 
 namespace CoffeeShop.Repository.Interface
 {
-    public interface ITenantRepository : IGenericRepository<Tenant>
+    public interface IFileRepository : IGenericRepository<FileStorage>
     {
 
     }

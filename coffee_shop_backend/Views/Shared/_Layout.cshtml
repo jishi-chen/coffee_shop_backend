@@ -77,6 +77,18 @@
                                 </a>
                             </div>
                         </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="account02" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                檔案功能
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="account02">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="File" asp-action="Index">前台檔案頁面</a>
+                                @if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+                                {
+                                    <a class="nav-link text-dark" asp-area="Admin" asp-controller="File" asp-action="Index">後台檔案頁面</a>
+                                }
+                            </div>
+                        </li>
                     </ul>
                 </div>
             </div>
